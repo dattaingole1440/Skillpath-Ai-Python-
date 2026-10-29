@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+
+{% block title %}Milestones - {{ career.name }} - SkillPath AI{% endblock %}
+{% block page_title %}Milestones: {{ career.name }}{% endblock %}
+
+{% block content %}
+<div class="container py-2">
+    <!-- Breadcrumbs -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/admin/careers" class="text-decoration-none">Careers</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ career.name }} Milestones</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold">Roadmap Milestones</h3>
+        </div>
+        <div class="col-md-4 text-md-end d-flex gap-2 justify-content-md-end">
+            <a href="/admin/audit-logs?entity_filter=roadmap" class="btn btn-outline-secondary rounded-pill">
+                <i class="bi-clock-history"></i> Milestone Audit
+            </a>
+            <a href="/admin/careers" class="btn btn-outline-secondary rounded-pill">Back to Careers</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- List Milestones -->
+        <div class="col-lg-8">
+            <div class="card custom-card border-0 p-4 shadow-sm">
+                <h5 class="fw-bold mb-4 text-primary"><i class="bi-signpost-split"></i> Milestones List</h5>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th style="width: 8%;">Order</th>
+                                <th>Milestone Title</th>
+                                <th>Description</th>
+                                <th style="width: 32%;" class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if roadmaps %}
+                                {% for rm in roadmaps %}
+                                    <tr>
+                                        <td class="fw-bold text-center bg-light rounded">{{ rm.order }}</td>
+                                        <td class="fw-semibold text-dark">{{ rm.title }}</td>
+                                        <td class="text-muted small">{{ rm.description }}</td>
+                                        <td class="text-end">
+                                            <div class="d-flex gap-1 justify-content-end">
+                                                <a href="/admin/topics/{{ rm.id }}" class="btn btn-sm btn-primary rounded-pill px-2 py-1" style="font-size: 0.78rem;">
+                                                    <i class="bi-file-text"></i> Topics
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2 py-1" style="font-size: 0.78rem;"
+                                                        onclick="openEditRoadmapModal({{ rm.id }}, {{ rm.title | tojson }}, {{ (rm.description or '') | tojson }}, {{ rm.order }})">
+                                                    <i class="bi-pencil"></i>
+                                                </button>
+                                                <form action="/admin/roadmaps/delete/{{ rm.id }}" method="POST" onsubmit="return confirm('Soft-delete milestone \'{{ rm.title }}\'? Child topics will be preserved in history.');" style="display:inline;">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2 py-1" style="font-size: 0.78rem;">
+                                                        <i class="bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-5">No milestones configured yet for this track.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Milestone Form -->
+        <div class="col-lg-4">
+            <div class="card custom-card border-0 p-4 shadow-sm">
+                <h5 class="fw-bold mb-3"><i class="bi-plus-circle text-primary"></i> Add Milestone</h5>
+                
+                <form action="/admin/roadmaps/add" method="POST">
+                    <input type="hidden" name="career_id" value="{{ career.id }}">
+                    
+                    <div class="mb-3">
+                        <label for="title" class="form-label fw-semibold">Milestone Title</label>
+                        <input type="text" class="form-control" id="title" name="title" required placeholder="e.g. Object Oriented Design">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label fw-semibold">Description</label>
+                        <textarea class="form-control" id="description" name="description" rows="3" placeholder="Explain what topics are grouped here..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="order" class="form-label fw-semibold">Chronological Order</label>
+                        <input type="number" class="form-control" id="order" name="order" required value="{{ roadmaps|length + 1 }}" min="1">
+                        <div class="form-text small">Indicates study sequence (lower numbers come first).</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill fw-bold">Create Milestone</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Roadmap Modal -->
+<div class="modal fade" id="editRoadmapModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold text-primary"><i class="bi-pencil-square"></i> Edit Milestone</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editRoadmapForm" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="edit_roadmap_title" class="form-label fw-semibold">Milestone Title</label>
+                        <input type="text" class="form-control" id="edit_roadmap_title" name="title" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_roadmap_description" class="form-label fw-semibold">Description</label>
+                        <textarea class="form-control" id="edit_roadmap_description" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="edit_roadmap_order" class="form-label fw-semibold">Order</label>
+                        <input type="number" class="form-control" id="edit_roadmap_order" name="order" required min="1">
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openEditRoadmapModal(id, title, description, order) {
+    document.getElementById('editRoadmapForm').action = '/admin/roadmaps/edit/' + id;
+    document.getElementById('edit_roadmap_title').value = title;
+    document.getElementById('edit_roadmap_description').value = description;
+    document.getElementById('edit_roadmap_order').value = order;
+    new bootstrap.Modal(document.getElementById('editRoadmapModal')).show();
+}
+</script>
+{% endblock %}

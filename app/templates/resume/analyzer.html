@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}AI Resume Analyzer - SkillPath AI{% endblock %}
+{% block page_title %}📄 AI Resume Analyzer{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="card border-0 rounded-4 shadow-sm mb-4 bg-body">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+                <div>
+                    <h4 class="fw-bold m-0">📑 <i class="bi bi-file-earmark-check-fill text-primary me-2"></i> ATS Resume Scanner & Skill Gap Analyzer</h4>
+                    <p class="text-secondary small mb-0">Upload or paste resume text to analyze ATS score, missing technical skills, formatting advice, and personalized recommendations.</p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <form id="analyzeForm" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-secondary">📤 Upload Resume Document (PDF / TXT)</label>
+                            <input type="file" class="form-control rounded-3" name="resume_file" accept=".pdf,.txt">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold text-secondary">✏️ OR Paste Resume Text</label>
+                            <textarea class="form-control rounded-3 font-monospace small" name="resume_text_input" rows="10" placeholder="Paste your complete resume text here..."></textarea>
+                        </div>
+                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold w-100" id="analyzeBtn">
+                            🔍 Analyze Resume
+                        </button>
+                    </form>
+                </div>
+
+                <div class="col-lg-6">
+                    <label class="form-label fw-semibold text-secondary">📊 ATS Evaluation Report</label>
+                    <div class="card border border-body rounded-3 p-4 bg-body h-100" id="analyzerResults">
+                        <div class="text-center text-muted py-5" id="analyzerPlaceholder">
+                            <div class="fs-1 text-secondary opacity-50 mb-3">📈</div>
+                            <h5>No Analysis Yet</h5>
+                            <p class="small">Upload or paste your resume text to compute your ATS compatibility score.</p>
+                        </div>
+                        <div class="d-none" id="analyzerLoader">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary mb-3" role="status"></div>
+                                <h5>🤖 Scanning Resume against ATS Filters...</h5>
+                            </div>
+                        </div>
+                        <div class="d-none" id="analyzerReport">
+                            <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+                                <div>
+                                    <small class="text-muted text-uppercase fw-bold">🎯 ATS Score</small>
+                                    <h2 class="fw-bold text-primary m-0" id="atsScoreText">88%</h2>
+                                </div>
+                                <span class="badge bg-success rounded-pill px-3 py-2" id="ratingText">Good</span>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="fw-bold text-danger">⚠️ Missing Skills</small>
+                                <div id="missingSkillsBadges" class="d-flex flex-wrap gap-1 mt-1"></div>
+                            </div>
+
+                            <div class="mb-3">
+                                <small class="fw-bold text-success">⭐ Recommended Skills</small>
+                                <div id="recommendedSkillsBadges" class="d-flex flex-wrap gap-1 mt-1"></div>
+                            </div>
+
+                            <div>
+                                <small class="fw-bold text-primary">💡 Improvement Suggestions</small>
+                                <p class="small text-secondary m-0 mt-1" id="suggestionsReportText"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('analyzeForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        const btn = document.getElementById('analyzeBtn');
+        btn.disabled = true;
+        
+        document.getElementById('analyzerPlaceholder').classList.add('d-none');
+        document.getElementById('analyzerReport').classList.add('d-none');
+        document.getElementById('analyzerLoader').classList.remove('d-none');
+
+        const formData = new FormData(this);
+        fetch('/resume/analyze', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            btn.disabled = false;
+            document.getElementById('analyzerLoader').classList.add('d-none');
+            if (data.status === 'success') {
+                document.getElementById('atsScoreText').innerText = data.ats_score + '%';
+                document.getElementById('ratingText').innerText = data.rating;
+
+                const missingDiv = document.getElementById('missingSkillsBadges');
+                missingDiv.innerHTML = data.missing_skills.map(s => `<span class="badge bg-danger bg-opacity-10 text-danger rounded-pill">${s}</span>`).join(' ');
+
+                const recDiv = document.getElementById('recommendedSkillsBadges');
+                recDiv.innerHTML = data.recommended_skills.map(s => `<span class="badge bg-success bg-opacity-10 text-success rounded-pill">${s}</span>`).join(' ');
+
+                document.getElementById('suggestionsReportText').innerText = data.suggestions;
+                document.getElementById('analyzerReport').classList.remove('d-none');
+            } else {
+                alert(data.detail || 'Analysis failed.');
+                document.getElementById('analyzerPlaceholder').classList.remove('d-none');
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            document.getElementById('analyzerLoader').classList.add('d-none');
+            document.getElementById('analyzerPlaceholder').classList.remove('d-none');
+            alert('Error running analysis: ' + err.message);
+        });
+    });
+</script>
+{% endblock %}

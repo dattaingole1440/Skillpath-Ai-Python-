@@ -1,0 +1,286 @@
+{% extends "base.html" %}
+
+{% block title %}Topics - {{ roadmap.title }} - SkillPath AI{% endblock %}
+{% block page_title %}Topics: {{ roadmap.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-2">
+    <!-- Breadcrumbs -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/admin/careers" class="text-decoration-none">Careers</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/roadmaps/{{ roadmap.career_id }}" class="text-decoration-none">Milestones</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Topics List</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold">Roadmap Topics</h3>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="/admin/roadmaps/{{ roadmap.career_id }}" class="btn btn-outline-secondary rounded-pill">Back to Milestones</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- List Topics -->
+        <div class="col-lg-7">
+            <div class="card custom-card border-0 p-4 shadow-sm">
+                <h5 class="fw-bold mb-4 text-primary"><i class="bi-file-text"></i> Configure Topics</h5>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle small">
+                        <thead>
+                            <tr>
+                                 <th style="width: 7%;">Order</th>
+                                <th>Topic Title</th>
+                                <th>Difficulty</th>
+                                <th>Duration</th>
+                                <th>Assessments</th>
+                                <th style="width: 15%;" class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if topics %}
+                                {% for topic in topics %}
+                                    <tr>
+                                        <td class="fw-bold text-center bg-light rounded">{{ topic.order }}</td>
+                                        <td class="fw-semibold text-dark">
+                                            {{ topic.title }}
+                                            {% if topic.youtube_videos and topic.youtube_videos != '[]' %}
+                                                <i class="bi-youtube text-danger ms-1" title="YouTube video attached"></i>
+                                            {% endif %}
+                                        </td>
+                                        <td class="text-capitalize"><span class="badge {% if topic.difficulty == 'easy' %}bg-success-subtle text-success{% elif topic.difficulty == 'hard' %}bg-danger-subtle text-danger{% else %}bg-warning-subtle text-warning{% endif %}">{{ topic.difficulty }}</span></td>
+                                        <td>{{ topic.estimated_time }}h</td>
+                                        <td>
+                                            <div class="d-flex gap-1 flex-wrap">
+                                                <a href="/admin/quizzes/{{ topic.id }}" class="btn btn-xs btn-outline-primary rounded-pill px-2 py-0.5" style="font-size: 0.72rem;">
+                                                    <i class="bi-question-circle"></i> Quiz
+                                                </a>
+                                                <a href="/admin/challenges/{{ topic.id }}" class="btn btn-xs btn-outline-warning rounded-pill px-2 py-0.5 text-dark" style="font-size: 0.72rem;">
+                                                    <i class="bi-code-slash"></i> Code
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="d-flex gap-1 justify-content-end">
+                                                <button type="button" class="btn btn-xs btn-primary rounded-pill px-2 py-0.5" style="font-size: 0.72rem;"
+                                                        onclick='openEditTopicModal({{ topic.id }}, {{ topic.title | tojson }}, {{ topic.description | tojson }}, {{ topic.learning_objectives | tojson }}, {{ topic.difficulty | tojson }}, {{ topic.estimated_time }}, {{ topic.order }}, {{ topic.youtube_videos | tojson }}, {{ topic.official_documentation | tojson }}, {{ topic.notes | tojson }}, {{ topic.cheat_sheet | tojson }})'>
+                                                    <i class="bi-pencil"></i> Edit
+                                                </button>
+                                                <form action="/admin/topics/delete/{{ topic.id }}" method="POST" onsubmit="return confirm('Are you sure you want to delete this topic?');" style="display:inline;">
+                                                    <button type="submit" class="btn btn-xs btn-outline-danger rounded-pill px-2 py-0.5" style="font-size: 0.72rem;">
+                                                        <i class="bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-5">No topics configured inside this milestone.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Topic Form -->
+        <div class="col-lg-5">
+            <div class="card custom-card border-0 p-4 shadow-sm">
+                <h5 class="fw-bold mb-3"><i class="bi-plus-circle text-primary"></i> Add Roadmap Topic</h5>
+                
+                <form action="/admin/topics/add" method="POST">
+                    <input type="hidden" name="roadmap_id" value="{{ roadmap.id }}">
+                    
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="title" class="form-label fw-semibold">Topic Title</label>
+                            <input type="text" class="form-control form-control-sm" id="title" name="title" required placeholder="e.g. Loops & Iterations">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="order" class="form-label fw-semibold">Order</label>
+                            <input type="number" class="form-control form-control-sm" id="order" name="order" required value="{{ topics|length + 1 }}" min="1">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label fw-semibold">Description</label>
+                        <textarea class="form-control form-control-sm" id="description" name="description" rows="2" placeholder="Brief explanation of the topic..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="learning_objectives" class="form-label fw-semibold">Learning Objectives (One per line)</label>
+                        <textarea class="form-control form-control-sm" id="learning_objectives" name="learning_objectives" rows="2" placeholder="e.g. Understand for-loops&#10;Implement while-loops"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label for="difficulty" class="form-label fw-semibold">Difficulty</label>
+                            <select class="form-select form-select-sm" id="difficulty" name="difficulty">
+                                <option value="easy">Easy</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label for="estimated_time" class="form-label fw-semibold">Est. Time (Hours)</label>
+                            <input type="number" step="0.5" class="form-control form-control-sm" id="estimated_time" name="estimated_time" required value="1.0" min="0.5">
+                        </div>
+                    </div>
+
+                    <div class="mb-3 p-3 bg-light rounded-3 border">
+                        <label for="youtube_videos" class="form-label fw-bold text-dark mb-1">
+                            <i class="bi-play-btn-fill text-danger me-1"></i> Attach Video Lecture (YouTube URL or Local File)
+                        </label>
+                        <textarea class="form-control form-control-sm mb-2" id="youtube_videos" name="youtube_videos" rows="2" placeholder="Paste YouTube link (https://www.youtube.com/watch?v=...) or local video path..."></textarea>
+                        <small class="text-muted d-block" style="font-size: 0.72rem;">💡 All YouTube videos and local video uploads are saved directly to MySQL database and preserved across server restarts.</small>
+                    </div>
+                    <div class="mb-3">
+                        <label for="official_documentation" class="form-label fw-semibold">Official Docs (URL or JSON)</label>
+                        <textarea class="form-control form-control-sm" id="official_documentation" name="official_documentation" rows="1.5" placeholder="https://docs.python.org/..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="notes" class="form-label fw-semibold">Study Notes Reference</label>
+                        <textarea class="form-control form-control-sm" id="notes" name="notes" rows="2" placeholder="Write markdown or text instructions..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="cheat_sheet" class="form-label fw-semibold">Cheat Sheet Code Snippets</label>
+                        <textarea class="form-control form-control-sm" id="cheat_sheet" name="cheat_sheet" rows="2" placeholder="Fast cheat codes reference..."></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill fw-bold">Create Topic</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Topic Modal -->
+<div class="modal fade" id="editTopicModal" tabindex="-1" aria-labelledby="editTopicModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content rounded-4 border-0 shadow">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold text-primary" id="editTopicModalLabel">
+                    <i class="bi-pencil-square"></i> Edit Topic & Resources
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editTopicForm" method="POST" enctype="multipart/form-data">
+                <div class="modal-body p-4">
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label fw-semibold">Topic Title</label>
+                            <input type="text" class="form-control form-control-sm" id="edit_title" name="title" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold">Order</label>
+                            <input type="number" class="form-control form-control-sm" id="edit_order" name="order" required min="1">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Description</label>
+                        <textarea class="form-control form-control-sm" id="edit_description" name="description" rows="2"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Learning Objectives</label>
+                        <textarea class="form-control form-control-sm" id="edit_learning_objectives" name="learning_objectives" rows="2"></textarea>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-semibold">Difficulty</label>
+                            <select class="form-select form-select-sm" id="edit_difficulty" name="difficulty">
+                                <option value="easy">Easy</option>
+                                <option value="medium">Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label fw-semibold">Est. Time (Hours)</label>
+                            <input type="number" step="0.5" class="form-control form-control-sm" id="edit_estimated_time" name="estimated_time" required min="0.5">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">
+                            <i class="bi-youtube text-danger"></i> YouTube Video (URL or JSON Array)
+                        </label>
+                        <textarea class="form-control form-control-sm" id="edit_youtube_videos" name="youtube_videos" rows="2" placeholder="https://www.youtube.com/watch?v=..."></textarea>
+                        <small class="text-muted" style="font-size: 0.72rem;">Paste a YouTube URL directly, or JSON array. Updates are saved permanently.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="edit_video_file" class="form-label fw-semibold"><i class="bi-file-earmark-play text-primary"></i> Upload Video File (Local)</label>
+                        <input class="form-control form-control-sm" type="file" id="edit_video_file" name="video_file" accept="video/mp4,video/x-m4v,video/*">
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Official Documentation</label>
+                        <textarea class="form-control form-control-sm" id="edit_official_documentation" name="official_documentation" rows="1.5"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Notes</label>
+                        <textarea class="form-control form-control-sm" id="edit_notes" name="notes" rows="2"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Cheat Sheet</label>
+                        <textarea class="form-control form-control-sm" id="edit_cheat_sheet" name="cheat_sheet" rows="2"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openEditTopicModal(id, title, desc, obj, diff, time, order, yt, docs, notes, cheat) {
+    document.getElementById('editTopicForm').action = '/admin/topics/edit/' + id;
+    document.getElementById('edit_title').value = title || '';
+    document.getElementById('edit_order').value = order || 1;
+    document.getElementById('edit_description').value = desc || '';
+    document.getElementById('edit_learning_objectives').value = obj || '';
+    document.getElementById('edit_difficulty').value = diff || 'medium';
+    document.getElementById('edit_estimated_time').value = time || 1.0;
+    
+    // Format YouTube for display - show plain URL if single video
+    let ytVal = yt || '';
+    try {
+        let parsed = JSON.parse(ytVal);
+        if (Array.isArray(parsed) && parsed.length === 1 && parsed[0].url) {
+            ytVal = parsed[0].url;
+        }
+    } catch(e) {}
+    document.getElementById('edit_youtube_videos').value = ytVal;
+    
+    let docsVal = docs || '';
+    try {
+        let parsedDocs = JSON.parse(docsVal);
+        if (Array.isArray(parsedDocs) && parsedDocs.length === 1 && parsedDocs[0].url) {
+            docsVal = parsedDocs[0].url;
+        }
+    } catch(e) {}
+    document.getElementById('edit_official_documentation').value = docsVal;
+    
+    document.getElementById('edit_notes').value = notes || '';
+    document.getElementById('edit_cheat_sheet').value = cheat || '';
+    
+    let modal = new bootstrap.Modal(document.getElementById('editTopicModal'));
+    modal.show();
+}
+</script>
+{% endblock %}

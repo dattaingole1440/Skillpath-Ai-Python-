@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block page_title %}Reports Center & Export Suite{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <h3 class="fw-bold mb-1"><i class="bi-file-earmark-pdf text-primary me-2"></i>Institutional Reports & Data Exports</h3>
+        <p class="text-muted mb-0">Generate and download official PDF reports and Excel/CSV data exports for Students, Attendance, and Placements.</p>
+    </div>
+
+    <div class="row g-4">
+        <!-- Student Academic Report -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card card-custom h-100 shadow-sm border-0">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 bg-primary-subtle text-primary rounded-circle"><i class="bi-people fs-3"></i></div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Student Report</h5>
+                            <span class="small text-muted">Academic Metrics & Scores</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-4">Export detailed student performance profiles, learning hours, quiz averages, and coding scores.</p>
+                    <div class="d-flex gap-2">
+                        <a href="/reports/students/pdf" class="btn btn-primary flex-fill"><i class="bi-file-pdf me-1"></i> PDF</a>
+                        <a href="/reports/students/excel" class="btn btn-success flex-fill"><i class="bi-file-excel me-1"></i> Excel / CSV</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Report -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card card-custom h-100 shadow-sm border-0">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 bg-success-subtle text-success rounded-circle"><i class="bi-calendar-check fs-3"></i></div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Attendance Report</h5>
+                            <span class="small text-muted">Activity Logs & Overrides</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-4">Export daily automated attendance records, study activity minutes, and manual teacher overrides.</p>
+                    <div class="d-flex gap-2">
+                        <a href="/reports/attendance/pdf" class="btn btn-primary flex-fill"><i class="bi-file-pdf me-1"></i> PDF</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Placement Report -->
+        <div class="col-md-6 col-lg-4">
+            <div class="card card-custom h-100 shadow-sm border-0">
+                <div class="card-body p-4">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <div class="p-3 bg-warning-subtle text-warning rounded-circle"><i class="bi-award fs-3"></i></div>
+                        <div>
+                            <h5 class="fw-bold mb-0">Placement Report</h5>
+                            <span class="small text-muted">Placement Readiness Score</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-4">Export candidate readiness scores across coding, quizzes, projects, attendance, and resume impact.</p>
+                    <div class="d-flex gap-2">
+                        <a href="/reports/placement/pdf" class="btn btn-primary flex-fill"><i class="bi-file-pdf me-1"></i> PDF</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

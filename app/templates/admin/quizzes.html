@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Quiz - {{ topic.title }} - SkillPath AI{% endblock %}
+{% block page_title %}Quiz Manager: {{ topic.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-2">
+    <!-- Breadcrumbs -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/admin/careers" class="text-decoration-none">Careers</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/topics/{{ topic.roadmap.id }}" class="text-decoration-none">Topics</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Quiz Config</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold">Topic Quiz Configurations</h3>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="/admin/topics/{{ topic.roadmap_id }}" class="btn btn-outline-secondary rounded-pill">Back to Topics</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- List Quizzes -->
+        <div class="col-lg-8">
+            <div class="card custom-card border-0 p-4 shadow-sm">
+                <h5 class="fw-bold mb-4 text-primary"><i class="bi-question-circle"></i> Quizzes Created</h5>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Quiz ID</th>
+                                <th>Passing Score</th>
+                                <th>Questions Count</th>
+                                <th style="width: 25%;">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if quizzes %}
+                                {% for q in quizzes %}
+                                    <tr>
+                                        <td>#{{ q.id }}</td>
+                                        <td class="fw-bold text-success">{{ q.passing_percentage }}%</td>
+                                        <td>{{ q.questions|length }} questions</td>
+                                        <td>
+                                            <div class="d-flex gap-1 align-items-center">
+                                                <a href="/admin/questions/{{ q.id }}" class="btn btn-sm btn-primary rounded-pill px-3">
+                                                    <i class="bi-list-ul"></i> Questions
+                                                </a>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary rounded-pill px-2.5"
+                                                        onclick="openEditQuizModal({{ q.id }}, {{ q.passing_percentage }})">
+                                                    <i class="bi-pencil"></i>
+                                                </button>
+                                                <form action="/admin/quizzes/delete/{{ q.id }}" method="POST" onsubmit="return confirm('Soft-delete this quiz and all its questions?');" style="display:inline;">
+                                                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill px-2.5">
+                                                        <i class="bi-trash"></i>
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="4" class="text-center text-muted py-5">No quiz initialized yet. Add one in the side menu.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add Quiz Form -->
+        <div class="col-lg-4">
+            {% if not quizzes %}
+                <div class="card custom-card border-0 p-4 shadow-sm">
+                    <h5 class="fw-bold mb-3"><i class="bi-plus-circle text-primary"></i> Create Quiz</h5>
+                    
+                    <form action="/admin/quizzes/add" method="POST">
+                        <input type="hidden" name="topic_id" value="{{ topic.id }}">
+                        
+                        <div class="mb-3">
+                            <label for="passing_percentage" class="form-label fw-semibold">Passing Threshold (%)</label>
+                            <input type="number" class="form-control" id="passing_percentage" name="passing_percentage" required value="70" min="50" max="100">
+                        </div>
+                        
+                        <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill fw-bold">Initialize Quiz</button>
+                    </form>
+                </div>
+            {% else %}
+                <div class="alert alert-info small" role="alert">
+                    Each topic supports a single active check-point quiz. To manage questions, click the <strong>Questions</strong> action button.
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Edit Quiz Modal -->
+<div class="modal fade" id="editQuizModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold text-primary"><i class="bi-pencil-square"></i> Edit Quiz Passing Target</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editQuizForm" method="POST">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label for="edit_passing_percentage" class="form-label fw-semibold">Passing Threshold (%)</label>
+                        <input type="number" class="form-control" id="edit_passing_percentage" name="passing_percentage" required min="50" max="100">
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openEditQuizModal(id, passing) {
+    document.getElementById('editQuizForm').action = '/admin/quizzes/edit/' + id;
+    document.getElementById('edit_passing_percentage').value = passing || 70;
+    new bootstrap.Modal(document.getElementById('editQuizModal')).show();
+}
+</script>
+{% endblock %}

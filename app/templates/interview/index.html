@@ -1,0 +1,180 @@
+{% extends "base.html" %}
+
+{% block title %}AI Mock Interview - SkillPath AI{% endblock %}
+{% block page_title %}🎙️ AI Mock Interview System{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="card border-0 rounded-4 shadow-sm mb-4 bg-body">
+        <div class="card-body p-4">
+    <!-- Vibrant Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="p-4 p-md-5 border-0 rounded-4 text-white shadow-lg d-flex flex-wrap align-items-center justify-content-between gap-3 vibrant-banner-hero" style="background: linear-gradient(135deg, #A78BFA 0%, #EC4899 100%);">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        <span class="sticker-badge sticker-ai">🤖 AI MOCK</span>
+                        <span class="sticker-badge sticker-pro">🎙️ INTERVIEW PRO</span>
+                    </div>
+                    <h2 class="fw-bold m-0 text-white display-6">🎙️ Interactive AI Mock Interviewer</h2>
+                    <p class="m-0 mt-1 opacity-90 text-white-50 fs-6">Simulate real-world Technical, HR, Behavioral, or Coding interviews. Gemini AI evaluates answer clarity, depth, and confidence ratings.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+            <!-- Select Interview Type -->
+            <div class="row g-3 mb-4" id="typeSelectionRow">
+                <div class="col-md-3">
+                    <div class="card border border-body rounded-4 p-3 text-center cursor-pointer type-card bg-body hover-shadow" data-type="Technical">
+                        <div class="fs-1 mb-2">💻</div>
+                        <h6 class="fw-bold">Technical Interview</h6>
+                        <small class="text-muted">Data structures, architecture, algorithms, DBs</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border border-body rounded-4 p-3 text-center cursor-pointer type-card bg-body hover-shadow" data-type="HR">
+                        <div class="fs-1 mb-2">👔</div>
+                        <h6 class="fw-bold">HR Interview</h6>
+                        <small class="text-muted">Culture fit, salary expectations, career path</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border border-body rounded-4 p-3 text-center cursor-pointer type-card bg-body hover-shadow" data-type="Behavioral">
+                        <div class="fs-1 mb-2">🧠</div>
+                        <h6 class="fw-bold">Behavioral Interview</h6>
+                        <small class="text-muted">STAR method, problem solving, teamwork</small>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card border border-body rounded-4 p-3 text-center cursor-pointer type-card bg-body hover-shadow" data-type="Coding">
+                        <div class="fs-1 mb-2">⚡</div>
+                        <h6 class="fw-bold">Coding Interview</h6>
+                        <small class="text-muted">Algorithm design, edge cases, time complexity</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive Interview Chat Session -->
+            <div class="card border border-body rounded-4 p-4 d-none bg-body" id="interviewChatContainer">
+                <div class="d-flex align-items-center justify-content-between border-bottom pb-3 mb-3">
+                    <h5 class="fw-bold m-0" id="sessionTitle">🔴 Live Interview Session</h5>
+                    <button class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="window.location.reload()">🛑 End Interview</button>
+                </div>
+
+                <div class="mb-4">
+                    <div class="bg-primary bg-opacity-10 border-start border-4 border-primary p-3 rounded-3 mb-3">
+                        <small class="text-primary fw-bold text-uppercase d-block mb-1">🤖 Interviewer Question</small>
+                        <h5 class="fw-semibold text-body m-0" id="currentQuestionText">Loading question...</h5>
+                        <small class="text-muted mt-2 d-block" id="questionTipsText"></small>
+                    </div>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">💬 Your Response</label>
+                    <textarea class="form-control rounded-3" id="candidateAnswerInput" rows="5" placeholder="Formulate your response here..."></textarea>
+                </div>
+
+                <div class="text-end">
+                    <button class="btn btn-primary rounded-pill px-4 fw-bold" id="submitAnswerBtn">
+                        🚀 Submit Answer
+                    </button>
+                </div>
+            </div>
+
+            <!-- Final Evaluation Summary Modal / View -->
+            <div class="card border-0 rounded-4 shadow-sm p-4 d-none text-center bg-body" id="evaluationContainer">
+                <div class="fs-1 mb-3">🏆</div>
+                <h3 class="fw-bold">🎉 Interview Completed!</h3>
+                <h2 class="display-5 fw-bold text-primary my-2" id="overallScoreDisplay">88.5%</h2>
+                <p class="text-secondary" id="overallFeedbackText"></p>
+                <div class="mt-4">
+                    <button class="btn btn-primary rounded-pill px-4" onclick="window.location.reload()">🔄 Start New Session</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    let activeSessionId = null;
+    let activeQaId = null;
+
+    document.querySelectorAll('.type-card').forEach(card => {
+        card.addEventListener('click', function() {
+            const type = this.getAttribute('data-type');
+            startSession(type);
+        });
+    });
+
+    function startSession(type) {
+        document.getElementById('typeSelectionRow').classList.add('d-none');
+        document.getElementById('interviewChatContainer').classList.remove('d-none');
+        document.getElementById('sessionTitle').innerText = `${type} Mock Interview`;
+
+        const formData = new FormData();
+        formData.append('interview_type', type);
+
+        fetch('/mock-interview/start', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                activeSessionId = data.session_id;
+                activeQaId = data.qa_id;
+                document.getElementById('currentQuestionText').innerText = data.question;
+                document.getElementById('questionTipsText').innerText = data.tips ? `Tip: ${data.tips}` : '';
+            } else {
+                alert(data.detail || 'Failed to start interview session.');
+            }
+        });
+    }
+
+    document.getElementById('submitAnswerBtn').addEventListener('click', function() {
+        const ans = document.getElementById('candidateAnswerInput').value.trim();
+        if (!ans) {
+            alert('Please type an answer before submitting.');
+            return;
+        }
+
+        this.disabled = true;
+        this.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span> Evaluating...`;
+
+        const formData = new FormData();
+        formData.append('session_id', activeSessionId);
+        formData.append('qa_id', activeQaId);
+        formData.append('answer', ans);
+
+        fetch('/mock-interview/answer', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            this.disabled = false;
+            this.innerHTML = `Submit Answer <i class="bi bi-send-fill ms-1"></i>`;
+            document.getElementById('candidateAnswerInput').value = '';
+
+            if (data.status === 'next') {
+                activeQaId = data.next_qa_id;
+                document.getElementById('currentQuestionText').innerText = data.next_question;
+                document.getElementById('questionTipsText').innerText = data.tips ? `Tip: ${data.tips}` : '';
+            } else if (data.status === 'completed') {
+                document.getElementById('interviewChatContainer').classList.add('d-none');
+                document.getElementById('overallScoreDisplay').innerText = `${data.overall_score}%`;
+                document.getElementById('overallFeedbackText').innerText = data.feedback;
+                document.getElementById('evaluationContainer').classList.remove('d-none');
+            }
+        })
+        .catch(err => {
+            this.disabled = false;
+            this.innerHTML = `Submit Answer <i class="bi bi-send-fill ms-1"></i>`;
+            alert('Error submitting answer: ' + err.message);
+        });
+    });
+</script>
+{% endblock %}

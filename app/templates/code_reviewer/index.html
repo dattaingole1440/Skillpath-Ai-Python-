@@ -1,0 +1,154 @@
+{% extends "base.html" %}
+
+{% block title %}AI Code Reviewer - SkillPath AI{% endblock %}
+{% block page_title %}🤖 AI Code Reviewer{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="card border-0 rounded-4 shadow-sm mb-4 bg-body">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+                <div>
+                    <h4 class="fw-bold m-0">🤖 <i class="bi bi-code-slash text-primary me-2"></i> Automated Gemini Code Review</h4>
+                    <p class="text-secondary small mb-0">Paste source code to get static analysis, bug detection, complexity breakdown, security evaluation, and an improved production code snippet.</p>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <select class="form-select rounded-pill px-3" id="reviewLanguage">
+                        <option value="python" selected>🐍 Python</option>
+                        <option value="java">☕ Java</option>
+                        <option value="cpp">⚡ C++</option>
+                        <option value="javascript">🌐 JavaScript</option>
+                    </select>
+                    <button class="btn btn-primary rounded-pill px-4 fw-bold" id="runReviewBtn">
+                        ⚡ Analyze Code
+                    </button>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-6">
+                    <label class="form-label fw-semibold text-secondary">💻 Paste Source Code</label>
+                    <textarea class="form-control font-monospace rounded-3 bg-dark text-light p-3" id="codeReviewInput" rows="16" placeholder="# Paste your Python, Java, C++, or JavaScript code snippet here...
+def calculate_factorial(n):
+    if n == 0:
+        return 1
+    return n * calculate_factorial(n - 1)"></textarea>
+                </div>
+
+                <div class="col-lg-6">
+                    <label class="form-label fw-semibold text-secondary">📊 AI Review & Diagnostic Score</label>
+                    <div class="card border border-body rounded-3 p-4 h-100 bg-body" id="reviewResultsContainer">
+                        <div class="text-center text-muted py-5" id="reviewPlaceholder">
+                            <div class="fs-1 text-secondary opacity-50 mb-3">🛡️</div>
+                            <h5>Ready to Analyze</h5>
+                            <p class="small">Click 'Analyze Code' to run Gemini AI static analysis against your code snippet.</p>
+                        </div>
+                        <div class="d-none" id="reviewLoader">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status"></div>
+                                <h5 class="fw-bold">🤖 Analyzing Code Quality...</h5>
+                                <p class="text-muted small">Checking bugs, time complexity, readability, security, and coding standards.</p>
+                            </div>
+                        </div>
+                        <div class="d-none" id="reviewContent">
+                            <div class="d-flex align-items-center justify-content-between mb-3 border-bottom pb-3">
+                                <div>
+                                    <small class="text-muted text-uppercase fw-bold">🎯 Overall Score</small>
+                                    <h2 class="fw-bold text-primary m-0" id="scoreDisplay">85 / 100</h2>
+                                </div>
+                                <span class="badge bg-success rounded-pill px-3 py-2" id="scoreBadge">Good Quality</span>
+                            </div>
+
+                            <ul class="nav nav-pills mb-3 gap-2" id="reviewTabs" role="tablist">
+                                <li class="nav-item"><button class="nav-link active rounded-pill px-3 py-1 text-xs" data-bs-toggle="pill" data-bs-target="#tabBugs">🐛 Bugs & Complexity</button></li>
+                                <li class="nav-item"><button class="nav-link rounded-pill px-3 py-1 text-xs" data-bs-toggle="pill" data-bs-target="#tabImproved">✨ Improved Code</button></li>
+                                <li class="nav-item"><button class="nav-link rounded-pill px-3 py-1 text-xs" data-bs-toggle="pill" data-bs-target="#tabSecurity">🔒 Security & Style</button></li>
+                            </ul>
+
+                            <div class="tab-content">
+                                <div class="tab-pane fade show active" id="tabBugs">
+                                    <div class="mb-3">
+                                        <small class="fw-bold text-danger">🐛 Bugs & Flaws</small>
+                                        <p class="small text-secondary m-0" id="bugsText"></p>
+                                    </div>
+                                    <div>
+                                        <small class="fw-bold text-primary">⏱️ Time & Space Complexity</small>
+                                        <p class="small text-secondary m-0" id="complexityText"></p>
+                                    </div>
+                                </div>
+                                <div class="tab-pane fade" id="tabImproved">
+                                    <div class="position-relative">
+                                        <pre class="bg-dark text-light p-3 rounded-3 font-monospace small" id="improvedCodeBlock" style="max-height: 220px; overflow-y: auto;"></pre>
+                                    </div>
+                                    <small class="fw-bold text-success mt-2 d-block">💡 Explanation</small>
+                                    <p class="small text-secondary m-0" id="explanationText"></p>
+                                </div>
+                                <div class="tab-pane fade" id="tabSecurity">
+                                    <div class="mb-3">
+                                        <small class="fw-bold text-warning">🛡️ Security Assessment</small>
+                                        <p class="small text-secondary m-0" id="securityText"></p>
+                                    </div>
+                                    <div>
+                                        <small class="fw-bold text-info"><i class="bi bi-chat-left-text me-1"></i> Readability & Suggestions</small>
+                                        <p class="small text-secondary m-0" id="suggestionsText"></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('runReviewBtn').addEventListener('click', function() {
+        const code = document.getElementById('codeReviewInput').value.trim();
+        const language = document.getElementById('reviewLanguage').value;
+        if (!code) {
+            alert('Please paste code before running review.');
+            return;
+        }
+
+        document.getElementById('reviewPlaceholder').classList.add('d-none');
+        document.getElementById('reviewContent').classList.add('d-none');
+        document.getElementById('reviewLoader').classList.remove('d-none');
+
+        const formData = new FormData();
+        formData.append('code', code);
+        formData.append('language', language);
+
+        fetch('/code-reviewer/analyze', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById('reviewLoader').classList.add('d-none');
+            if (data.status === 'success') {
+                const rev = data.review;
+                document.getElementById('scoreDisplay').innerText = rev.score + ' / 100';
+                document.getElementById('bugsText').innerText = rev.bugs;
+                document.getElementById('complexityText').innerText = rev.complexity;
+                document.getElementById('improvedCodeBlock').innerText = rev.improved_code;
+                document.getElementById('explanationText').innerText = rev.explanation;
+                document.getElementById('securityText').innerText = rev.security;
+                document.getElementById('suggestionsText').innerText = rev.suggestions;
+
+                document.getElementById('reviewContent').classList.remove('d-none');
+            } else {
+                alert(data.detail || 'Code review failed.');
+                document.getElementById('reviewPlaceholder').classList.remove('d-none');
+            }
+        })
+        .catch(err => {
+            document.getElementById('reviewLoader').classList.add('d-none');
+            document.getElementById('reviewPlaceholder').classList.remove('d-none');
+            alert('Error running code review: ' + err.message);
+        });
+    });
+</script>
+{% endblock %}

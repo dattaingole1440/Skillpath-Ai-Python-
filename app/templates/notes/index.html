@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+
+{% block title %}Notes & Bookmarks - SkillPath AI{% endblock %}
+{% block page_title %}📝 Notes & Bookmarks{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="card border-0 rounded-4 shadow-sm mb-4 bg-body">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+                <div>
+                    <h4 class="fw-bold m-0">📒 <i class="bi bi-journal-bookmark-fill text-primary me-2"></i> Personal Notes & Saved Bookmarks</h4>
+                    <p class="text-secondary small mb-0">Create private learning notes, highlight code patterns, export PDFs, and manage quick bookmarks.</p>
+                </div>
+                <button class="btn btn-primary rounded-pill px-4 fw-bold" data-bs-toggle="modal" data-bs-target="#newNoteModal">
+                    ✏️ New Note
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <ul class="nav nav-pills mb-4 gap-2" role="tablist">
+                <li class="nav-item"><button class="nav-link active rounded-pill px-4 py-2" data-bs-toggle="pill" data-bs-target="#tabMyNotes">📝 My Notes ({{ notes|length }})</button></li>
+                <li class="nav-item"><button class="nav-link rounded-pill px-4 py-2" data-bs-toggle="pill" data-bs-target="#tabBookmarks">⭐ Bookmarks ({{ bookmarks|length }})</button></li>
+            </ul>
+
+            <div class="tab-content">
+                <!-- Notes Tab -->
+                <div class="tab-pane fade show active" id="tabMyNotes">
+                    <div class="row g-4">
+                        {% for n in notes %}
+                        <div class="col-md-6 col-lg-4">
+                            <div class="card border border-body rounded-4 p-4 h-100 bg-body d-flex flex-column justify-content-between">
+                                <div>
+                                    <div class="d-flex align-items-center justify-content-between mb-2">
+                                        <span class="badge bg-secondary bg-opacity-10 text-body rounded-pill px-3 py-1">🔒 Private Note</span>
+                                        <button class="btn btn-sm btn-link text-danger delete-note-btn" data-id="{{ n.id }}">🗑️</button>
+                                    </div>
+                                    <h5 class="fw-bold mb-2">📌 {{ n.title }}</h5>
+                                    <p class="small text-secondary mb-3" style="white-space: pre-wrap;">{{ n.content }}</p>
+                                </div>
+                                <div class="text-end border-top pt-2">
+                                    <small class="text-muted text-xs">⏱️ Updated: {{ n.updated_at.strftime('%b %d, %Y') }}</small>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5 text-muted col-12">
+                            <i class="bi bi-journal display-3 opacity-50 mb-3"></i>
+                            <h5 class="fw-bold">📝 No Private Notes</h5>
+                            <p class="small">Click 'New Note' to create your first personal notebook entry.</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Bookmarks Tab -->
+                <div class="tab-pane fade" id="tabBookmarks">
+                    <div class="list-group list-group-flush rounded-3 border">
+                        {% for b in bookmarks %}
+                        <div class="list-group-item d-flex align-items-center justify-content-between py-3 bg-body">
+                            <div>
+                                <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1 me-2 text-capitalize">🏷️ {{ b.resource_type }}</span>
+                                <strong class="text-body">🔖 {{ b.title }}</strong>
+                            </div>
+                            {% if b.url %}
+                            <a href="{{ b.url }}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill px-3">🔗 Open Resource</a>
+                            {% endif %}
+                        </div>
+                        {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="bi bi-bookmark display-3 opacity-50 mb-3"></i>
+                            <h5 class="fw-bold">⭐ No Bookmarks Saved</h5>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal New Note -->
+<div class="modal fade" id="newNoteModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-primary">✏️ Create Private Note</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="newNoteForm">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Note Title</label>
+                        <input type="text" class="form-control rounded-3" name="title" required placeholder="e.g. FastAPI Async Route Patterns">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Note Content</label>
+                        <textarea class="form-control rounded-3" name="content" rows="6" required placeholder="Write notes, code snippets, or revision points..."></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4">💾 Save Note</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('newNoteForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const formData = new FormData(this);
+        fetch('/api/notes', { method: 'POST', body: formData })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') window.location.reload();
+        });
+    });
+
+    document.querySelectorAll('.delete-note-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const nid = this.getAttribute('data-id');
+            if (confirm('Delete this note?')) {
+                fetch(`/api/notes/${nid}`, { method: 'DELETE' })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.status === 'success') window.location.reload();
+                });
+            }
+        });
+    });
+</script>
+{% endblock %}

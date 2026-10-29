@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Credential Verification - SkillPath AI</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <style>
+        body {
+            background-color: #F8F9FA;
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        [data-bs-theme="dark"] {
+            background-color: #0F172A;
+        }
+        .verify-card {
+            border: none;
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+            max-width: 500px;
+            width: 100%;
+            padding: 3rem;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card verify-card bg-body mb-4">
+        <!-- Logo -->
+        <div class="d-flex align-items-center justify-content-center gap-2 text-primary fs-3 fw-bold mb-4">
+            <i class="bi-compass-fill"></i> SkillPath AI
+        </div>
+
+        {% if is_valid %}
+            <!-- Verified State -->
+            <div class="fs-1 text-success mb-3"><i class="bi-shield-check-fill" style="font-size: 4rem;"></i></div>
+            <h3 class="fw-bold text-success mb-2">Credential Verified</h3>
+            <p class="text-muted small mb-4">This digital certificate has been verified as authentic by the SkillPath AI certification registry.</p>
+            
+            <div class="table-responsive text-start border rounded-3 p-3 bg-light-subtle small">
+                <table class="table table-borderless m-0">
+                    <tbody>
+                        <tr>
+                            <td class="fw-bold text-muted" style="width: 35%;">Recipient:</td>
+                            <td class="fw-semibold text-dark">{{ student_name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-muted">Pathway:</td>
+                            <td class="fw-semibold text-dark">{{ career_name }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-muted">Issue Date:</td>
+                            <td class="fw-semibold text-dark">{{ issue_date }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-muted">Certificate ID:</td>
+                            <td class="fw-semibold text-dark">{{ cert_number }}</td>
+                        </tr>
+                        <tr>
+                            <td class="fw-bold text-muted">Status:</td>
+                            <td><span class="badge bg-success-subtle text-success px-2.5 py-1">Active / Verified</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        {% else %}
+            <!-- Invalid State -->
+            <div class="fs-1 text-danger mb-3"><i class="bi-exclamation-triangle-fill" style="font-size: 4rem;"></i></div>
+            <h3 class="fw-bold text-danger mb-2">Invalid Credential</h3>
+            <p class="text-muted small mb-4">The certificate identifier provided does not match any valid records in our registration database.</p>
+            
+            <div class="alert alert-danger border-0 rounded-3 p-3 text-start small">
+                <strong>Warning:</strong> If you are verifying a printed copy of a certificate, please double check the ID parameter or scan the QR code again.
+            </div>
+            
+            <p class="text-secondary small">Certificate ID parameter: <strong>{{ cert_number }}</strong></p>
+        {% endif %}
+        
+        <hr class="my-4">
+        
+        <a href="/" class="btn btn-outline-primary btn-sm rounded-pill px-4">Visit Platform Home</a>
+    </div>
+
+    <!-- Small Footer -->
+    <div class="text-center text-muted small">
+        &copy; 2026 SkillPath AI Registry. All rights reserved.
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

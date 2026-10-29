@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Practicals & Labs - SkillPath AI{% endblock %}
+{% block page_title %}🔬 Practicals & Virtual Labs{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+    <!-- Header Banner -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="p-4 rounded-4 shadow-sm text-white" style="background: linear-gradient(135deg, #0D5C3A 0%, #10B981 100%);">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <h2 class="fw-bold m-0 text-white"><i class="bi-laptop me-2"></i>🔬 Practicals & Hands-On Labs</h2>
+                        <p class="m-0 text-white-50">Execute real-world coding problems, practical lab experiments, and capstone projects.</p>
+                    </div>
+                    <a href="/code-editor" class="btn btn-warning rounded-pill px-4 py-2 fw-bold text-dark shadow-sm">
+                        <i class="bi-terminal me-1"></i> Open Code Sandbox
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Practical Labs Grid -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card border-0 rounded-4 p-4 shadow-sm bg-white">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold m-0"><i class="bi-code-square text-success me-2"></i>💻 Interactive Coding Labs</h5>
+                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1.5">{{ challenges|length }} Practical Problems</span>
+                </div>
+                
+                <div class="row g-3">
+                    {% for c in challenges %}
+                    <div class="col-md-6">
+                        <div class="card border rounded-4 p-3 h-100 hover-shadow-sm transition-all">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2.5 py-1 text-uppercase" style="font-size: 0.7rem;">
+                                    {{ c.difficulty or 'MEDIUM' }}
+                                </span>
+                                <span class="badge bg-warning bg-opacity-15 text-warning rounded-pill px-2 py-0.5" style="font-size: 0.65rem;">
+                                    +{{ c.points or 50 }} XP
+                                </span>
+                            </div>
+                            <h6 class="fw-bold text-dark mb-1">{{ c.title }}</h6>
+                            <p class="text-muted small mb-3 text-truncate-2" style="font-size: 0.825rem;">
+                                {{ c.description or 'Solve the algorithmic practical problem and evaluate pass/fail test cases.' }}
+                            </p>
+                            <div class="mt-auto pt-2 border-top d-flex justify-content-between align-items-center">
+                                <span class="text-muted small font-mono"><i class="bi-clock me-1"></i>~20 mins</span>
+                                <a href="/coding/challenge/{{ c.id }}" class="btn btn-sm btn-success rounded-pill px-3 fw-semibold text-white">
+                                    <i class="bi-play-fill me-1"></i>Start Lab
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi-journal-x fs-2"></i>
+                        <p class="mb-0 mt-2">No practical lab problems available.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Capstone Practical Projects -->
+        <div class="col-lg-4">
+            <div class="card border-0 rounded-4 p-4 shadow-sm bg-white">
+                <h5 class="fw-bold mb-3"><i class="bi-diagram-3 text-primary me-2"></i>🚀 Practical Projects</h5>
+                <div class="d-flex flex-column gap-3">
+                    {% for p in projects[:6] %}
+                    <div class="p-3 border rounded-3 bg-light bg-opacity-50">
+                        <div class="d-flex justify-content-between align-items-start mb-1">
+                            <h6 class="fw-bold text-dark m-0">{{ p.title }}</h6>
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-2 py-0.5" style="font-size: 0.65rem;">
+                                {{ p.difficulty or 'INTERMEDIATE' }}
+                            </span>
+                        </div>
+                        <p class="text-muted small mb-2" style="font-size: 0.8rem;">{{ p.description[:80] }}...</p>
+                        <a href="/projects" class="btn btn-sm btn-outline-primary rounded-pill w-100 py-1 font-mono">View Specs <i class="bi-arrow-right"></i></a>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

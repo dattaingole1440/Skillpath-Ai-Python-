@@ -1,0 +1,174 @@
+{% extends "base.html" %}
+
+{% block title %}Notifications Center - SkillPath AI{% endblock %}
+{% block page_title %}Notifications & Announcements{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="p-4 border-0 rounded-4 text-white shadow-lg d-flex flex-wrap align-items-center justify-content-between gap-3 vibrant-banner-hero" style="background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        <span class="sticker-badge sticker-fire">🔔 ALERTS</span>
+                        <span class="sticker-badge sticker-pro">📣 BROADCASTS</span>
+                    </div>
+                    <h3 class="fw-bold m-0 text-white display-6">
+                        <i class="bi bi-bell-fill text-warning"></i> Notifications Center
+                    </h3>
+                    <p class="m-0 mt-1 opacity-90 text-white-50 fs-6">Stay updated on teacher announcements, assignment reminders, exam alerts, and platform milestones.</p>
+                </div>
+                {% if user.role in ['teacher', 'hod', 'principal', 'college_admin', 'super_admin'] %}
+                <div>
+                    <a href="/teacher/notifications" class="btn btn-warning btn-lg rounded-pill fw-bold px-4 py-3 shadow-lg text-dark d-flex align-items-center gap-2">
+                        <i class="bi bi-send-fill fs-5"></i> Send Announcement
+                    </a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Tabs -->
+    <ul class="nav nav-pills mb-4 gap-2" id="notifTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active rounded-pill px-4 fw-semibold" id="all-tab" data-bs-toggle="pill" data-bs-target="#all-notifs" type="button" role="tab">
+                <i class="bi bi-collection me-1"></i> All Updates ({{ (notifications|length) + (teacher_notifications|length) }})
+            </button>
+        </li>
+        {% if teacher_notifications %}
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill px-4 fw-semibold" id="teacher-tab" data-bs-toggle="pill" data-bs-target="#teacher-notifs" type="button" role="tab">
+                <i class="bi bi-mortarboard me-1"></i> Teacher Announcements ({{ teacher_notifications|length }})
+            </button>
+        </li>
+        {% endif %}
+        <li class="nav-item" role="presentation">
+            <button class="nav-link rounded-pill px-4 fw-semibold" id="system-tab" data-bs-toggle="pill" data-bs-target="#system-notifs" type="button" role="tab">
+                <i class="bi bi-cpu me-1"></i> System Milestones ({{ notifications|length }})
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Contents -->
+    <div class="tab-content" id="notifTabsContent">
+        <!-- ALL TAB -->
+        <div class="tab-pane fade show active" id="all-notifs" role="tabpanel">
+            <div class="row g-3">
+                {% if teacher_notifications %}
+                    {% for tn in teacher_notifications %}
+                    <div class="col-12">
+                        <div class="card border-0 rounded-4 shadow-sm custom-card p-4">
+                            <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    {% if tn.type == 'warning' %}
+                                        <span class="badge bg-danger-subtle text-danger text-uppercase px-3 py-2 rounded-pill"><i class="bi bi-exclamation-triangle-fill me-1"></i> Warning</span>
+                                    {% elif tn.type == 'congratulations' or tn.type == 'greeting' %}
+                                        <span class="badge bg-success-subtle text-success text-uppercase px-3 py-2 rounded-pill"><i class="bi bi-gift-fill me-1"></i> {{ tn.type }}</span>
+                                    {% elif tn.type == 'exam_reminder' %}
+                                        <span class="badge bg-warning-subtle text-warning text-uppercase px-3 py-2 rounded-pill"><i class="bi bi-alarm-fill me-1"></i> Exam Alert</span>
+                                    {% else %}
+                                        <span class="badge bg-primary-subtle text-primary text-uppercase px-3 py-2 rounded-pill"><i class="bi bi-megaphone-fill me-1"></i> Announcement</span>
+                                    {% endif %}
+                                    <h5 class="fw-bold m-0 ms-1">{{ tn.title }}</h5>
+                                </div>
+                                <small class="text-muted"><i class="bi bi-clock me-1"></i>{{ tn.sent_at.strftime('%b %d, %Y • %I:%M %p') }}</small>
+                            </div>
+                            <p class="text-body mb-3 ps-1" style="font-size: 0.95rem; line-height: 1.6;">{{ tn.message }}</p>
+                            <div class="d-flex align-items-center justify-content-between pt-2 border-top">
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="avatar-circle d-flex align-items-center justify-content-center bg-primary text-white fw-bold" style="width: 32px; height: 32px; font-size: 13px;">
+                                        {{ tn.sender_teacher.name[0] if tn.sender_teacher else 'T' }}
+                                    </div>
+                                    <small class="fw-semibold text-secondary">Prof. {{ tn.sender_teacher.name if tn.sender_teacher else 'Faculty Member' }}</small>
+                                </div>
+                                <span class="badge bg-light text-secondary border rounded-pill px-3 py-1.5 small">
+                                    <i class="bi bi-broadcast me-1"></i> {% if tn.recipient_student_id %}Direct Notice{% else %}Class Broadcast{% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if notifications %}
+                    {% for n in notifications %}
+                    <div class="col-12">
+                        <div class="card border-0 rounded-4 shadow-sm custom-card p-4">
+                            <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-amber-subtle text-warning text-uppercase px-3 py-2 rounded-pill"><i class="bi bi-bell-fill me-1"></i> {{ n.type }}</span>
+                                    <h5 class="fw-bold m-0 ms-1">{{ n.title }}</h5>
+                                </div>
+                                <small class="text-muted"><i class="bi bi-clock me-1"></i>{{ n.created_at.strftime('%b %d, %Y • %I:%M %p') }}</small>
+                            </div>
+                            <p class="text-body mb-3 ps-1" style="font-size: 0.95rem; line-height: 1.6;">{{ n.message }}</p>
+                            {% if n.link %}
+                            <div class="pt-2 border-top d-flex justify-content-end">
+                                <a href="{{ n.link }}" class="btn btn-sm btn-outline-primary rounded-pill px-4 fw-semibold">View Details <i class="bi bi-arrow-right ms-1"></i></a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if not teacher_notifications and not notifications %}
+                <div class="col-12 text-center py-5 text-muted">
+                    <div class="p-5 rounded-4 bg-body border shadow-sm">
+                        <i class="bi bi-bell-slash display-2 text-secondary opacity-50 mb-3"></i>
+                        <h4 class="fw-bold">No Notifications Yet</h4>
+                        <p class="small text-secondary mb-0">You're all caught up! Check back later for teacher notices and milestones.</p>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- TEACHER ANNOUNCEMENTS TAB -->
+        {% if teacher_notifications %}
+        <div class="tab-pane fade" id="teacher-notifs" role="tabpanel">
+            <div class="row g-3">
+                {% for tn in teacher_notifications %}
+                <div class="col-12">
+                    <div class="card border-0 rounded-4 shadow-sm custom-card p-4">
+                        <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-2">
+                            <h5 class="fw-bold m-0 text-primary"><i class="bi bi-mortarboard me-2"></i>{{ tn.title }}</h5>
+                            <small class="text-muted">{{ tn.sent_at.strftime('%b %d, %Y • %I:%M %p') }}</small>
+                        </div>
+                        <p class="text-body mb-3" style="line-height: 1.6;">{{ tn.message }}</p>
+                        <div class="small text-muted d-flex align-items-center gap-2">
+                            <i class="bi bi-person-badge"></i> Faculty: {{ tn.sender_teacher.name if tn.sender_teacher else 'Instructor' }}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- SYSTEM TAB -->
+        <div class="tab-pane fade" id="system-notifs" role="tabpanel">
+            <div class="row g-3">
+                {% for n in notifications %}
+                <div class="col-12">
+                    <div class="card border-0 rounded-4 shadow-sm custom-card p-4">
+                        <div class="d-flex align-items-start justify-content-between flex-wrap gap-2 mb-2">
+                            <h5 class="fw-bold m-0"><i class="bi bi-award-fill text-warning me-2"></i>{{ n.title }}</h5>
+                            <small class="text-muted">{{ n.created_at.strftime('%b %d, %Y • %I:%M %p') }}</small>
+                        </div>
+                        <p class="text-body mb-0">{{ n.message }}</p>
+                    </div>
+                </div>
+                {% else %}
+                <div class="col-12 text-center py-5 text-muted">
+                    <p class="mb-0">No system notifications.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

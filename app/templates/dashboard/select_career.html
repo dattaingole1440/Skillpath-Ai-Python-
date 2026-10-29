@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Select Career Pathway - SkillPath AI{% endblock %}
+{% block page_title %}Choose Your Career Track{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row text-center mb-5">
+        <div class="col-md-8 mx-auto">
+            <h2 class="fw-bold text-primary mb-2">Set Your Learning Goal</h2>
+            <p class="text-muted">Select one of our specialized career pathways. SkillPath AI will customize an adaptive roadmap, quizzes, and coding challenges aligned to this path.</p>
+        </div>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        {% if careers %}
+            {% for career in careers %}
+                <div class="col-md-4">
+                    <div class="card h-100 custom-card border-0 shadow-sm p-3">
+                        <div class="card-body d-flex flex-column">
+                            <div class="d-flex align-items-center mb-3 gap-2">
+                                <i class="bi-briefcase-fill text-primary fs-3"></i>
+                                <h4 class="card-title fw-bold m-0">{{ career.name }}</h4>
+                            </div>
+                            
+                            <p class="card-text text-muted flex-grow-1">{{ career.description or 'Explore core modules, quizzes, and practical coding workflows aligned to this specialty.' }}</p>
+                            
+                            {% if career in user.enrolled_careers %}
+                                <div class="mt-4 d-grid gap-2 text-center">
+                                    <span class="badge bg-success-subtle text-success py-2.5 rounded-pill fw-bold mb-1"><i class="bi-check-circle-fill"></i> Enrolled</span>
+                                    <form action="/roadmap/select-career" method="POST">
+                                        <input type="hidden" name="career_id" value="{{ career.id }}">
+                                        <button type="submit" class="btn btn-outline-primary btn-sm w-100 rounded-pill py-1.5 fw-semibold">Set Focus / Study</button>
+                                    </form>
+                                </div>
+                            {% else %}
+                                <form action="/roadmap/select-career" method="POST" class="mt-4">
+                                    <input type="hidden" name="career_id" value="{{ career.id }}">
+                                    <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill fw-bold">Enroll Pathway</button>
+                                </form>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-10 text-center py-5 border rounded bg-white">
+                <i class="bi-exclamation-triangle-fill text-warning display-4"></i>
+                <h4 class="fw-bold mt-3">No Active Pathways Found</h4>
+                <p class="text-muted">Please ask an administrator to add career paths in the Admin Panel.</p>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

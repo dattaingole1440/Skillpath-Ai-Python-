@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% block page_title %}💼 Placement Readiness & Career Score{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header banner -->
+    <div class="card bg-gradient-primary text-white border-0 shadow-sm p-4 mb-4" style="background: linear-gradient(135deg, #1E293B 0%, #3B82F6 100%);">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <span class="badge bg-white text-primary mb-2 fw-bold">🤖 AI Placement Readiness Index</span>
+                <h2 class="fw-bold mb-2">🎯 Career Placement Readiness: {{ placement_eval.overall_placement_score }}%</h2>
+                <p class="mb-0 opacity-90">Evaluated across Coding Mastery, Quiz Performance, Capstone Projects, Attendance Record, Resume Impact, and Mock Interview Scores.</p>
+            </div>
+            <div class="col-md-4 text-end d-none d-md-block">
+                <span class="badge bg-success fs-5 p-3 rounded-pill shadow">🌟 {{ placement_eval.readiness_label }}</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Breakdown Grid -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card card-custom shadow-sm border-0 p-3 text-center">
+                <div class="text-muted small fw-semibold">💻 Coding Proficiency</div>
+                <h4 class="fw-bold text-primary mb-0 mt-1">{{ scores.coding_score }}%</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-custom shadow-sm border-0 p-3 text-center">
+                <div class="text-muted small fw-semibold">🧠 Quiz Accuracy</div>
+                <h4 class="fw-bold text-success mb-0 mt-1">{{ scores.quiz_score }}%</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-custom shadow-sm border-0 p-3 text-center">
+                <div class="text-muted small fw-semibold">📅 Attendance Record</div>
+                <h4 class="fw-bold text-info mb-0 mt-1">{{ scores.attendance_score|round(1) }}%</h4>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card card-custom shadow-sm border-0 p-3 text-center">
+                <div class="text-muted small fw-semibold">📄 Resume & ATS Rating</div>
+                <h4 class="fw-bold text-warning mb-0 mt-1">{{ scores.resume_score }}%</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- AI Advice & Action Plan -->
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card card-custom shadow-sm border-0 h-100">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">🤖 <i class="bi-cpu text-primary me-2"></i>AI Actionable Recommendations</h5>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <ul class="list-group list-group-flush">
+                        {% for rec in placement_eval.ai_recommendations %}
+                        <li class="list-group-item bg-transparent px-0 py-3 d-flex align-items-start gap-3">
+                            <span class="p-2 bg-primary-subtle text-primary rounded-circle">✅</span>
+                            <div>
+                                <h6 class="fw-semibold mb-1">{{ rec }}</h6>
+                                <span class="small text-muted">Focusing on this milestone will boost your placement score by ~4–8%.</span>
+                            </div>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card card-custom shadow-sm border-0 h-100">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0">🏆 <i class="bi-trophy text-warning me-2"></i>Top Candidate Strengths</h5>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    {% for st in placement_eval.top_strengths %}
+                    <div class="p-3 bg-success-subtle rounded mb-3">
+                        <div class="fw-bold text-success">⭐ <i class="bi-star-fill me-1"></i>{{ st }}</div>
+                    </div>
+                    {% endfor %}
+
+                    <div class="d-grid gap-2 mt-4">
+                        <a href="/mock-interview" class="btn btn-outline-primary">🎙️ Take AI Mock Interview</a>
+                        <a href="/resume/builder" class="btn btn-outline-secondary">📄 Update ATS Resume</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

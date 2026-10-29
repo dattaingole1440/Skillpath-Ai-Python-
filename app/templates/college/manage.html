@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% block page_title %}🏛️ College & Organization Management{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1">🏛️ <i class="bi-building text-primary me-2"></i>College Administration</h3>
+            <p class="text-muted mb-0">Manage Colleges, Departments, Semesters, Divisions, and Batch Student Imports.</p>
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createCollegeModal">
+            ➕ Add New College
+        </button>
+    </div>
+
+    <!-- Colleges Grid -->
+    <div class="row g-4 mb-4">
+        {% for c in colleges %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card card-custom h-100 shadow-sm border-0">
+                <div class="card-body">
+                    <div class="d-flex align-items-center gap-3 mb-3">
+                        <img src="{{ c.logo }}" alt="Logo" class="rounded" width="48" height="48">
+                        <div>
+                            <h5 class="fw-bold mb-0">{{ c.name }}</h5>
+                            <span class="badge bg-primary-subtle text-primary fw-semibold">Code: {{ c.code }}</span>
+                        </div>
+                    </div>
+                    <p class="text-muted small mb-2"><i class="bi-geo-alt me-1"></i>{{ c.address or 'Address not specified' }}</p>
+                    <p class="text-muted small mb-3"><i class="bi-envelope me-1"></i>{{ c.contact_email or 'Contact not set' }}</p>
+                    <hr>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="small text-muted">{{ c.departments|length }} Departments</span>
+                        <span class="small text-muted">{{ c.users|length }} Registered Users</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <div class="row g-4">
+        <!-- Create Department -->
+        <div class="col-lg-6">
+            <div class="card card-custom shadow-sm border-0">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0"><i class="bi-diagram-2 text-primary me-2"></i>Add Department</h5>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <form action="/college/department/create" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Select College</label>
+                            <select name="college_id" class="form-select" required>
+                                {% for c in colleges %}
+                                    <option value="{{ c.id }}">{{ c.name }} ({{ c.code }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Department Name</label>
+                            <input type="text" name="name" class="form-control" placeholder="e.g. Computer Science & Engineering" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Department Code</label>
+                            <input type="text" name="code" class="form-control" placeholder="e.g. CSE" required>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi-check-circle me-1"></i> Create Department & Auto-generate Semesters
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Import Students CSV -->
+        <div class="col-lg-6">
+            <div class="card card-custom shadow-sm border-0">
+                <div class="card-header bg-transparent border-0 pt-4 px-4">
+                    <h5 class="fw-bold mb-0"><i class="bi-file-earmark-spreadsheet text-success me-2"></i>Batch Student Import (Excel/CSV)</h5>
+                </div>
+                <div class="card-body px-4 pb-4">
+                    <form action="/college/students/import" method="POST" enctype="multipart/form-data">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Select Target College</label>
+                            <select name="college_id" class="form-select" required>
+                                {% for c in colleges %}
+                                    <option value="{{ c.id }}">{{ c.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Select Target Department</label>
+                            <select name="department_id" class="form-select" required>
+                                {% for d in departments %}
+                                    <option value="{{ d.id }}">{{ d.name }} ({{ d.code }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Upload CSV File</label>
+                            <input type="file" name="file" accept=".csv" class="form-control" required>
+                            <div class="form-text">CSV Headers required: <code>name, email, roll_number, phone_number</code></div>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="bi-cloud-upload me-1"></i> Import Students Batch
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Create College -->
+<div class="modal fade" id="createCollegeModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="/college/create" method="POST" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-header-title fw-bold">Register New College</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">College Name</label>
+                    <input type="text" name="name" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">College Code</label>
+                    <input type="text" name="code" class="form-control" placeholder="e.g. Stanford" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Contact Email</label>
+                    <input type="email" name="contact_email" class="form-control">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Address</label>
+                    <textarea name="address" class="form-control" rows="2"></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary">Create College</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

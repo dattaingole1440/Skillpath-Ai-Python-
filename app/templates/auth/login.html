@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Universal Portal Login — SkillPath AI</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        :root {
+            --brand-primary: #0D5C3A;
+            --brand-accent: #2ECC71;
+            --brand-glow: rgba(46, 204, 113, 0.35);
+            --card-bg: #FFFFFF;
+            --page-bg: #F0F4F8;
+            --input-bg: #F1F5F9;
+            --text-dark: #0F172A;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+        }
+
+        [data-bs-theme="dark"] {
+            --brand-primary: #10B981;
+            --brand-accent: #34D399;
+            --brand-glow: rgba(52, 211, 153, 0.25);
+            --card-bg: #0F172A;
+            --page-bg: #070D18;
+            --input-bg: #1E293B;
+            --text-dark: #F8FAFC;
+            --text-muted: #94A3B8;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background: var(--page-bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem 1rem;
+            margin: 0;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(46, 204, 113, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(13, 92, 58, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .auth-container {
+            width: 100%;
+            max-width: 480px;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1.5rem;
+            padding: 2.75rem 2.5rem;
+            box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .brand-chip-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #0D5C3A 0%, #10B981 100%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+
+        .brand-logo-text {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.45rem;
+            color: var(--text-dark);
+            letter-spacing: -0.02em;
+        }
+
+        .brand-logo-text span {
+            color: #10B981;
+        }
+
+        .card-heading {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+            color: var(--text-dark);
+            margin-top: 0.75rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 1.75rem;
+            line-height: 1.45;
+        }
+
+        .form-label {
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.4rem;
+        }
+
+        .custom-input-group {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            display: flex;
+            align-items: center;
+            padding: 0.15rem 0.5rem;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .custom-input-group:focus-within {
+            border-color: #10B981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+        }
+
+        .custom-input-group .input-group-text {
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            padding: 0.55rem 0.65rem;
+            font-size: 1rem;
+        }
+
+        .custom-input-group .form-control {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            padding: 0.65rem 0.5rem 0.65rem 0;
+            font-size: 0.92rem;
+            color: var(--text-dark);
+        }
+
+        .custom-input-group .form-control:focus {
+            outline: none;
+            box-shadow: none;
+        }
+
+        /* CAPTCHA Display Card */
+        .visual-captcha-card {
+            background: rgba(13, 92, 58, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 0.9rem;
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .captcha-display-row {
+            display: flex;
+            align-items: center;
+            gap: 0.65rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .captcha-canvas {
+            border-radius: 0.6rem;
+            cursor: pointer;
+            box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.4), 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.15s ease;
+            background: #06130D;
+            flex-shrink: 0;
+        }
+
+        .captcha-canvas:hover {
+            transform: scale(1.02);
+        }
+
+        .captcha-btn-action {
+            width: 36px;
+            height: 36px;
+            border-radius: 0.55rem;
+            border: 1px solid var(--border-color);
+            background: var(--card-bg);
+            color: var(--text-dark);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .captcha-btn-action:hover {
+            background: #10B981;
+            color: white;
+            border-color: #10B981;
+            transform: translateY(-1px);
+        }
+
+        .captcha-code-input {
+            font-family: 'JetBrains Mono', monospace;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+
+        .btn-submit-portal {
+            background: linear-gradient(135deg, #0D5C3A 0%, #10B981 100%);
+            border: none;
+            color: white;
+            font-weight: 700;
+            font-size: 0.95rem;
+            padding: 0.78rem;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .btn-submit-portal:hover {
+            background: linear-gradient(135deg, #09472c 0%, #059669 100%);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-submit-portal:active {
+            transform: translateY(0);
+        }
+
+        .shake-animation {
+            animation: shake 0.45s cubic-bezier(.36,.07,.19,.97) both;
+        }
+
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="auth-container">
+        <div class="login-card">
+            
+            <!-- Brand Header -->
+            <div class="text-center mb-3">
+                <a href="/" class="d-inline-flex align-items-center gap-2 text-decoration-none">
+                    <div class="brand-chip-icon">
+                        <i class="bi bi-cpu-fill"></i>
+                    </div>
+                    <span class="brand-logo-text">SkillPath <span>AI</span></span>
+                </a>
+                <h2 class="card-heading">Universal Portal Login</h2>
+                <p class="card-subtitle">Access your personalized role workspace with secure CAPTCHA verification</p>
+            </div>
+
+            <!-- Dynamic Alert Box -->
+            <div id="alertBox"></div>
+
+            <!-- Main Form -->
+            <form id="portalLoginForm" action="/auth/login" method="POST" onsubmit="return handlePortalLoginSubmit(event)">
+                
+                <!-- Email Field -->
+                <div class="mb-3">
+                    <label for="email" class="form-label">Email Address</label>
+                    <div class="custom-input-group">
+                        <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                        <input type="email" class="form-control" id="email" name="email" required placeholder="user@college.edu" autocomplete="username">
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="mb-3">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <label for="password" class="form-label mb-0">Password</label>
+                        <a href="/auth/forgot-password" class="small text-success text-decoration-none fw-semibold">Forgot Password (SMS)?</a>
+                    </div>
+                    <div class="custom-input-group">
+                        <span class="input-group-text"><i class="bi bi-lock"></i></span>
+                        <input type="password" class="form-control" id="password" name="password" required placeholder="••••••••" autocomplete="current-password">
+                    </div>
+                </div>
+
+                <!-- Security Verification (Visual Alphanumeric CAPTCHA) -->
+                <div class="visual-captcha-card" id="captchaSection">
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <label class="form-label mb-0" for="captchaInput">
+                            <i class="bi bi-shield-lock-fill text-success me-1"></i> Security Verification
+                        </label>
+                        <span class="badge bg-secondary-subtle text-secondary small py-1 px-2">
+                            <i class="bi bi-info-circle me-1"></i> Case-Insensitive
+                        </span>
+                    </div>
+
+                    <div class="captcha-display-row">
+                        <!-- Canvas Element -->
+                        <canvas id="captchaCanvas" width="160" height="44" class="captcha-canvas" onclick="generateVisualCaptcha()" title="Click image to refresh"></canvas>
+                        
+                        <!-- Action Buttons -->
+                        <button type="button" class="captcha-btn-action" onclick="playCaptchaAudio()" title="Listen to CAPTCHA code">
+                            <i class="bi bi-volume-up-fill"></i>
+                        </button>
+                        <button type="button" class="captcha-btn-action" onclick="generateVisualCaptcha()" title="Get a new CAPTCHA code">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+
+                    <div class="custom-input-group">
+                        <span class="input-group-text"><i class="bi bi-key"></i></span>
+                        <input type="text" id="captchaInput" class="form-control captcha-code-input" placeholder="Enter 5-character code" maxlength="5" autocomplete="off" required>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <button type="submit" id="loginBtn" class="btn-submit-portal w-100 mb-3">
+                    <i class="bi bi-box-arrow-in-right"></i> Secure Portal Login
+                </button>
+            </form>
+
+            <!-- Bottom Navigation -->
+            <div class="text-center pt-3 border-top" style="border-color: var(--border-color) !important;">
+                <small class="text-muted">
+                    New user or institution? <a href="/auth/register" class="fw-bold text-success text-decoration-none">Register Account</a>
+                </small>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Interactive CAPTCHA & Form Logic -->
+    <script>
+        let currentCaptchaText = "";
+
+        // High-clarity alphanumeric characters (excluding confusing O, 0, I, 1)
+        const CAPTCHA_CHARS = "23456789ABCDEFGHJKLMNPQRSTUVWXYZ";
+
+        function generateVisualCaptcha() {
+            let text = "";
+            for (let i = 0; i < 5; i++) {
+                text += CAPTCHA_CHARS.charAt(Math.floor(Math.random() * CAPTCHA_CHARS.length));
+            }
+            currentCaptchaText = text;
+
+            const canvas = document.getElementById('captchaCanvas');
+            if (!canvas) return;
+
+            const ctx = canvas.getContext('2d');
+            const width = canvas.width;
+            const height = canvas.height;
+
+            // Security Background Gradient
+            const grad = ctx.createLinearGradient(0, 0, width, height);
+            grad.addColorStop(0, '#06130D');
+            grad.addColorStop(0.5, '#0B2217');
+            grad.addColorStop(1, '#05110B');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, width, height);
+
+            // Security interference curves
+            const lineColors = ['rgba(46, 204, 113, 0.55)', 'rgba(78, 186, 111, 0.45)', 'rgba(56, 239, 125, 0.5)'];
+            for (let i = 0; i < 4; i++) {
+                ctx.strokeStyle = lineColors[i % lineColors.length];
+                ctx.lineWidth = 1.6;
+                ctx.beginPath();
+                ctx.moveTo(Math.random() * 20, Math.random() * height);
+                ctx.bezierCurveTo(
+                    Math.random() * width * 0.4, Math.random() * height,
+                    Math.random() * width * 0.8, Math.random() * height,
+                    width - Math.random() * 20, Math.random() * height
+                );
+                ctx.stroke();
+            }
+
+            // Security noise dots
+            for (let i = 0; i < 35; i++) {
+                ctx.fillStyle = Math.random() > 0.5 ? 'rgba(46, 204, 113, 0.55)' : 'rgba(255, 255, 255, 0.35)';
+                ctx.beginPath();
+                ctx.arc(Math.random() * width, Math.random() * height, Math.random() * 1.5 + 0.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            // Render characters with slight rotation & vivid glow colors
+            const charColors = ['#FFFFFF', '#2ECC71', '#4EBA6F', '#A8E6CF', '#F1C40F'];
+            const charSpacing = (width - 24) / 5;
+
+            for (let i = 0; i < 5; i++) {
+                const char = text[i];
+                const x = 14 + i * charSpacing;
+                const y = height / 2 + 7 + (Math.random() * 6 - 3);
+                const angle = (Math.random() * 28 - 14) * Math.PI / 180;
+
+                ctx.save();
+                ctx.translate(x, y);
+                ctx.rotate(angle);
+
+                ctx.font = `bold ${Math.floor(Math.random() * 4 + 22)}px 'JetBrains Mono', monospace`;
+                ctx.fillStyle = charColors[i % charColors.length];
+                ctx.shadowColor = 'rgba(46, 204, 113, 0.8)';
+                ctx.shadowBlur = 6;
+                ctx.fillText(char, 0, 0);
+                ctx.restore();
+            }
+
+            const input = document.getElementById('captchaInput');
+            if (input) input.value = '';
+        }
+
+        function playCaptchaAudio() {
+            if (!currentCaptchaText) return;
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+                const textToSpeak = "Security verification code: " + currentCaptchaText.split('').join(' , ');
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.rate = 0.85;
+                utterance.pitch = 1.0;
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert("Audio synthesis is not supported on your browser.");
+            }
+        }
+
+        function showAlert(message, type = "danger") {
+            const alertBox = document.getElementById("alertBox");
+            if (!alertBox) return;
+            alertBox.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show small py-2 px-3 mb-3 rounded-3" role="alert">
+                    <i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill'} me-1"></i> ${message}
+                    <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+        }
+
+        function handlePortalLoginSubmit(e) {
+            const entered = (document.getElementById('captchaInput')?.value || '').trim().toUpperCase();
+            const expected = (currentCaptchaText || '').toUpperCase();
+            const captchaCard = document.getElementById('captchaSection');
+
+            if (!entered) {
+                e.preventDefault();
+                showAlert("Please enter the 5-character security CAPTCHA code.", "warning");
+                if (captchaCard) {
+                    captchaCard.classList.remove('shake-animation');
+                    void captchaCard.offsetWidth; // trigger reflow
+                    captchaCard.classList.add('shake-animation');
+                }
+                document.getElementById('captchaInput')?.focus();
+                return false;
+            }
+
+            if (entered !== expected) {
+                e.preventDefault();
+                showAlert("Incorrect CAPTCHA entered. Please enter the new code.", "danger");
+                if (captchaCard) {
+                    captchaCard.classList.remove('shake-animation');
+                    void captchaCard.offsetWidth;
+                    captchaCard.classList.add('shake-animation');
+                }
+                generateVisualCaptcha();
+                const inp = document.getElementById('captchaInput');
+                if (inp) {
+                    inp.value = '';
+                    inp.focus();
+                }
+                return false;
+            }
+
+            // Valid CAPTCHA — Allow standard form submission to POST /auth/login
+            const btn = document.getElementById('loginBtn');
+            if (btn) {
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> Signing In...';
+                btn.disabled = true;
+            }
+            return true;
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            generateVisualCaptcha();
+
+            // Query parameter handler for notifications
+            const params = new URLSearchParams(window.location.search);
+            if (params.get("registered") === "true") {
+                showAlert("Registration successful! You can now sign in with your credentials.", "success");
+            } else if (params.get("reset") === "true") {
+                showAlert("Password updated successfully. Please log in with your new password.", "success");
+            } else if (params.get("error") === "invalid_credentials") {
+                showAlert("Invalid email or password. Please double check and try again.", "danger");
+            }
+        });
+    </script>
+</body>
+</html>

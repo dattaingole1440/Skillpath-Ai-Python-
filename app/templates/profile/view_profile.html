@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - SkillPath AI{% endblock %}
+{% block page_title %}👤 My Profile & Achievements{% endblock %}
+
+{% block content %}
+<div class="container py-2">
+    <!-- Success Banner -->
+    {% if request.query_params.get('certificate_unlocked') == 'true' %}
+        <div class="alert alert-success alert-dismissible fade show border-0 rounded-3 mb-4 shadow-sm" role="alert">
+            <h5 class="fw-bold">🎓 <i class="bi-patch-check-fill"></i> Certificate Generated Successfully!</h5>
+            Your verified PDF certificate and validation QR code have been created. You can download them from your certificates panel below.
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Left: Student info card, upload photo, and achievements -->
+        <div class="col-lg-5">
+            <!-- Profile Info card -->
+            <div class="card custom-card border-0 p-4 shadow-sm text-center mb-4">
+                <div class="position-relative d-inline-block mx-auto mb-3">
+                    <img src="{{ user.profile_photo or '/static/images/default-avatar.png' }}" alt="Avatar" class="avatar-large">
+                </div>
+                
+                <h4 class="fw-bold mb-1">{{ user.name }}</h4>
+                <p class="text-muted small mb-4">📧 {{ user.email }} | <span class="text-capitalize">🏅 {{ user.role }}</span></p>
+
+                <!-- Update photo form -->
+                <form action="/profile/photo" method="POST" enctype="multipart/form-data" class="border p-3 rounded bg-light-subtle">
+                    <label for="file" class="form-label fw-semibold small d-block text-start mb-2">📸 Update Profile Picture</label>
+                    <div class="input-group input-group-sm">
+                        <input type="file" class="form-control" id="file" name="file" accept="image/*" required>
+                        <button class="btn btn-primary" type="submit">⬆️ Upload</button>
+                    </div>
+                </form>
+
+                <hr class="my-4">
+
+                <!-- Stats summary -->
+                <div class="row text-center text-secondary small">
+                    <div class="col-4">
+                        <div class="fw-bold text-dark fs-5">🔥 {{ user.daily_streak }}</div>
+                        <div>Streak</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="fw-bold text-dark fs-5">🧠 {{ user.quiz_avg }}%</div>
+                        <div>Quiz Avg</div>
+                    </div>
+                    <div class="col-4">
+                        <div class="fw-bold text-dark fs-5">💻 {{ user.coding_avg }}%</div>
+                        <div>Code Avg</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Achievements list card -->
+            <div class="card custom-card border-0 p-4 shadow-sm">
+                <h5 class="fw-bold mb-3">🏆 <i class="bi-award-fill text-primary"></i> Earned Badges</h5>
+                
+                {% if achievements %}
+                    <div class="d-grid gap-3">
+                        {% for badge in achievements %}
+                            <div class="d-flex align-items-center gap-3 p-3 border rounded-3 bg-light-subtle">
+                                <div class="fs-2 {{ badge.color }}"><i class="bi {{ badge.icon }}"></i></div>
+                                <div>
+                                    <h6 class="fw-bold m-0 text-dark">🎖️ {{ badge.title }}</h6>
+                                    <small class="text-muted">{{ badge.desc }}</small>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4 text-muted">
+                        <i class="bi-patch-question display-6 mb-2 d-block"></i>
+                        <p class="mb-0 small">✨ Study every day, pass quizzes, and complete code challenges to unlock special milestone badges!</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right: Certificates listing panel -->
+        <div class="col-lg-7">
+            <div class="card custom-card border-0 p-4 shadow-sm h-100">
+                <h5 class="fw-bold mb-4">📜 <i class="bi-patch-check-fill text-success"></i> My Path Certificates</h5>
+                
+                {% if certificates %}
+                    <div class="d-grid gap-4">
+                        {% for cert in certificates %}
+                            <div class="card border rounded-3 p-4 bg-body">
+                                <div class="d-flex flex-wrap align-items-center justify-content-between gap-3 mb-3">
+                                    <div>
+                                        <h5 class="fw-bold text-success m-0">🎓 {{ cert.career.name }}</h5>
+                                        <small class="text-muted">📅 Issued on: {{ cert.issue_date.strftime('%B %d, %Y') }}</small>
+                                    </div>
+                                    <span class="badge bg-success-subtle text-success px-3 py-1.5 rounded-pill small">Verified Credential</span>
+                                </div>
+
+                                <p class="text-secondary small mb-3">Certificate ID: <strong>{{ cert.certificate_number }}</strong></p>
+
+                                <div class="row align-items-center">
+                                    <div class="col-md-8 mb-3 mb-md-0">
+                                        <p class="text-muted small">This certificate has a public verification page linked to the QR code. You can present this URL to employers or institutions to verify certificate authenticity.</p>
+                                        <div class="d-flex gap-2">
+                                            <a href="/certificate/download/{{ cert.certificate_number }}" class="btn btn-primary btn-sm rounded-pill px-3 py-2 fw-semibold">
+                                                📥 Download PDF
+                                            </a>
+                                            <a href="/certificate/verify/{{ cert.certificate_number }}" target="_blank" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-2">
+                                                🔍 Verify Credentials
+                                            </a>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 text-center">
+                                        {% if cert.qr_code_path %}
+                                            <img src="{{ cert.qr_code_path }}" alt="Verification QR Code" class="img-thumbnail" style="width: 100px; height: 100px;">
+                                            <div class="small text-muted mt-1" style="font-size: 0.7rem;">Verification QR</div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-5">
+                        <i class="bi-file-earmark-lock display-3 text-muted mb-3 d-block"></i>
+                        <h5 class="fw-bold text-dark">🎯 No Certificates Claimed Yet</h5>
+                        <p class="text-muted small px-md-5">Once you complete 100% of your career roadmap topics (MCQ quizzes cleared and code challenges submitted), a badge will unlock allowing you to generate your verified QR certificate.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

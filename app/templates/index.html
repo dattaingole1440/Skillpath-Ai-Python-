@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkillPath AI — AI-Powered Adaptive Learning & Career Platform</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <style>
+        .hero-glass-panel {
+            background: rgba(255, 255, 255, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(13, 92, 58, 0.18);
+            border-radius: 2rem;
+            padding: 3.5rem 3rem;
+            box-shadow: 0 20px 50px -10px rgba(13, 92, 58, 0.12), 0 1px 3px rgba(0, 0, 0, 0.05);
+        }
+
+        [data-bs-theme="dark"] .hero-glass-panel {
+            background: rgba(14, 30, 22, 0.92);
+            border-color: rgba(46, 204, 113, 0.25);
+            box-shadow: 0 20px 50px -10px rgba(0, 0, 0, 0.6);
+        }
+
+        .nature-feature-card {
+            background: rgba(255, 255, 255, 0.94);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(13, 92, 58, 0.14);
+            border-radius: 1.25rem;
+            padding: 2rem;
+            box-shadow: 0 6px 20px -4px rgba(13, 92, 58, 0.08);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        [data-bs-theme="dark"] .nature-feature-card {
+            background: rgba(14, 30, 22, 0.94);
+            border-color: rgba(46, 204, 113, 0.2);
+            box-shadow: 0 6px 20px -4px rgba(0, 0, 0, 0.4);
+        }
+
+        .nature-feature-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px -4px rgba(13, 92, 58, 0.14);
+            border-color: rgba(46, 204, 113, 0.4);
+        }
+
+        .badge-nature-sprout {
+            background: rgba(46, 204, 113, 0.14);
+            color: #0D5C3A;
+            border: 1px solid rgba(46, 204, 113, 0.3);
+            border-radius: 999px;
+            padding: 0.35rem 0.9rem;
+            font-weight: 600;
+            font-size: 0.8rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        [data-bs-theme="dark"] .badge-nature-sprout {
+            color: #2ECC71;
+            border-color: rgba(46, 204, 113, 0.4);
+        }
+
+        .sprout-icon-box {
+            width: 52px;
+            height: 52px;
+            border-radius: 1rem;
+            background: linear-gradient(135deg, rgba(13, 92, 58, 0.15) 0%, rgba(46, 204, 113, 0.2) 100%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: #0D5C3A;
+            margin-bottom: 1.25rem;
+        }
+
+        [data-bs-theme="dark"] .sprout-icon-box {
+            color: #2ECC71;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 8K Cinematic Intro Video Splash Overlay -->
+    <div id="introVideoSplash" class="intro-8k-fullscreen-overlay">
+        <!-- 8K Video Stream Layer -->
+        <video id="introMp4Player" class="intro-8k-video-stream" src="/static/videos/intro.mp4" playsinline muted autoplay preload="auto">
+            <source src="/static/videos/intro.mp4" type="video/mp4">
+        </video>
+
+        <!-- Real-Time 8K Particle & Neural Glow Canvas Layer -->
+        <canvas id="intro8kCanvasLayer" class="intro-8k-canvas-layer"></canvas>
+
+        <!-- 8K Ultra-Clarity Optical Vignette & Cinematic Grid -->
+        <div class="intro-8k-vignette"></div>
+        <div class="intro-8k-grid"></div>
+
+        <!-- Integrated Software Boot HUD (Top) -->
+        <div class="intro-8k-hud-header">
+            <div class="d-flex align-items-center gap-3">
+                <div class="intro-8k-badge">
+                    <span class="intro-8k-pulse"></span>
+                    <span class="font-mono small fw-bold">8K ULTRA-HD ENHANCED • 60 FPS</span>
+                </div>
+                <span class="text-white-50 small font-mono d-none d-md-inline">
+                    <i class="bi bi-cpu text-success me-1"></i> GPU ACCELERATION: ACTIVE
+                </span>
+            </div>
+
+            <div class="d-flex align-items-center gap-2">
+                <button class="intro-8k-btn-action" id="introAudioToggleBtn" onclick="window.IntroVideo.toggleMute()" title="Toggle Sound">
+                    <i class="bi bi-volume-mute-fill" id="introAudioIcon"></i>
+                </button>
+                <button class="intro-8k-btn-skip" onclick="window.IntroVideo.dismiss()" title="Skip into workspace (ESC / Space)">
+                    Skip to workspace <i class="bi bi-arrow-right ms-1"></i>
+                </button>
+            </div>
+        </div>
+
+        <!-- Integrated Software Telemetry (Bottom) -->
+        <div class="intro-8k-hud-footer">
+            <div class="d-flex align-items-center justify-content-between mb-2">
+                <div class="d-flex align-items-center gap-2">
+                    <div style="width: 22px; height: 22px; border-radius: 4px; background: var(--brand-primary); display: flex; align-items: center; justify-content: center; color: white;">
+                        <i class="bi-cpu-fill" style="font-size: 0.75rem;"></i>
+                    </div>
+                    <span class="font-mono text-white small fw-semibold">SKILLPATH AI • CORE INITIALIZATION</span>
+                </div>
+                <span id="intro8kPercent" class="font-mono text-success small fw-bold">0%</span>
+            </div>
+
+            <!-- 8K Progress Tracker -->
+            <div class="intro-8k-tracker-bar">
+                <div class="intro-8k-tracker-fill" id="intro8kTrackerFill"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    /**
+     * SkillPath AI — 8K Enhanced Fullscreen Cinematic Startup Experience
+     */
+    window.IntroVideo = {
+        videoElement: null,
+        overlayElement: null,
+        canvasElement: null,
+        ctx: null,
+        animId: null,
+        particles: [],
+        isDismissed: false,
+
+        init() {
+            // Skip intro if already played in this session
+            if (sessionStorage.getItem('introPlayed') === 'true') {
+                const overlay = document.getElementById('introVideoSplash');
+                if (overlay) overlay.style.display = 'none';
+                return;
+            }
+
+            const overlay = document.getElementById('introVideoSplash');
+            const video = document.getElementById('introMp4Player');
+            this.videoElement = video;
+            this.overlayElement = overlay;
+            document.body.style.overflow = 'hidden';
+
+            // Setup 8K Particle Canvas
+            this.canvasElement = document.getElementById('intro8kCanvasLayer');
+            if (this.canvasElement) {
+                this.ctx = this.canvasElement.getContext('2d');
+                this.resizeCanvas();
+                window.addEventListener('resize', this.onResizeBound = () => this.resizeCanvas());
+                this.initParticles();
+                this.renderParticles();
+            }
+
+            if (video) {
+                video.muted = true;
+                video.defaultMuted = true;
+
+                const triggerPlay = () => {
+                    const p = video.play();
+                    if (p !== undefined) {
+                        p.catch(() => {
+                            video.muted = true;
+                            video.play().catch(() => {});
+                        });
+                    }
+                };
+
+                video.addEventListener('loadeddata', triggerPlay);
+                video.addEventListener('canplay', triggerPlay);
+                triggerPlay();
+
+                video.addEventListener('timeupdate', () => {
+                    if (video.duration) {
+                        const pct = Math.min((video.currentTime / video.duration) * 100, 100);
+                        const fill = document.getElementById('intro8kTrackerFill');
+                        const label = document.getElementById('intro8kPercent');
+                        if (fill) fill.style.width = `${pct}%`;
+                        if (label) label.textContent = `${Math.round(pct)}%`;
+                    }
+                });
+
+                video.addEventListener('ended', () => { this.dismiss(); });
+                video.addEventListener('error', () => { setTimeout(() => this.dismiss(), 1500); });
+            }
+
+            // Keyboard handler (ESC / Space / Enter to skip)
+            this.onKeyDown = (e) => {
+                if (e.key === 'Escape' || e.code === 'Space' || e.key === 'Enter') {
+                    this.dismiss();
+                }
+            };
+            window.addEventListener('keydown', this.onKeyDown);
+        },
+
+        resizeCanvas() {
+            if (!this.canvasElement) return;
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            this.canvasElement.width = window.innerWidth * dpr;
+            this.canvasElement.height = window.innerHeight * dpr;
+            if (this.ctx) this.ctx.scale(dpr, dpr);
+        },
+
+        initParticles() {
+            this.particles = [];
+            const count = 120;
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            for (let i = 0; i < count; i++) {
+                this.particles.push({
+                    x: Math.random() * w, y: Math.random() * h,
+                    vx: (Math.random() - 0.5) * 0.8, vy: (Math.random() - 0.5) * 0.8,
+                    radius: Math.random() * 2 + 0.8,
+                    alpha: Math.random() * 0.7 + 0.2,
+                    color: Math.random() > 0.4 ? '#10B981' : '#06B6D4'
+                });
+            }
+        },
+
+        renderParticles() {
+            if (this.isDismissed || !this.ctx || !this.canvasElement) return;
+            const ctx = this.ctx;
+            const w = window.innerWidth;
+            const h = window.innerHeight;
+            ctx.clearRect(0, 0, w, h);
+
+            const len = this.particles.length;
+            for (let i = 0; i < len; i++) {
+                const p = this.particles[i];
+                p.x += p.vx; p.y += p.vy;
+                if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+                if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, p.radius, 0, Math.PI * 2);
+                ctx.fillStyle = p.color;
+                ctx.globalAlpha = p.alpha;
+                ctx.shadowBlur = 8;
+                ctx.shadowColor = p.color;
+                ctx.fill();
+
+                for (let j = i + 1; j < Math.min(i + 4, len); j++) {
+                    const p2 = this.particles[j];
+                    const dx = p.x - p2.x, dy = p.y - p2.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+                    if (dist < 110) {
+                        ctx.beginPath();
+                        ctx.moveTo(p.x, p.y);
+                        ctx.lineTo(p2.x, p2.y);
+                        ctx.strokeStyle = p.color;
+                        ctx.globalAlpha = (1 - dist / 110) * 0.18;
+                        ctx.lineWidth = 0.6;
+                        ctx.stroke();
+                    }
+                }
+            }
+            ctx.globalAlpha = 1.0;
+            ctx.shadowBlur = 0;
+            this.animId = requestAnimationFrame(() => this.renderParticles());
+        },
+
+        toggleMute() {
+            if (!this.videoElement) return;
+            this.videoElement.muted = !this.videoElement.muted;
+            const icon = document.getElementById('introAudioIcon');
+            if (icon) {
+                icon.className = this.videoElement.muted ? 'bi bi-volume-mute-fill' : 'bi bi-volume-up-fill text-success';
+            }
+        },
+
+        dismiss() {
+            if (this.isDismissed) return;
+            this.isDismissed = true;
+            window.removeEventListener('keydown', this.onKeyDown);
+            window.removeEventListener('resize', this.onResizeBound);
+            if (this.animId) cancelAnimationFrame(this.animId);
+            if (this.videoElement) { try { this.videoElement.pause(); } catch(e) {} }
+
+            if (this.overlayElement) {
+                this.overlayElement.classList.add('intro-8k-fade-out');
+                setTimeout(() => {
+                    if (this.overlayElement) this.overlayElement.remove();
+                    document.body.style.overflow = '';
+                    sessionStorage.setItem('introPlayed', 'true');
+                }, 450);
+            } else {
+                document.body.style.overflow = '';
+                sessionStorage.setItem('introPlayed', 'true');
+            }
+        }
+    };
+
+    // Initialize on DOM ready
+    document.addEventListener('DOMContentLoaded', () => window.IntroVideo.init());
+    </script>
+
+
+    <!-- Header Navigation -->
+    <header class="container pt-4 position-relative" style="z-index: 10;">
+        <nav class="d-flex align-items-center justify-content-between px-4 py-3 rounded-pill" style="background: rgba(255, 255, 255, 0.94); border: 1px solid rgba(13, 92, 58, 0.16); backdrop-filter: blur(20px); box-shadow: 0 4px 20px rgba(13, 92, 58, 0.08);">
+            <!-- Brand -->
+            <a href="/" class="d-flex align-items-center gap-2 text-decoration-none" style="font-family: 'Outfit', sans-serif;">
+                <i class="bi-flower1 fs-3" style="color: #2ECC71;"></i>
+                <span class="fs-4 fw-bold" style="color: #0D5C3A; letter-spacing: -0.02em;">SkillPath <span style="color: #2ECC71;">Ai</span></span>
+            </a>
+
+            <!-- Navigation Links -->
+            <div class="d-none d-md-flex align-items-center gap-4">
+                <a href="#features" class="text-decoration-none text-secondary fw-semibold small">Features</a>
+                <a href="#pathways" class="text-decoration-none text-secondary fw-semibold small">Career Pathways</a>
+                <a href="/resume/builder" class="text-decoration-none text-secondary fw-semibold small">ATS Resume Builder</a>
+                <a href="/notifications" class="text-decoration-none text-secondary fw-semibold small">Notifications</a>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-flex align-items-center gap-2">
+                {% if user %}
+                    <a href="/dashboard" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
+                        <i class="bi-speedometer2 me-1"></i> Dashboard
+                    </a>
+                {% else %}
+                    <a href="/auth/login" class="btn btn-link text-secondary text-decoration-none fw-semibold small px-3">Sign In</a>
+                    <a href="/auth/register" class="btn btn-primary px-4 py-2 rounded-pill shadow-sm">
+                        Get Started <i class="bi-arrow-right ms-1"></i>
+                    </a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <main class="container my-4 position-relative" style="z-index: 5;">
+        <div class="hero-glass-panel text-center position-relative">
+            
+            <div class="mb-3">
+                <span class="badge-nature-sprout">
+                    <i class="bi-patch-check-fill text-success"></i> Next-Gen Adaptive Engineering & Career Copilot
+                </span>
+            </div>
+
+            <h1 class="display-4 fw-bolder mb-3" style="color: #0D5C3A; line-height: 1.15; max-width: 900px; margin: 0 auto;">
+                Empowering Students & Colleges with <span class="text-brand-gradient">AI Growth Roadmaps</span>
+            </h1>
+
+            <p class="lead text-secondary mx-auto mb-4" style="max-width: 720px; font-size: 1.15rem; line-height: 1.6;">
+                Master full-stack programming, cloud architecture, and AI engineering with dynamic curriculum trees, real-time code verification, ATS resume formatting, and integrated college academic management.
+            </p>
+
+            <div class="d-flex flex-wrap justify-content-center align-items-center gap-3 mb-4">
+                {% if user %}
+                    <a href="/dashboard" class="btn btn-primary btn-lg px-5 py-3 rounded-pill shadow-sm">
+                        <i class="bi-compass me-2"></i> Open Learning Dashboard
+                    </a>
+                {% else %}
+                    <a href="/auth/register" class="btn btn-primary btn-lg px-5 py-3 rounded-pill shadow-sm">
+                        <i class="bi-person-plus me-2"></i> Get Started Free
+                    </a>
+                    <a href="/auth/login" class="btn btn-brand-outline btn-lg px-4 py-3 rounded-pill">
+                        <i class="bi-box-arrow-in-right me-1"></i> Sign In / Login
+                    </a>
+                {% endif %}
+            </div>
+
+            <!-- Stats Bar -->
+            <div class="row g-3 pt-3 border-top" style="border-color: rgba(13, 92, 58, 0.12) !important;">
+                <div class="col-6 col-md-3">
+                    <h3 class="fw-bold mb-0" style="color: #0D5C3A;">14+</h3>
+                    <small class="text-secondary fw-semibold">Career Pathways</small>
+                </div>
+                <div class="col-6 col-md-3">
+                    <h3 class="fw-bold mb-0" style="color: #0D5C3A;">85+</h3>
+                    <small class="text-secondary fw-semibold">Interactive Topics</small>
+                </div>
+                <div class="col-6 col-md-3">
+                    <h3 class="fw-bold mb-0" style="color: #0D5C3A;">100%</h3>
+                    <small class="text-secondary fw-semibold">Automated ATS Resumes</small>
+                </div>
+                <div class="col-6 col-md-3">
+                    <h3 class="fw-bold mb-0" style="color: #0D5C3A;">QR</h3>
+                    <small class="text-secondary fw-semibold">Verified Certificates</small>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- Key Platform Capabilities -->
+    <section class="container my-5 py-2" id="features">
+        <div class="text-center mb-4">
+            <span class="badge-nature-sprout mb-2">Comprehensive Learning Architecture</span>
+            <h2 class="fw-bold" style="color: #0D5C3A;">Built for Every Academic & Career Stage</h2>
+            <p class="text-secondary small mx-auto" style="max-width: 600px;">
+                Designed for students, teachers, department heads, principals, and college administrators.
+            </p>
+        </div>
+
+        <div class="row g-4">
+            <!-- 1. AI Roadmaps -->
+            <div class="col-md-6 col-lg-4">
+                <div class="nature-feature-card h-100">
+                    <div class="sprout-icon-box">
+                        <i class="bi-diagram-3-fill"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2" style="color: #0D5C3A;">Dynamic AI Roadmaps</h5>
+                    <p class="text-secondary small mb-0">Interactive visual learning graphs that unlock milestone checkpoints as you pass coding tests and quizzes.</p>
+                </div>
+            </div>
+
+            <!-- 2. Integrated Code Editor -->
+            <div class="col-md-6 col-lg-4">
+                <div class="nature-feature-card h-100">
+                    <div class="sprout-icon-box">
+                        <i class="bi-code-slash"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2" style="color: #0D5C3A;">Built-in Code Compiler</h5>
+                    <p class="text-secondary small mb-0">Write, test, and submit Python, Java, and C++ code with real-time testcase assertions and AI optimization feedback.</p>
+                </div>
+            </div>
+
+            <!-- 3. ATS Resume Builder -->
+            <div class="col-md-6 col-lg-4">
+                <div class="nature-feature-card h-100">
+                    <div class="sprout-icon-box">
+                        <i class="bi-file-earmark-text-fill"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2" style="color: #0D5C3A;">FAANG ATS Resume Engine</h5>
+                    <p class="text-secondary small mb-0">Generates clean Harvard/Ivy ATS resumes grouped into Languages, Frameworks, and Tools with 1-click print & PDF export.</p>
+                </div>
+            </div>
+
+            <!-- 4. Teacher & HOD Notification Broadcast -->
+            <div class="col-md-6 col-lg-4">
+                <div class="nature-feature-card h-100">
+                    <div class="sprout-icon-box">
+                        <i class="bi-megaphone-fill"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2" style="color: #0D5C3A;">College & Teacher Portals</h5>
+                    <p class="text-secondary small mb-0">Multi-role hierarchy for Teachers, HODs, and Principals to post assignment updates and broadcast notices directly to student dashboards.</p>
+                </div>
+            </div>
+
+            <!-- 5. Placement & Mock Interviews -->
+            <div class="col-md-6 col-lg-4">
+                <div class="nature-feature-card h-100">
+                    <div class="sprout-icon-box">
+                        <i class="bi-briefcase-fill"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2" style="color: #0D5C3A;">Placement Readiness</h5>
+                    <p class="text-secondary small mb-0">Simulated AI mock interviews, career trajectory matching, campus recruitment analytics, and early warning trackers.</p>
+                </div>
+            </div>
+
+            <!-- 6. Cryptographic Certifications -->
+            <div class="col-md-6 col-lg-4">
+                <div class="nature-feature-card h-100">
+                    <div class="sprout-icon-box">
+                        <i class="bi-patch-check-fill"></i>
+                    </div>
+                    <h5 class="fw-bold mb-2" style="color: #0D5C3A;">Verifiable Certificates</h5>
+                    <p class="text-secondary small mb-0">Earn high-resolution completion certificates embedded with cryptographic QR verification for hiring recruiters.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Career Pathways Matrix -->
+    <section class="container my-5" id="pathways">
+        <div class="hero-glass-panel p-4 p-lg-5">
+            <div class="d-flex flex-wrap justify-content-between align-items-center mb-4">
+                <div>
+                    <span class="badge-nature-sprout mb-2">Curated Pathways</span>
+                    <h3 class="fw-bold m-0" style="color: #0D5C3A;">Popular Career Tracks</h3>
+                </div>
+                <div>
+                    <a href="/auth/register" class="btn btn-primary px-4 py-2 rounded-pill">Explore All 14 Tracks <i class="bi-arrow-right ms-1"></i></a>
+                </div>
+            </div>
+
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <div class="p-3 rounded-4" style="background: rgba(240, 248, 243, 0.9); border: 1px solid rgba(13, 92, 58, 0.15);">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="fw-bold m-0" style="color: #0D5C3A;">Full-Stack Python Engineer</h6>
+                            <span class="badge bg-success-subtle text-success small">Popular</span>
+                        </div>
+                        <small class="text-secondary d-block mb-2">FastAPI • React • PostgreSQL • Docker</small>
+                        <div class="d-flex justify-content-between text-muted small fw-semibold">
+                            <span>12 Milestones</span>
+                            <span class="text-success">98% Placement Rate</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="p-3 rounded-4" style="background: rgba(240, 248, 243, 0.9); border: 1px solid rgba(13, 92, 58, 0.15);">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="fw-bold m-0" style="color: #0D5C3A;">AI & Machine Learning Core</h6>
+                            <span class="badge bg-success-subtle text-success small">High Demand</span>
+                        </div>
+                        <small class="text-secondary d-block mb-2">PyTorch • NLP • LLMs • MLOps</small>
+                        <div class="d-flex justify-content-between text-muted small fw-semibold">
+                            <span>15 Milestones</span>
+                            <span class="text-success">96% Placement Rate</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="col-md-4">
+                    <div class="p-3 rounded-4" style="background: rgba(240, 248, 243, 0.9); border: 1px solid rgba(13, 92, 58, 0.15);">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="fw-bold m-0" style="color: #0D5C3A;">Cloud & DevOps Architect</h6>
+                            <span class="badge bg-success-subtle text-success small">Enterprise</span>
+                        </div>
+                        <small class="text-secondary d-block mb-2">AWS • Kubernetes • Terraform • CI/CD</small>
+                        <div class="d-flex justify-content-between text-muted small fw-semibold">
+                            <span>10 Milestones</span>
+                            <span class="text-success">94% Placement Rate</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="container text-center py-4 my-4 border-top" style="border-color: rgba(13, 92, 58, 0.15) !important;">
+        <div class="d-flex align-items-center justify-content-center gap-2 mb-2">
+            <i class="bi-flower1 fs-4 text-success"></i>
+            <span class="fs-5 fw-bold" style="color: #0D5C3A; font-family: 'Outfit', sans-serif;">SkillPath <span class="text-success">Ai</span></span>
+        </div>
+        <p class="text-secondary small mb-2">AI-Powered Adaptive Learning & Career Acceleration Platform</p>
+        <p class="text-muted small m-0">&copy; 2026 SkillPath AI. All rights reserved.</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
+

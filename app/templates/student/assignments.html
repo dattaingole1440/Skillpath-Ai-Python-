@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block page_title %}📝 Assignments & Grades{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <!-- Header Banner -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="p-4 rounded-4 shadow-sm text-white d-flex align-items-center justify-content-between flex-wrap gap-3" style="background: linear-gradient(135deg, #0D5C3A 0%, #10B981 100%);">
+                <div>
+                    <h2 class="fw-bold m-0 text-white"><i class="bi-journal-check me-2"></i>📝 Assignments & Grades</h2>
+                    <p class="m-0 text-white-50">View course assignments, submit code or written work, and track teacher & AI grades.</p>
+                </div>
+                <span class="badge bg-warning text-dark rounded-pill px-3 py-2 fw-bold" style="font-size: 0.85rem;">
+                    ⚡ Earn +40 XP Per Submission
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        {% for a in assignments %}
+        {% set sub = submissions.get(a.id) %}
+        <div class="col-lg-6">
+            <div class="card border-0 rounded-4 shadow-sm h-100 bg-white p-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-1 fw-bold" style="font-size: 0.75rem;">
+                        {{ a.subject.name if a.subject else 'Core Subject' }}
+                    </span>
+                    <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1 text-capitalize" style="font-size: 0.7rem;">
+                        {{ a.type or 'theory' }}
+                    </span>
+                </div>
+
+                <h5 class="fw-bold text-dark mb-2">{{ a.title }}</h5>
+                <p class="text-muted small mb-3 flex-grow-1" style="line-height: 1.4;">{{ a.description }}</p>
+
+                <div class="d-flex justify-content-between align-items-center small text-muted mb-3 font-mono bg-light p-2.5 rounded-3">
+                    <span><i class="bi-clock me-1 text-danger"></i>Due: {{ a.due_date.strftime('%Y-%m-%d') if a.due_date else 'No deadline' }}</span>
+                    <span><i class="bi-trophy me-1 text-warning"></i>Max Marks: {{ a.max_marks }} pts</span>
+                </div>
+
+                {% if sub %}
+                    <div class="p-3 bg-success bg-opacity-10 rounded-3 border border-success border-opacity-25 mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="fw-bold text-success"><i class="bi-check-circle-fill me-1"></i>Submitted</span>
+                            <span class="small text-muted font-mono">{{ sub.submitted_at.strftime('%m-%d %H:%M') if sub.submitted_at else '' }}</span>
+                        </div>
+
+                        {% if sub.marks_obtained != None %}
+                            <div class="fw-bold text-dark mt-2">Grade: <span class="text-success fs-5">{{ sub.marks_obtained }} / {{ a.max_marks }}</span></div>
+                        {% else %}
+                            <div class="small text-warning fw-semibold mt-1"><i class="bi-hourglass-split me-1"></i>Pending Teacher Evaluation</div>
+                        {% endif %}
+                        
+                        {% if sub.ai_feedback %}
+                            <div class="mt-2 pt-2 border-top small text-primary">
+                                <strong><i class="bi-cpu me-1"></i>AI Feedback:</strong> {{ sub.ai_feedback }}
+                            </div>
+                        {% endif %}
+                        {% if sub.feedback %}
+                            <div class="mt-1 small text-dark">
+                                <strong><i class="bi-person me-1"></i>Teacher Note:</strong> {{ sub.feedback }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% else %}
+                    <div class="p-3 bg-light rounded-3 mb-3 text-center border border-dashed">
+                        <span class="text-muted small"><i class="bi-info-circle me-1"></i>Not submitted yet. Click below to submit your solution.</span>
+                    </div>
+                {% endif %}
+
+                <button class="btn btn-success rounded-pill w-100 py-2 fw-semibold shadow-xs" style="background-color: #10B981; border: none;" data-bs-toggle="modal" data-bs-target="#submitModal-{{ a.id }}">
+                    <i class="bi-send me-1"></i> {{ 'Update Submission' if sub else 'Submit Assignment' }}
+                </button>
+            </div>
+        </div>
+
+        <!-- Submission Modal -->
+        <div class="modal fade" id="submitModal-{{ a.id }}" tabindex="-1">
+            <div class="modal-dialog modal-lg modal-dialog-centered">
+                <form action="/student/assignments/submit" method="POST" class="modal-content rounded-4 border-0 shadow-lg">
+                    <input type="hidden" name="assignment_id" value="{{ a.id }}">
+                    <div class="modal-header border-0 pb-0">
+                        <h5 class="modal-title fw-bold text-dark"><i class="bi-journal-arrow-up text-success me-2"></i>Submit Assignment: {{ a.title }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body p-4">
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Written Response / Explanation</label>
+                            <textarea name="submission_text" class="form-control rounded-3" rows="4" placeholder="Enter your response or summary...">{{ sub.submission_text if sub else '' }}</textarea>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">Source Code Solution (If applicable)</label>
+                            <textarea name="code" class="form-control font-monospace rounded-3" rows="6" placeholder="Paste your code implementation here...">{{ sub.code if sub else '' }}</textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label fw-semibold">File / Project URL / GitHub Link (Optional)</label>
+                            <input type="url" name="file_url" class="form-control rounded-3" placeholder="https://github.com/username/project or PDF URL" value="{{ sub.file_url if sub else '' }}">
+                        </div>
+                    </div>
+                    <div class="modal-footer border-0 pt-0">
+                        <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold" style="background-color: #10B981; border: none;">
+                            <i class="bi-check-circle me-1"></i> Confirm & Submit Solution
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12">
+            <div class="card border-0 rounded-4 shadow-sm bg-white p-5 text-center text-muted">
+                <i class="bi-journal-x display-4 mb-2 text-success"></i>
+                <h5 class="fw-bold text-dark">No Active Assignments</h5>
+                <p class="mb-0">Check back later for newly published coursework by your instructors.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,193 @@
+{% extends "base.html" %}
+
+{% block title %}AI Study Planner - SkillPath AI{% endblock %}
+{% block page_title %}📅 AI Study Planner{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <!-- Header Hero Banner -->
+    <div class="card border-0 rounded-4 shadow-sm mb-4 text-white overflow-hidden" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);">
+        <div class="card-body p-4 p-md-5 position-relative">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-2 mb-3">
+                        🤖 AI Personalization Engine
+                    </span>
+                    <h2 class="display-6 fw-bold mb-2">✨ Smart Daily Learning Schedule</h2>
+                    <p class="fs-6 opacity-90 mb-0">Set your daily hours and target date. Gemini AI continuously calculates, adapts, and reschedules missed tasks automatically.</p>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                    <button class="btn btn-light btn-lg rounded-pill fw-bold text-primary shadow-sm" data-bs-toggle="modal" data-bs-target="#generatePlanModal">
+                        🪄 Generate New Plan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Plan Overview -->
+    {% if plan %}
+    <div class="row g-4 mb-4">
+        <div class="col-md-4">
+            <div class="card border-0 rounded-4 shadow-sm p-4 text-center bg-body">
+                <div class="text-primary mb-2 fs-1">⏱️</div>
+                <h5 class="fw-bold m-0">{{ plan.hours_per_day }} Hours / Day</h5>
+                <small class="text-muted">Target Daily Commitment</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 rounded-4 shadow-sm p-4 text-center bg-body">
+                <div class="text-success mb-2 fs-1">🎯</div>
+                <h5 class="fw-bold m-0">{{ plan.target_date }}</h5>
+                <small class="text-muted">Target Completion Date</small>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="card border-0 rounded-4 shadow-sm p-4 text-center bg-body">
+                <div class="text-warning mb-2 fs-1">✅</div>
+                <h5 class="fw-bold m-0">{{ tasks|selectattr("status", "equalto", "completed")|list|length }} / {{ tasks|length }}</h5>
+                <small class="text-muted">Tasks Completed</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Schedule Timeline -->
+    <div class="card border-0 rounded-4 shadow-sm">
+        <div class="card-header bg-body border-0 py-3 px-4 d-flex align-items-center justify-content-between">
+            <h5 class="fw-bold m-0">📋 Scheduled Learning Tasks</h5>
+            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-2">📌 {{ tasks|length }} Total Tasks</span>
+        </div>
+        <div class="card-body p-4">
+            <div class="timeline position-relative">
+                {% for task in tasks %}
+                <div class="card border border-body rounded-3 mb-3 shadow-none p-3 {% if task.status == 'completed' %}bg-success bg-opacity-10 border-success{% endif %}">
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <div class="d-flex align-items-center gap-3">
+                            <span class="badge rounded-circle p-3 {% if task.status == 'completed' %}bg-success{% else %}bg-primary{% endif %} text-white fs-6">
+                                {% if task.status == 'completed' %}✅{% else %}📘{% endif %}
+                            </span>
+                            <div>
+                                <h6 class="fw-bold mb-1 {% if task.status == 'completed' %}text-decoration-line-through text-muted{% endif %}">📖 {{ task.title }}</h6>
+                                <p class="small text-secondary mb-0">{{ task.description }}</p>
+                                <small class="text-muted mt-1 d-block">📅 Scheduled: {{ task.scheduled_date }} • ⏱️ Est. {{ task.hours_estimated }} hours</small>
+                            </div>
+                        </div>
+                        <div>
+                            {% if task.status == 'completed' %}
+                            <span class="badge bg-success rounded-pill px-3 py-2">✅ Completed</span>
+                            {% else %}
+                            <button class="btn btn-sm btn-outline-success rounded-pill px-3 py-2 fw-semibold complete-task-btn" data-task-id="{{ task.id }}">
+                                ✨ Mark Done (+20 XP)
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="card border-0 rounded-4 shadow-sm p-5 text-center bg-body">
+        <div class="fs-1 text-primary mb-3">📅</div>
+        <h4 class="fw-bold mb-2">No Active Study Plan</h4>
+        <p class="text-muted mb-4">Let Gemini AI build your personalized step-by-step daily study schedule based on your target date.</p>
+        <div>
+            <button class="btn btn-primary rounded-pill btn-lg px-4" data-bs-toggle="modal" data-bs-target="#generatePlanModal">
+                🪄 Create AI Study Plan
+            </button>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Modal Generate Plan -->
+<div class="modal fade" id="generatePlanModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-primary">🪄 Generate AI Study Schedule</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="generatePlanForm">
+                <div class="modal-body p-4">
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Daily Study Hours</label>
+                        <input type="number" step="0.5" min="0.5" max="12" class="form-control rounded-3" name="hours_per_day" value="2.0" required>
+                        <small class="text-muted">How many hours can you dedicate each day?</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Target Completion Date</label>
+                        <input type="date" class="form-control rounded-3" name="target_date" required>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 pt-0">
+                    <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4" id="submitPlanBtn">
+                        <i class="bi bi-sparkles me-1"></i> Generate with Gemini
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // Set default target date to 30 days from now
+    const targetInput = document.querySelector('input[name="target_date"]');
+    if (targetInput) {
+        const futureDate = new Date();
+        futureDate.setDate(futureDate.getDate() + 30);
+        targetInput.value = futureDate.toISOString().split('T')[0];
+    }
+
+    document.getElementById('generatePlanForm')?.addEventListener('submit', function(e) {
+        e.preventDefault();
+        const submitBtn = document.getElementById('submitPlanBtn');
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span> Generating schedule...`;
+
+        // Hide modal
+        const modalEl = document.getElementById('generatePlanModal');
+        const modalInstance = bootstrap.Modal.getInstance(modalEl);
+
+        const formData = new FormData(this);
+        fetch('/study-planner/generate', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status === 'success') {
+                if (modalInstance) modalInstance.hide();
+                window.location.reload();
+            } else {
+                alert(data.detail || 'Failed to generate study plan.');
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<i class="bi bi-sparkles me-1"></i> Generate with Gemini`;
+            }
+        })
+        .catch(err => {
+            alert('Error generating plan: ' + err.message);
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = `<i class="bi bi-sparkles me-1"></i> Generate with Gemini`;
+        });
+    });
+
+    document.querySelectorAll('.complete-task-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const taskId = this.getAttribute('data-task-id');
+            this.disabled = true;
+            fetch(`/study-planner/tasks/${taskId}/complete`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    window.location.reload();
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

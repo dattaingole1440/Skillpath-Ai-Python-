@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Leaderboard & Ranks - SkillPath AI{% endblock %}
+{% block page_title %}🏆 Leaderboard & Rankings{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <!-- User Rank Banner -->
+    <div class="card border-0 rounded-4 shadow-sm mb-4 text-white overflow-hidden" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+        <div class="card-body p-4 p-md-5">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-2 mb-3">
+                        🏆 Student Rank Tier
+                    </span>
+                    <h2 class="display-6 fw-bold mb-1">🎖️ {{ user.rank }} Rank</h2>
+                    <p class="fs-6 opacity-90 mb-0">⚡ Total XP: <strong>{{ user.xp }} XP</strong> • 🪙 Learning Coins: <strong>{{ user.coins }} Coins</strong> • 🔥 Daily Streak: <strong>{{ user.daily_streak }} Days</strong></p>
+                </div>
+                <div class="col-lg-4 text-lg-end mt-3 mt-lg-0">
+                    <a href="/daily-challenges" class="btn btn-light btn-lg rounded-pill fw-bold text-success shadow-sm">
+                        📅 Daily Challenges
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Leaderboard Table -->
+    <div class="card border-0 rounded-4 shadow-sm">
+        <div class="card-header bg-body border-0 py-3 px-4 d-flex align-items-center justify-content-between">
+            <h5 class="fw-bold m-0">🏆 Top Global Learners</h5>
+            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-3 py-2">⚡ Updated Live</span>
+        </div>
+        <div class="table-responsive p-3">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="text-center" style="width: 70px;">Rank</th>
+                        <th>Student</th>
+                        <th>Tier Rank</th>
+                        <th class="text-center">Active Streak</th>
+                        <th class="text-end">XP Earned</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for st in students %}
+                    <tr {% if st.id == user.id %}class="table-success fw-bold"{% endif %}>
+                        <td class="text-center">
+                            {% if loop.index == 1 %}
+                                <span class="fs-4">🥇</span>
+                            {% elif loop.index == 2 %}
+                                <span class="fs-4">🥈</span>
+                            {% elif loop.index == 3 %}
+                                <span class="fs-4">🥉</span>
+                            {% else %}
+                                <span class="fw-bold text-muted">#{{ loop.index }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-3">
+                                <img src="{{ st.profile_photo }}" alt="Avatar" class="avatar-circle">
+                                <div>
+                                    <div class="fw-bold mb-0">{{ st.name }}</div>
+                                    <small class="text-muted">{{ st.email }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary bg-opacity-10 text-primary rounded-pill px-3 py-1">
+                                🏅 {{ st.rank }}
+                            </span>
+                        </td>
+                        <td class="text-center">
+                            <span class="badge bg-warning bg-opacity-20 text-warning rounded-pill px-3 py-1 fw-bold">
+                                🔥 {{ st.daily_streak }} days
+                            </span>
+                        </td>
+                        <td class="text-end fw-bold text-success fs-5">
+                            ⚡ {{ st.xp }} XP
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

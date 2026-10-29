@@ -1,0 +1,307 @@
+{% extends "base.html" %}
+
+{% block title %}Admin Dashboard - SkillPath AI{% endblock %}
+{% block page_title %}Admin Control Center{% endblock %}
+
+{% block content %}
+<div class="container py-2">
+    <!-- Stat grid -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-2.5 col-lg-3">
+            <div class="card custom-card border-0 p-3">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="p-3 bg-primary-subtle text-primary rounded-3 fs-3"><i class="bi-people-fill"></i></div>
+                    <div>
+                        <h6 class="text-muted m-0">Students</h6>
+                        <h3 class="fw-bold m-0">{{ total_students }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2.5 col-lg-3">
+            <div class="card custom-card border-0 p-3">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="p-3 bg-success-subtle text-success rounded-3 fs-3"><i class="bi-briefcase-fill"></i></div>
+                    <div>
+                        <h6 class="text-muted m-0">Careers</h6>
+                        <h3 class="fw-bold m-0">{{ total_careers }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2.5 col-lg-3">
+            <div class="card custom-card border-0 p-3">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="p-3 bg-warning-subtle text-warning rounded-3 fs-3"><i class="bi-signpost-split-fill"></i></div>
+                    <div>
+                        <h6 class="text-muted m-0">Milestones</h6>
+                        <h3 class="fw-bold m-0">{{ total_roadmaps }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2.5 col-lg-3">
+            <div class="card custom-card border-0 p-3">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="p-3 bg-info-subtle text-info rounded-3 fs-3"><i class="bi-file-text-fill"></i></div>
+                    <div>
+                        <h6 class="text-muted m-0">Topics</h6>
+                        <h3 class="fw-bold m-0">{{ total_topics }}</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Details Columns -->
+    <div class="row g-4">
+        <!-- Recent Signups -->
+        <div class="col-lg-7">
+            <div class="card custom-card border-0 p-4 shadow-sm h-100">
+                <h5 class="fw-bold mb-3"><i class="bi-person-plus text-primary"></i> Recent Student Registrations</h5>
+                
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Joined</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if recent_students %}
+                                {% for student in recent_students %}
+                                    <tr>
+                                        <td>{{ student.name }}</td>
+                                        <td>{{ student.email }}</td>
+                                        <td>{% if student.created_at %}{{ student.created_at.strftime('%b %d, %Y') }}{% else %}Recently{% endif %}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr>
+                                    <td colspan="3" class="text-center text-muted py-4">No student signups found.</td>
+                                </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Shortcuts card & Quick Creation Suite -->
+        <div class="col-lg-5">
+            <div class="card custom-card border-0 p-4 shadow-sm mb-4">
+                <h5 class="fw-bold mb-3 text-dark"><i class="bi-lightning-charge text-warning"></i> Super Admin Quick Add Tools</h5>
+                <div class="row g-2 mb-3">
+                    <div class="col-4">
+                        <button class="btn btn-warning w-100 rounded-3 py-2 text-dark fw-bold small shadow-xs" data-bs-toggle="modal" data-bs-target="#quickAddVideoModal">
+                            <i class="bi-camera-reels-fill me-1"></i> + Video
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button class="btn btn-success w-100 rounded-3 py-2 fw-bold small shadow-xs text-white" data-bs-toggle="modal" data-bs-target="#quickAddQuizModal">
+                            <i class="bi-question-circle-fill me-1"></i> + MCQ Quiz
+                        </button>
+                    </div>
+                    <div class="col-4">
+                        <button class="btn btn-primary w-100 rounded-3 py-2 fw-bold small shadow-xs" data-bs-toggle="modal" data-bs-target="#quickAddCodingModal">
+                            <i class="bi-code-square me-1"></i> + Coding Qs
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card custom-card border-0 p-4 shadow-sm h-100">
+                <h5 class="fw-bold mb-3"><i class="bi-grid text-primary"></i> Management Shortcuts</h5>
+                <div class="d-grid gap-2">
+                    <a href="/college/manage" class="btn btn-outline-success text-start px-3 py-2.5 rounded-3 d-flex align-items-center justify-content-between">
+                        <span><i class="bi-building me-2"></i> College Management</span>
+                        <i class="bi-chevron-right"></i>
+                    </a>
+                    <a href="/admin/careers" class="btn btn-outline-primary text-start px-3 py-2.5 rounded-3 d-flex align-items-center justify-content-between">
+                        <span><i class="bi-briefcase me-2"></i> Manage Pathways & Topics</span>
+                        <i class="bi-chevron-right"></i>
+                    </a>
+                    <a href="/admin/students" class="btn btn-outline-primary text-start px-3 py-2.5 rounded-3 d-flex align-items-center justify-content-between">
+                        <span><i class="bi-people me-2"></i> Monitor & Manage Users</span>
+                        <i class="bi-chevron-right"></i>
+                    </a>
+                    <a href="/admin/quizzes" class="btn btn-outline-primary text-start px-3 py-2.5 rounded-3 d-flex align-items-center justify-content-between">
+                        <span><i class="bi-question-square me-2"></i> Quiz Assessments & Bank</span>
+                        <i class="bi-chevron-right"></i>
+                    </a>
+                    <a href="/reports" class="btn btn-outline-info text-start px-3 py-2.5 rounded-3 d-flex align-items-center justify-content-between">
+                        <span><i class="bi-file-earmark-pdf me-2"></i> System PDF Reports</span>
+                        <i class="bi-chevron-right"></i>
+                    </a>
+                    <a href="/resources" class="btn btn-outline-secondary text-start px-3 py-2.5 rounded-3 d-flex align-items-center justify-content-between">
+                        <span><i class="bi-collection-play me-2"></i> Resource Library & Videos</span>
+                        <i class="bi-chevron-right"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal 1: Quick Add Video -->
+<div class="modal fade" id="quickAddVideoModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <form action="/admin/videos/add" method="POST" enctype="multipart/form-data" class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi-camera-reels text-warning me-2"></i>Add Video to Topic</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Target Topic <span class="text-danger">*</span></label>
+                    <select name="topic_id" class="form-select rounded-3" required>
+                        {% for t in topics %}
+                            <option value="{{ t.id }}">{{ t.title }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Video Title <span class="text-danger">*</span></label>
+                    <input type="text" name="title" class="form-control rounded-3" placeholder="e.g. Master Arrays in Python" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">📁 Upload Local Video File (.mp4, .webm)</label>
+                    <input type="file" name="file" accept="video/*" class="form-control rounded-3">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">OR YouTube / Video URL</label>
+                    <input type="url" name="youtube_url" class="form-control rounded-3" placeholder="https://www.youtube.com/watch?v=...">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Description (Optional)</label>
+                    <textarea name="description" class="form-control rounded-3" rows="2" placeholder="Brief lesson notes..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-warning rounded-pill px-4 fw-bold text-dark">Save Video</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal 2: Quick Add Quiz Question -->
+<div class="modal fade" id="quickAddQuizModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <form action="/admin/questions/add" method="POST" class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi-question-circle text-success me-2"></i>Add Quiz MCQ Question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Target Quiz <span class="text-danger">*</span></label>
+                    <select name="quiz_id" class="form-select rounded-3" required>
+                        {% for q in quizzes %}
+                            <option value="{{ q.id }}">{{ q.title or ('Quiz #' ~ q.id) }} (Topic ID: {{ q.topic_id }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Question Text <span class="text-danger">*</span></label>
+                    <textarea name="question_text" class="form-control rounded-3" rows="2" placeholder="Enter question..." required></textarea>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Option A</label>
+                        <input type="text" name="option_a" class="form-control rounded-3" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Option B</label>
+                        <input type="text" name="option_b" class="form-control rounded-3" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Option C</label>
+                        <input type="text" name="option_c" class="form-control rounded-3" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label small fw-semibold">Option D</label>
+                        <input type="text" name="option_d" class="form-control rounded-3" required>
+                    </div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Correct Option <span class="text-danger">*</span></label>
+                        <select name="correct_option" class="form-select rounded-3" required>
+                            <option value="A">Option A</option>
+                            <option value="B">Option B</option>
+                            <option value="C">Option C</option>
+                            <option value="D">Option D</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Explanation</label>
+                        <input type="text" name="explanation" class="form-control rounded-3" placeholder="Why this option is correct...">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-success rounded-pill px-4 fw-bold">Save MCQ Question</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Modal 3: Quick Add Coding Question -->
+<div class="modal fade" id="quickAddCodingModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <form action="/admin/challenges/add" method="POST" class="modal-content rounded-4 border-0 shadow-lg">
+            <div class="modal-header border-0 pb-0">
+                <h5 class="modal-title fw-bold text-dark"><i class="bi-code-square text-primary me-2"></i>Add Coding Challenge Question</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Target Topic <span class="text-danger">*</span></label>
+                        <select name="topic_id" class="form-select rounded-3" required>
+                            {% for t in topics %}
+                                <option value="{{ t.id }}">{{ t.title }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label fw-semibold">Difficulty & Points</label>
+                        <div class="input-group">
+                            <select name="difficulty" class="form-select rounded-start-3">
+                                <option value="easy">Easy</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="hard">Hard</option>
+                            </select>
+                            <input type="number" name="score_points" class="form-control rounded-end-3" value="10" placeholder="Points">
+                        </div>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Challenge Title <span class="text-danger">*</span></label>
+                        <input type="text" name="title" class="form-control rounded-3" placeholder="e.g. Reverse a String" required>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Problem Description <span class="text-danger">*</span></label>
+                        <textarea name="description" class="form-control rounded-3" rows="3" placeholder="Write a function reverse_string(s) that returns reversed string..." required></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Starter Code Template</label>
+                        <textarea name="template_code" class="form-control rounded-3 font-monospace" rows="3" placeholder="def reverse_string(s):&#10;    # Write code here&#10;    pass"></textarea>
+                    </div>
+                    <div class="col-12">
+                        <label class="form-label fw-semibold">Test Cases JSON</label>
+                        <textarea name="test_cases" class="form-control rounded-3 font-monospace" rows="2" placeholder='[{"function_name": "reverse_string", "args": ["hello"], "expected": "olleh"}]'></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer border-0 pt-0">
+                <button type="button" class="btn btn-light rounded-pill px-3" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Save Coding Challenge</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,298 @@
+{% extends "base.html" %}
+{% block title %}{{ student.name }} — Complete Marks & Attempt Breakdown{% endblock %}
+{% block page_title %}{{ student.name }} — Academic Marks & Attempt History{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Back Button & Breadcrumb -->
+    <div class="mb-3 d-flex align-items-center justify-content-between flex-wrap gap-2">
+        <a href="/teacher/performance" class="btn btn-sm btn-outline-secondary rounded-pill px-3 shadow-xs">
+            <i class="bi-arrow-left me-1"></i> Back to Student Marks List
+        </a>
+        <div class="text-muted small">
+            Student ID: <span class="badge bg-light text-dark border">#{{ student.id }}</span>
+        </div>
+    </div>
+
+    <!-- Student Profile & Marks Summary Banner -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 mb-4 bg-white position-relative overflow-hidden">
+        <div class="position-absolute top-0 end-0 rounded-circle bg-success opacity-10" style="width: 220px; height: 220px; margin-top: -60px; margin-right: -60px; pointer-events: none;"></div>
+
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-4 position-relative" style="z-index: 2;">
+            <div class="d-flex align-items-center gap-3">
+                <img src="{{ student.profile_photo or '/static/uploads/avatars/default.png' }}" 
+                     alt="Avatar" class="avatar-circle rounded-circle border shadow-sm" 
+                     style="width: 72px; height: 72px; object-fit: cover;"
+                     onerror="this.src='/static/uploads/avatars/default.png'">
+                <div>
+                    <div class="d-flex align-items-center gap-2">
+                        <h3 class="fw-bold m-0 text-dark">{{ student.name }}</h3>
+                        <span class="badge bg-primary rounded-pill px-2.5 py-1 text-uppercase small">{{ student.rank or 'Apprentice' }}</span>
+                    </div>
+                    <p class="text-muted m-0 mt-1">
+                        <i class="bi-envelope me-1"></i>{{ student.email }} &bull; 
+                        <i class="bi-lightning-charge-fill text-warning me-1"></i>{{ student.xp or 0 }} XP &bull; 
+                        <i class="bi-clock-history text-info me-1"></i>{{ "%.1f"|format(student.learning_hours or 0) }} hrs study time
+                    </p>
+                </div>
+            </div>
+
+            <!-- Score Metric Badges -->
+            <div class="d-flex gap-2 flex-wrap">
+                <div class="p-3 bg-success-subtle text-success rounded-4 text-center px-4">
+                    <span class="small text-muted d-block fw-semibold">📝 Quiz Marks Avg</span>
+                    <span class="fs-4 fw-bold text-success">{{ quiz_avg }}%</span>
+                </div>
+                <div class="p-3 bg-warning-subtle text-dark rounded-4 text-center px-4">
+                    <span class="small text-muted d-block fw-semibold">💻 Coding Marks Avg</span>
+                    <span class="fs-4 fw-bold text-warning">{{ coding_avg }}%</span>
+                </div>
+                <div class="p-3 bg-info-subtle text-info rounded-4 text-center px-4">
+                    <span class="small text-muted d-block fw-semibold">📋 Assignment Marks Avg</span>
+                    <span class="fs-4 fw-bold text-info">
+                        {% if assignment_avg > 0 %}{{ assignment_avg }}%{% else %}N/A{% endif %}
+                    </span>
+                </div>
+                <div class="p-3 bg-primary-subtle text-primary rounded-4 text-center px-4">
+                    <span class="small text-muted d-block fw-semibold">⭐ Overall GPA</span>
+                    <span class="fs-4 fw-bold text-primary">
+                        {{ "%.1f"|format((quiz_avg * 0.4 + coding_avg * 0.35 + (assignment_avg if assignment_avg > 0 else quiz_avg) * 0.25)) }}%
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Marks History Tabs -->
+    <div class="card border-0 rounded-4 shadow-sm bg-white p-4">
+        <ul class="nav nav-pills mb-4 gap-2 border-bottom pb-3" id="marksTabs" role="tablist">
+            <li class="nav-item">
+                <button class="nav-link active rounded-pill px-4 fw-semibold" id="quizzes-tab" data-bs-toggle="pill" data-bs-target="#quizzes-pane" type="button">
+                    <i class="bi-question-circle-fill me-1"></i> Quiz Checkpoints Marks ({{ quiz_history|length }})
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link rounded-pill px-4 fw-semibold" id="coding-tab" data-bs-toggle="pill" data-bs-target="#coding-pane" type="button">
+                    <i class="bi-code-square me-1"></i> Coding Challenges Marks ({{ coding_history|length }})
+                </button>
+            </li>
+            <li class="nav-item">
+                <button class="nav-link rounded-pill px-4 fw-semibold" id="assignments-tab" data-bs-toggle="pill" data-bs-target="#assignments-pane" type="button">
+                    <i class="bi-journal-check me-1"></i> Assignment Grades & Evaluations ({{ assignment_history|length }})
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content" id="marksTabsContent">
+            <!-- 1. Quizzes Tab -->
+            <div class="tab-pane fade show active" id="quizzes-pane" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-dark m-0">📝 Topic MCQ Quiz Attempt Marks</h5>
+                    <span class="badge bg-success-subtle text-success rounded-pill px-3 py-1">Passing Threshold: 75%</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Quiz / Topic Checkpoint</th>
+                                <th>Attempt #</th>
+                                <th>Actual Marks Obtained</th>
+                                <th>Result Status</th>
+                                <th>Attempted Date & Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for att in quiz_history %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ att.quiz_title }}</div>
+                                    <small class="text-muted">{{ att.topic_title }}</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2.5 py-1">
+                                        Attempt #{{ att.attempt_number }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="fs-5 fw-bold {% if att.score >= 75 %}text-success{% else %}text-danger{% endif %}">
+                                        {{ att.actual_marks }} / {{ att.total_questions }} Marks <small class="text-muted fs-6">({{ att.score }}%)</small>
+                                    </span>
+                                </td>
+                                <td>
+                                    {% if att.score >= 75 %}
+                                        <span class="badge bg-success rounded-pill px-3 py-1 fw-bold">
+                                            <i class="bi-check-circle-fill me-1"></i> PASSED
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger rounded-pill px-3 py-1 fw-bold">
+                                            <i class="bi-x-circle-fill me-1"></i> FAILED (<75%)
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td class="small text-muted">
+                                    {{ att.attempted_at.strftime('%b %d, %Y - %I:%M %p') if att.attempted_at else 'Recent' }}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-5">
+                                    <i class="bi-question-circle fs-1 text-muted opacity-50"></i>
+                                    <p class="mt-2 mb-0">No quiz attempts recorded yet for this student.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 2. Coding Challenges Tab -->
+            <div class="tab-pane fade" id="coding-pane" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-dark m-0">💻 Algorithmic Coding Challenge Submissions</h5>
+                    <span class="badge bg-warning-subtle text-dark rounded-pill px-3 py-1">Test Case Automated Engine</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Challenge Title</th>
+                                <th>Attempt #</th>
+                                <th>Score Earned</th>
+                                <th>Evaluation Status</th>
+                                <th>Submission Code</th>
+                                <th>Submitted Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for sub in coding_history %}
+                            <tr>
+                                <td><span class="fw-bold text-dark">{{ sub.challenge_title }}</span></td>
+                                <td>
+                                    <span class="badge bg-secondary bg-opacity-10 text-secondary rounded-pill px-2.5 py-1">
+                                        Attempt #{{ sub.attempt_number }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <strong class="text-primary fs-6">+{{ sub.score_earned }} pts</strong>
+                                </td>
+                                <td>
+                                    {% if sub.status == 'passed' %}
+                                        <span class="badge bg-success rounded-pill px-3 py-1 fw-bold">
+                                            <i class="bi-check-all me-1"></i> ALL TESTS PASSED
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-danger rounded-pill px-3 py-1 fw-bold">
+                                            <i class="bi-x-circle me-1"></i> FAILED TESTS
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if sub.submitted_code %}
+                                        <button class="btn btn-xs btn-outline-secondary rounded-pill px-3 py-1" 
+                                                data-bs-toggle="modal" data-bs-target="#codeModal-{{ sub.submission_id }}">
+                                            <i class="bi-code-slash me-1"></i> View Code
+                                        </button>
+
+                                        <!-- Code Modal -->
+                                        <div class="modal fade" id="codeModal-{{ sub.submission_id }}" tabindex="-1">
+                                            <div class="modal-dialog modal-lg">
+                                                <div class="modal-content rounded-4 border-0">
+                                                    <div class="modal-header">
+                                                        <h5 class="modal-title fw-bold">{{ sub.challenge_title }} — Submitted Code</h5>
+                                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                                    </div>
+                                                    <div class="modal-body p-0">
+                                                        <pre class="bg-dark text-white p-3 m-0 rounded-bottom" style="max-height: 400px; overflow-y: auto;"><code>{{ sub.submitted_code }}</code></pre>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-muted small">N/A</span>
+                                    {% endif %}
+                                </td>
+                                <td class="small text-muted">
+                                    {{ sub.submitted_at.strftime('%b %d, %Y - %I:%M %p') if sub.submitted_at else 'Recent' }}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-5">
+                                    <i class="bi-code-square fs-1 text-muted opacity-50"></i>
+                                    <p class="mt-2 mb-0">No coding challenge submissions recorded yet.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- 3. Assignments Tab -->
+            <div class="tab-pane fade" id="assignments-pane" role="tabpanel">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold text-dark m-0">📋 Assignment Submissions & Graded Marks</h5>
+                    <span class="badge bg-info-subtle text-info rounded-pill px-3 py-1">Teacher & AI Evaluations</span>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Assignment Title</th>
+                                <th>Subject</th>
+                                <th>Marks Obtained</th>
+                                <th>Teacher / AI Feedback</th>
+                                <th>Submitted Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for asub in assignment_history %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ asub.assignment_title }}</div>
+                                </td>
+                                <td><span class="badge bg-light text-secondary border">{{ asub.subject_name }}</span></td>
+                                <td>
+                                    {% if asub.marks_obtained != None %}
+                                        <span class="badge bg-success fs-6 rounded-pill px-3 py-1">
+                                            {{ asub.marks_obtained }} / {{ asub.max_marks }} pts ({{ asub.percentage }}%)
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-warning text-dark rounded-pill px-3 py-1">Ungraded</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if asub.feedback %}
+                                        <div class="small text-dark"><b>Teacher:</b> {{ asub.feedback }}</div>
+                                    {% endif %}
+                                    {% if asub.ai_feedback %}
+                                        <div class="small text-primary mt-1"><i class="bi-cpu me-1"></i><b>AI:</b> {{ asub.ai_feedback|truncate(90) }}</div>
+                                    {% endif %}
+                                    {% if not asub.feedback and not asub.ai_feedback %}
+                                        <span class="text-muted small">No feedback entered</span>
+                                    {% endif %}
+                                </td>
+                                <td class="small text-muted">
+                                    {{ asub.submitted_at.strftime('%b %d, %Y - %I:%M %p') if asub.submitted_at else 'Recent' }}
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="text-center text-muted py-5">
+                                    <i class="bi-journal-check fs-1 text-muted opacity-50"></i>
+                                    <p class="mt-2 mb-0">No assignment submissions submitted by this student yet.</p>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

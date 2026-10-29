@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Your Account — SkillPath AI</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <style>
+        :root {
+            --brand-primary: #0D5C3A;
+            --brand-accent: #2ECC71;
+            --brand-blue: #1D6AE5;
+            --card-bg: #FFFFFF;
+            --page-bg: #F0F4F8;
+            --input-bg: #F1F5F9;
+            --tab-bg: #E8EEF5;
+            --text-dark: #0F172A;
+            --text-muted: #64748B;
+            --border-color: #E2E8F0;
+        }
+
+        [data-bs-theme="dark"] {
+            --brand-primary: #10B981;
+            --brand-accent: #34D399;
+            --brand-blue: #2563EB;
+            --card-bg: #0F172A;
+            --page-bg: #070D18;
+            --input-bg: #1E293B;
+            --tab-bg: #1A2234;
+            --text-dark: #F8FAFC;
+            --text-muted: #94A3B8;
+            --border-color: #334155;
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background: var(--page-bg);
+            color: var(--text-dark);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2.5rem 1rem;
+            margin: 0;
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(46, 204, 113, 0.08) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(13, 92, 58, 0.08) 0px, transparent 50%);
+            background-attachment: fixed;
+        }
+
+        .register-container {
+            width: 100%;
+            max-width: 860px;
+        }
+
+        .register-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 1.5rem;
+            padding: 2.75rem 2.5rem;
+            box-shadow: 0 20px 45px -10px rgba(0, 0, 0, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .brand-chip-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #0D5C3A 0%, #10B981 100%);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1rem;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.25);
+        }
+
+        .brand-logo-text {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.45rem;
+            color: var(--text-dark);
+            letter-spacing: -0.02em;
+        }
+
+        .brand-logo-text span {
+            color: #10B981;
+        }
+
+        .card-heading {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 1.6rem;
+            color: var(--text-dark);
+            margin-top: 0.75rem;
+            margin-bottom: 0.35rem;
+        }
+
+        .card-subtitle {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            margin-bottom: 1.75rem;
+            line-height: 1.45;
+        }
+
+        /* Role Pill Tabs */
+        .role-tabs-wrapper {
+            background: var(--tab-bg);
+            border-radius: 999px;
+            padding: 0.35rem;
+            display: flex;
+            gap: 0.25rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .role-tab-btn {
+            flex: 1;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            padding: 0.65rem 1rem;
+            font-weight: 600;
+            font-size: 0.92rem;
+            border-radius: 999px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.4rem;
+            transition: all 0.2s ease;
+            cursor: pointer;
+            text-decoration: none;
+        }
+
+        .role-tab-btn:hover {
+            color: var(--text-dark);
+        }
+
+        .role-tab-btn.active {
+            background: var(--brand-blue);
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(29, 106, 229, 0.35);
+        }
+
+        .form-label {
+            font-size: 0.84rem;
+            font-weight: 600;
+            color: var(--text-dark);
+            margin-bottom: 0.4rem;
+        }
+
+        .form-control, .form-select {
+            background: var(--input-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.75rem;
+            padding: 0.65rem 0.9rem;
+            font-size: 0.92rem;
+            color: var(--text-dark);
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .form-control:focus, .form-select:focus {
+            background: var(--input-bg);
+            border-color: #10B981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.15);
+            outline: none;
+            color: var(--text-dark);
+        }
+
+        .btn-submit-registration {
+            background: linear-gradient(135deg, #0D5C3A 0%, #10B981 100%);
+            border: none;
+            color: white;
+            font-weight: 700;
+            font-size: 1rem;
+            padding: 0.85rem;
+            border-radius: 999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            box-shadow: 0 4px 16px rgba(16, 185, 129, 0.3);
+            transition: all 0.2s ease;
+            cursor: pointer;
+            margin-top: 1.5rem;
+        }
+
+        .btn-submit-registration:hover {
+            background: linear-gradient(135deg, #09472c 0%, #059669 100%);
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+        }
+
+        .institutional-box {
+            background: rgba(13, 92, 58, 0.03);
+            border: 1px solid var(--border-color);
+            border-radius: 1rem;
+            padding: 1.25rem;
+            margin-top: 1rem;
+        }
+
+        @media (max-width: 768px) {
+            .role-tabs-wrapper {
+                border-radius: 1rem;
+                flex-wrap: wrap;
+            }
+            .role-tab-btn {
+                flex: 1 1 45%;
+                border-radius: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="register-container">
+        <div class="register-card">
+            
+            <!-- Brand Header -->
+            <div class="text-center mb-3">
+                <a href="/" class="d-inline-flex align-items-center gap-2 text-decoration-none">
+                    <div class="brand-chip-icon">
+                        <i class="bi bi-cpu-fill"></i>
+                    </div>
+                    <span class="brand-logo-text">SkillPath <span>AI</span></span>
+                </a>
+                <h2 class="card-heading">Create Your Account</h2>
+                <p class="card-subtitle">Select your institutional role to unlock customized academic workflows</p>
+            </div>
+
+            <!-- Role Selector Tabs -->
+            <div class="role-tabs-wrapper" role="tablist">
+                <button type="button" class="role-tab-btn active" id="tab-student" onclick="switchRole('student')">
+                    <i class="bi bi-person-fill"></i> Student
+                </button>
+                <button type="button" class="role-tab-btn" id="tab-teacher" onclick="switchRole('teacher')">
+                    <i class="bi bi-mortarboard-fill"></i> Teacher
+                </button>
+                <button type="button" class="role-tab-btn" id="tab-hod" onclick="switchRole('hod')">
+                    <i class="bi bi-person-badge-fill"></i> HOD
+                </button>
+                <button type="button" class="role-tab-btn" id="tab-college_admin" onclick="switchRole('college_admin')">
+                    <i class="bi bi-building"></i> College Admin
+                </button>
+            </div>
+
+            <!-- Dynamic Alert Box -->
+            <div id="alertBox"></div>
+
+            <!-- Registration Form -->
+            <form id="multiRoleRegisterForm" action="/auth/register" method="POST" onsubmit="return handleRegisterSubmit(event)">
+                <input type="hidden" name="role" id="regRole" value="student">
+
+                <!-- Core Details (2x2 Grid) -->
+                <div class="row g-3 mb-3">
+                    <div class="col-md-6">
+                        <label for="regName" class="form-label">Full Legal Name</label>
+                        <input type="text" id="regName" name="name" class="form-control" placeholder="e.g. Alex Johnson" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="regMobile" class="form-label">Mobile Number</label>
+                        <input type="tel" id="regMobile" name="phone_number" class="form-control" placeholder="e.g. +1 555-019-2834" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="regEmail" class="form-label">Email Address</label>
+                        <input type="email" id="regEmail" name="email" class="form-control" placeholder="daoceth@123.com" required>
+                    </div>
+                    <div class="col-md-6">
+                        <label for="regPassword" class="form-label">Set Portal Password</label>
+                        <input type="password" id="regPassword" name="password" class="form-control" placeholder="••••••" minlength="6" required>
+                    </div>
+                </div>
+
+                <!-- Academic Section (for Student, Teacher, HOD) -->
+                <div id="academicFieldsSection">
+                    <div class="row g-3 mb-3">
+                        <div class="col-md-6">
+                            <label for="regEducation" id="educationLabel" class="form-label">Education / Degree</label>
+                            <input type="text" id="regEducation" name="education" class="form-control" placeholder="e.g. B.Tech Computer Science">
+                        </div>
+                        <div class="col-md-6">
+                            <label for="regBranch" id="branchLabel" class="form-label">Branch / Department</label>
+                            <select id="regBranch" name="department_id" class="form-select">
+                                <option value="">Select Department / Branch</option>
+                                {% for dept in departments %}
+                                    <option value="{{ dept.id }}" {% if loop.first %}selected{% endif %}>{{ dept.name }}</option>
+                                {% endfor %}
+                                <option value="" {% if not departments %}selected{% endif %}>Computer Science & Engineering</option>
+                                <option value="">Information Technology</option>
+                                <option value="">Artificial Intelligence & Data Science</option>
+                                <option value="">Electronics & Telecommunication</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Role-Specific Dynamic Row -->
+                    <div class="row g-3 mb-3">
+                        <!-- Student Specific: Roll Number & Address -->
+                        <div class="col-md-6" id="studentRollBox">
+                            <label for="regRollNumber" class="form-label">Student Roll Number</label>
+                            <input type="text" id="regRollNumber" name="roll_number" class="form-control" placeholder="e.g. 21CS042">
+                        </div>
+
+                        <!-- Teacher / HOD Specific: Employee ID -->
+                        <div class="col-md-6 d-none" id="facultyIdBox">
+                            <label for="regEmployeeId" id="employeeIdLabel" class="form-label">Faculty / Employee ID</label>
+                            <input type="text" id="regEmployeeId" name="employee_id" class="form-control" placeholder="e.g. FAC-2024-089">
+                        </div>
+
+                        <!-- Teacher Specific: Subject Taught -->
+                        <div class="col-md-6 d-none" id="teacherSubjectBox">
+                            <label for="regTeacherSubject" class="form-label">Primary Course / Subject Taught</label>
+                            <select id="regTeacherSubject" name="subject" class="form-select">
+                                <option value="Data Structures & Algorithms">Data Structures & Algorithms</option>
+                                <option value="Database Management Systems">Database Management Systems</option>
+                                <option value="Web Technologies & Full-Stack">Web Technologies & Full-Stack</option>
+                                <option value="Artificial Intelligence & Machine Learning">Artificial Intelligence & Machine Learning</option>
+                                <option value="Operating Systems & Concurrency">Operating Systems & Concurrency</option>
+                                <option value="Computer Networks & Security">Computer Networks & Security</option>
+                                <option value="Other">Other / Custom Course</option>
+                            </select>
+                        </div>
+
+                        <!-- Address (for Students) -->
+                        <div class="col-12" id="studentAddressBox">
+                            <label for="regAddress" class="form-label">Residential / Campus Address</label>
+                            <input type="text" id="regAddress" name="address" class="form-control" placeholder="e.g. Campus Dormitory 4B / City">
+                        </div>
+
+                        <!-- College Affiliation -->
+                        <div class="col-md-6" id="collegeSelectBox">
+                            <label for="regCollegeSelect" class="form-label">College Affiliation</label>
+                            <select id="regCollegeSelect" name="college_id" class="form-select" onchange="handleCollegeSelectChange(this.value)">
+                                {% for clg in colleges %}
+                                    <option value="{{ clg.id }}" {% if loop.first %}selected{% endif %}>{{ clg.name }} ({{ clg.code }})</option>
+                                {% endfor %}
+                                {% if not colleges %}
+                                    <option value="21" selected>Apex Institute of Technology (AIT)</option>
+                                    <option value="22">Metropolitan Engineering College</option>
+                                {% endif %}
+                                <option value="other">Other (Enter Institute Name)</option>
+                            </select>
+                        </div>
+
+                        <div class="col-md-6 d-none" id="customCollegeBox">
+                            <label for="customCollegeName" class="form-label">Custom College / Institute Name</label>
+                            <input type="text" id="customCollegeName" name="custom_college" class="form-control" placeholder="Enter institution name">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- College Admin Institutional Information -->
+                <div id="collegeAdminFieldsSection" class="d-none">
+                    <div class="institutional-box mb-3">
+                        <h6 class="fw-bold text-success mb-3">
+                            <i class="bi bi-building-gear me-1"></i> Institutional Setup & College Information
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="admCollegeName" class="form-label">Official College / University Name *</label>
+                                <input type="text" id="admCollegeName" name="adm_college_name" class="form-control" placeholder="e.g. Apex Institute of Technology">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="admCollegeWebsite" class="form-label">Official Website URL</label>
+                                <input type="url" id="admCollegeWebsite" name="adm_college_website" class="form-control" placeholder="https://institution.edu">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="admCollegeLocation" class="form-label">Campus Location / City</label>
+                                <input type="text" id="admCollegeLocation" name="adm_college_location" class="form-control" placeholder="e.g. Boston, MA">
+                            </div>
+                            <div class="col-md-6">
+                                <label for="admCollegeImage" class="form-label">Campus Image / Banner URL</label>
+                                <input type="url" id="admCollegeImage" name="adm_college_image" class="form-control" placeholder="https://institution.edu/campus.jpg">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Complete Registration Button -->
+                <button type="submit" id="regSubmitBtn" class="btn-submit-registration w-100">
+                    <i class="bi bi-check-circle-fill"></i> Complete Registration
+                </button>
+            </form>
+
+            <!-- Bottom Navigation -->
+            <div class="text-center pt-3 mt-4 border-top" style="border-color: var(--border-color) !important;">
+                <small class="text-muted">
+                    Already have an account? <a href="/auth/login" class="fw-bold text-success text-decoration-none">Sign In</a>
+                </small>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function switchRole(role) {
+            // Update active pill
+            document.querySelectorAll('.role-tab-btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById(`tab-${role}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            // Set role input
+            const regRole = document.getElementById('regRole');
+            if (regRole) regRole.value = role;
+
+            const academicSec = document.getElementById('academicFieldsSection');
+            const adminSec = document.getElementById('collegeAdminFieldsSection');
+            const studentRollBox = document.getElementById('studentRollBox');
+            const facultyIdBox = document.getElementById('facultyIdBox');
+            const teacherSubjectBox = document.getElementById('teacherSubjectBox');
+            const studentAddressBox = document.getElementById('studentAddressBox');
+            const eduLabel = document.getElementById('educationLabel');
+            const branchLabel = document.getElementById('branchLabel');
+            const employeeIdLabel = document.getElementById('employeeIdLabel');
+
+            if (role === 'college_admin') {
+                if (academicSec) academicSec.classList.add('d-none');
+                if (adminSec) adminSec.classList.remove('d-none');
+            } else {
+                if (academicSec) academicSec.classList.remove('d-none');
+                if (adminSec) adminSec.classList.add('d-none');
+
+                if (role === 'student') {
+                    if (eduLabel) eduLabel.innerText = "Education / Current Degree";
+                    if (branchLabel) branchLabel.innerText = "Student Branch";
+                    if (studentRollBox) studentRollBox.classList.remove('d-none');
+                    if (facultyIdBox) facultyIdBox.classList.add('d-none');
+                    if (teacherSubjectBox) teacherSubjectBox.classList.add('d-none');
+                    if (studentAddressBox) studentAddressBox.classList.remove('d-none');
+                } else if (role === 'teacher') {
+                    if (eduLabel) eduLabel.innerText = "Highest Qualification (M.Tech / Ph.D.)";
+                    if (branchLabel) branchLabel.innerText = "Branch of Teaching";
+                    if (employeeIdLabel) employeeIdLabel.innerText = "Teacher Employee ID";
+                    if (studentRollBox) studentRollBox.classList.add('d-none');
+                    if (facultyIdBox) facultyIdBox.classList.remove('d-none');
+                    if (teacherSubjectBox) teacherSubjectBox.classList.remove('d-none');
+                    if (studentAddressBox) studentAddressBox.classList.add('d-none');
+                } else if (role === 'hod') {
+                    if (eduLabel) eduLabel.innerText = "Faculty Qualification (Ph.D.)";
+                    if (branchLabel) branchLabel.innerText = "Department Managed";
+                    if (employeeIdLabel) employeeIdLabel.innerText = "HOD Employee / Faculty ID";
+                    if (studentRollBox) studentRollBox.classList.add('d-none');
+                    if (facultyIdBox) facultyIdBox.classList.remove('d-none');
+                    if (teacherSubjectBox) teacherSubjectBox.classList.add('d-none');
+                    if (studentAddressBox) studentAddressBox.classList.add('d-none');
+                }
+            }
+        }
+
+        function handleCollegeSelectChange(val) {
+            const customBox = document.getElementById('customCollegeBox');
+            if (customBox) {
+                if (val === 'other') {
+                    customBox.classList.remove('d-none');
+                    document.getElementById('customCollegeName')?.focus();
+                } else {
+                    customBox.classList.add('d-none');
+                }
+            }
+        }
+
+        function showAlert(message, type = "danger") {
+            const alertBox = document.getElementById("alertBox");
+            if (!alertBox) return;
+            alertBox.innerHTML = `
+                <div class="alert alert-${type} alert-dismissible fade show small py-2 px-3 mb-3 rounded-3" role="alert">
+                    <i class="bi bi-${type === 'success' ? 'check-circle-fill' : 'exclamation-triangle-fill'} me-1"></i> ${message}
+                    <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            `;
+        }
+
+        function handleRegisterSubmit(e) {
+            const name = document.getElementById('regName')?.value || '';
+            const email = document.getElementById('regEmail')?.value || '';
+            const password = document.getElementById('regPassword')?.value || '';
+            const role = document.getElementById('regRole')?.value || 'student';
+
+            if (!name.trim() || !email.trim() || !password.trim()) {
+                e.preventDefault();
+                showAlert("Please complete all required fields.", "warning");
+                return false;
+            }
+
+            if (role === 'college_admin') {
+                const cName = document.getElementById('admCollegeName')?.value || '';
+                if (!cName.trim()) {
+                    e.preventDefault();
+                    showAlert("Please enter your official College / University Name.", "warning");
+                    document.getElementById('admCollegeName')?.focus();
+                    return false;
+                }
+            }
+
+            const btn = document.getElementById('regSubmitBtn');
+            if (btn) {
+                btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status"></span> Creating Account...';
+                btn.disabled = true;
+            }
+            return true;
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const params = new URLSearchParams(window.location.search);
+            if (params.get("error") === "email_exists") {
+                showAlert("An account with this email address already exists. Please sign in instead.", "danger");
+            }
+        });
+    </script>
+</body>
+</html>

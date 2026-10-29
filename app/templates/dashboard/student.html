@@ -1,0 +1,391 @@
+{% extends "base.html" %}
+
+{% block title %}Student Dashboard - SkillPath AI{% endblock %}
+{% block page_title %}🏠 Student Dashboard{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+    <!-- Welcome Header with Vibrant Styling & Sticker Badges -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="p-4 p-md-5 border-0 rounded-4 text-white shadow-lg d-flex flex-wrap align-items-center justify-content-between gap-3 vibrant-banner-hero">
+                <div>
+                    <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                        <span class="sticker-badge sticker-fire">🔥 STREAK {{ user.daily_streak }} DAYS</span>
+                        <span class="sticker-badge sticker-pro">⚡ RANK: {{ user.rank|upper }}</span>
+                        <span class="sticker-badge sticker-ai">🤖 AI COACH ACTIVE</span>
+                    </div>
+                    <h2 class="fw-bold m-0 text-white display-6">👋 Welcome back, {{ user.name }}!</h2>
+                    <p class="m-0 mt-1 opacity-90 text-white-50 fs-6">🎯 Pathway Goal: <strong class="text-white">{{ career.name }}</strong></p>
+                </div>
+                <div>
+                    {% if current_topic %}
+                        <a href="/roadmap/topic/{{ current_topic.id }}" class="btn btn-warning btn-lg rounded-pill fw-bold px-4 py-3 shadow-lg text-dark d-flex align-items-center gap-2" style="background: #F59E0B; border: none;">
+                            <i class="bi-play-fill fs-4"></i> Continue Learning
+                        </a>
+                    {% else %}
+                        {% if progress_percent >= 100 %}
+                            <a href="/certificate/generate/{{ career.id }}" class="btn btn-success btn-lg rounded-pill fw-bold px-4 py-3 shadow-lg">
+                                <i class="bi-patch-check-fill me-1"></i> Claim Certificate
+                            </a>
+                        {% else %}
+                            <a href="/roadmap/view" class="btn btn-warning btn-lg rounded-pill fw-bold px-4 py-3 shadow-lg text-dark">
+                                <i class="bi-eye me-1"></i> View Learning Path
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enrolled Pathways List -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card custom-card border-0 p-4 shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold m-0"><i class="bi-journals text-primary"></i> 📚 My Enrolled Pathways</h5>
+                    <a href="/roadmap/select-career" class="btn btn-sm btn-outline-primary rounded-pill px-3"><i class="bi-plus"></i> Enroll in Another Track</a>
+                </div>
+                <div class="row g-3">
+                    {% for path in enrolled_paths %}
+                        <div class="col-md-4">
+                            <div class="card border rounded-3 p-3 h-100 {% if path.is_active %}border-primary bg-primary bg-opacity-10{% endif %}">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h6 class="fw-bold m-0 text-dark">{{ path.career.name }}</h6>
+                                    {% if path.is_active %}
+                                        <span class="badge bg-primary rounded-pill px-2 py-1" style="font-size: 0.65rem;">Active Focus</span>
+                                    {% endif %}
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center small text-muted mb-1">
+                                    <span>Progress: {{ path.percent }}%</span>
+                                    <span>{{ path.completed }}/{{ path.total }} topics</span>
+                                </div>
+                                <div class="progress mb-3" style="height: 6px; border-radius: 3px;">
+                                    <div class="progress-bar {% if path.is_active %}bg-primary{% else %}bg-secondary{% endif %}" role="progressbar" style="width: {{ path.percent }}%;"></div>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center">
+                                    {% if path.is_active %}
+                                        <a href="/roadmap/view?career_id={{ path.career.id }}" class="btn btn-sm btn-primary rounded-pill px-3 w-100 py-1 fw-semibold"><i class="bi-play-fill"></i> Study Pathway</a>
+                                    {% else %}
+                                        <form action="/roadmap/select-career" method="POST" class="w-100">
+                                            <input type="hidden" name="career_id" value="{{ path.career.id }}">
+                                            <button type="submit" class="btn btn-sm btn-outline-secondary rounded-pill px-3 w-100 py-1">Switch Focus</button>
+                                        </form>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Interactive Learning & Skill Acceleration Hub -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3 col-lg-2">
+            <a href="/quiz" class="card border-0 rounded-4 p-3 text-center text-decoration-none shadow-sm h-100 hover-quick-action" style="background: linear-gradient(135deg, rgba(46, 204, 113, 0.15) 0%, rgba(13, 92, 58, 0.05) 100%); border: 1px solid rgba(46, 204, 113, 0.3) !important;">
+                <div class="fs-2 mb-1">🧠</div>
+                <div class="fw-bold text-dark small">MCQ Quizzes</div>
+                <span class="text-muted" style="font-size: 0.72rem;">Pass Checkpoints</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <a href="/student/resources" class="card border-0 rounded-4 p-3 text-center text-decoration-none shadow-sm h-100 hover-quick-action" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.05) 100%); border: 1px solid rgba(239, 68, 68, 0.3) !important;">
+                <div class="fs-2 mb-1">🎥</div>
+                <div class="fw-bold text-dark small">Extra Videos</div>
+                <span class="text-muted" style="font-size: 0.72rem;">Faculty Lectures</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <a href="/student/assignments" class="card border-0 rounded-4 p-3 text-center text-decoration-none shadow-sm h-100 hover-quick-action" style="background: linear-gradient(135deg, rgba(59, 130, 246, 0.15) 0%, rgba(37, 99, 235, 0.05) 100%); border: 1px solid rgba(59, 130, 246, 0.3) !important;">
+                <div class="fs-2 mb-1">📋</div>
+                <div class="fw-bold text-dark small">Assignments</div>
+                <span class="text-muted" style="font-size: 0.72rem;">Submit & Marks</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <a href="/code-editor" class="card border-0 rounded-4 p-3 text-center text-decoration-none shadow-sm h-100 hover-quick-action" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.05) 100%); border: 1px solid rgba(245, 158, 11, 0.3) !important;">
+                <div class="fs-2 mb-1">💻</div>
+                <div class="fw-bold text-dark small">Code Sandbox</div>
+                <span class="text-muted" style="font-size: 0.72rem;">Compile & Test</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <a href="/mock-interview" class="card border-0 rounded-4 p-3 text-center text-decoration-none shadow-sm h-100 hover-quick-action" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.15) 0%, rgba(147, 51, 234, 0.05) 100%); border: 1px solid rgba(168, 85, 247, 0.3) !important;">
+                <div class="fs-2 mb-1">🎙️</div>
+                <div class="fw-bold text-dark small">AI Interview</div>
+                <span class="text-muted" style="font-size: 0.72rem;">Voice Practice</span>
+            </a>
+        </div>
+        <div class="col-6 col-md-3 col-lg-2">
+            <a href="/resume/builder" class="card border-0 rounded-4 p-3 text-center text-decoration-none shadow-sm h-100 hover-quick-action" style="background: linear-gradient(135deg, rgba(14, 165, 233, 0.15) 0%, rgba(2, 132, 199, 0.05) 100%); border: 1px solid rgba(14, 165, 233, 0.3) !important;">
+                <div class="fs-2 mb-1">📄</div>
+                <div class="fw-bold text-dark small">ATS Resume</div>
+                <span class="text-muted" style="font-size: 0.72rem;">AI Generator</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Quick Stats Grid -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-3">
+            <div class="card custom-card border-0 p-3">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="p-3 bg-primary-subtle text-primary rounded-3 fs-3"><i class="bi-fire"></i></div>
+                    <div>
+                        <h6 class="text-muted m-0">🔥 Daily Streak</h6>
+                        <h3 class="fw-bold m-0">{{ user.daily_streak }} Days</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card custom-card border-0 p-3">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="p-3 bg-success-subtle text-success rounded-3 fs-3"><i class="bi-trophy-fill"></i></div>
+                    <div>
+                        <h6 class="text-muted m-0">🏆 Quiz Average</h6>
+                        <h3 class="fw-bold m-0">{{ user.quiz_avg }}%</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card custom-card border-0 p-3">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="p-3 bg-warning-subtle text-warning rounded-3 fs-3"><i class="bi-code-slash"></i></div>
+                    <div>
+                        <h6 class="text-muted m-0">💻 Coding Avg</h6>
+                        <h3 class="fw-bold m-0">{{ user.coding_avg }}%</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card custom-card border-0 p-3">
+                <div class="card-body d-flex align-items-center gap-3">
+                    <div class="p-3 bg-info-subtle text-info rounded-3 fs-3"><i class="bi-clock-fill"></i></div>
+                    <div>
+                        <h6 class="text-muted m-0">⏰ Study Hours</h6>
+                        <h3 class="fw-bold m-0">{{ "%.2f"|format(user.learning_hours) }} hrs</h3>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Core Progress & AI Recommendations -->
+    <div class="row g-4 mb-4">
+        <!-- Progress Bar and Node Summary -->
+        <div class="col-lg-7">
+            <div class="card custom-card border-0 h-100 p-4">
+                <h5 class="fw-bold mb-3"><i class="bi-bar-chart-steps text-primary"></i> 📊 Pathway Progress</h5>
+                
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-muted">{{ completed_count }} of {{ total_topics }} topics completed</span>
+                    <span class="fw-bold text-primary">{{ progress_percent }}%</span>
+                </div>
+                <div class="progress mb-4" style="height: 12px; border-radius: 6px;">
+                    <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" style="width: {{ progress_percent }}%;" aria-valuenow="{{ progress_percent }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                
+                <div class="list-group list-group-flush">
+                    <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent py-3">
+                        <div>
+                            <div class="fw-bold">📍 Current Node</div>
+                            <small class="text-muted">{{ current_topic.title if current_topic else 'All completed!' }}</small>
+                        </div>
+                        {% if current_topic %}
+                            <span class="badge badge-unlocked px-3 py-2 rounded-pill">Active</span>
+                        {% else %}
+                            <span class="badge badge-completed px-3 py-2 rounded-pill">Completed</span>
+                        {% endif %}
+                    </div>
+                    <div class="list-group-item d-flex justify-content-between align-items-center bg-transparent py-3">
+                        <div>
+                            <div class="fw-bold">🔒 Next Node</div>
+                            <small class="text-muted">{{ next_topic.title if next_topic else 'No subsequent topic' }}</small>
+                        </div>
+                        <span class="badge badge-locked px-3 py-2 rounded-pill">Locked</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Coach Panel -->
+        <div class="col-lg-5">
+            <div class="card custom-card border-0 h-100 p-4 bg-light-subtle position-relative overflow-hidden" style="border: 1px solid rgba(13,110,253,0.15) !important;">
+                <div class="d-flex align-items-center justify-content-between mb-3">
+                    <h5 class="fw-bold m-0"><i class="bi-cpu-fill text-primary"></i> 🤖 SkillPath AI Advisor</h5>
+                    <button class="btn btn-sm btn-outline-primary rounded-pill px-3" id="askAiBtn">
+                        <i class="bi-lightning-fill"></i> Ask AI
+                    </button>
+                </div>
+
+                <div id="aiRecBox" class="flex-grow-1 d-flex flex-column justify-content-center">
+                    {% if recommendation %}
+                        <div class="alert alert-primary border-0 rounded-3 p-3">
+                            <span class="badge bg-primary text-capitalize mb-2">{{ recommendation.type }}</span>
+                            <p class="m-0 text-dark" style="font-size: 0.95rem; line-height: 1.6;">{{ recommendation.content | safe }}</p>
+                        </div>
+                        <small class="text-muted mt-2 d-block">Generated: {{ recommendation.created_at.strftime('%b %d, %I:%M %p') }}</small>
+                    {% else %}
+                        <div class="text-center py-4">
+                            <i class="bi-robot text-primary display-4 mb-2 d-block"></i>
+                            <p class="text-muted mb-0">No active advice. Click <strong>Ask AI</strong> to analyze your analytics and recommend next steps.</p>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Overlay Loader -->
+                <div id="aiLoader" class="position-absolute top-0 start-0 w-100 h-100 bg-body bg-opacity-75 d-none align-items-center justify-content-center flex-column" style="z-index: 10;">
+                    <div class="spinner-border text-primary mb-2" role="status"></div>
+                    <span class="fw-semibold">AI is analyzing performance...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Analytics Charts & Activity Log -->
+    <div class="row g-4">
+        <!-- Analytics Visuals -->
+        <div class="col-lg-8">
+            <div class="card custom-card border-0 p-4 mb-4">
+                <h5 class="fw-bold mb-4"><i class="bi-graph-up text-primary"></i> 📈 Weekly Progress Trends</h5>
+                <div class="row">
+                    <div class="col-md-6 mb-3 mb-md-0">
+                        <h6 class="text-center text-muted mb-2">Study Hours (Past 7 Days)</h6>
+                        <canvas id="hoursChart" style="max-height: 250px;"></canvas>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="text-center text-muted mb-2">Quiz vs Code Scores</h6>
+                        <canvas id="scoresChart" style="max-height: 250px;"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Activity Logs -->
+        <div class="col-lg-4">
+            <div class="card custom-card border-0 p-4 h-100">
+                <h5 class="fw-bold mb-3"><i class="bi-activity text-primary"></i> ⚡ Recent Activity</h5>
+                <ul class="list-group list-group-flush small">
+                    {% if activities %}
+                        {% for act in activities %}
+                            <li class="list-group-item bg-transparent px-0 py-2.5">
+                                <div class="d-flex justify-content-between">
+                                    <strong class="text-capitalize text-primary">{{ act.action.replace('_', ' ') }}</strong>
+                                    <span class="text-muted">{{ act.created_at.strftime('%H:%M') }}</span>
+                                </div>
+                                <div class="text-muted mt-1">{{ act.details }}</div>
+                            </li>
+                        {% endfor %}
+                    {% else %}
+                        <li class="list-group-item bg-transparent px-0 py-4 text-center text-muted">
+                            No activities logged yet. Get started on topics!
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    // 1. AJAX AI recommendation generation
+    const askAiBtn = document.getElementById("askAiBtn");
+    const aiLoader = document.getElementById("aiLoader");
+    const aiRecBox = document.getElementById("aiRecBox");
+
+    askAiBtn.addEventListener("click", () => {
+        aiLoader.classList.remove("d-none");
+        aiLoader.classList.add("d-flex");
+
+        fetch("/recommendation/generate", {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("AI request failed");
+            return response.json();
+        })
+        .then(data => {
+            aiLoader.classList.remove("d-flex");
+            aiLoader.classList.add("d-none");
+            
+            // Format content nicely, mapping markdown bold if any
+            let formattedContent = data.content.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            
+            aiRecBox.innerHTML = `
+                <div class="alert alert-primary border-0 rounded-3 p-3">
+                    <span class="badge bg-primary text-capitalize mb-2">${data.type}</span>
+                    <p class="m-0 text-dark" style="font-size: 0.95rem; line-height: 1.6;">${formattedContent}</p>
+                </div>
+                <small class="text-muted mt-2 d-block">Generated: Just Now</small>
+            `;
+        })
+        .catch(err => {
+            aiLoader.classList.remove("d-flex");
+            aiLoader.classList.add("d-none");
+            alert("Failed to connect with AI Coach. Using local fallback recommendations.");
+        });
+    });
+
+    // 2. Fetch Chart.js analytics datasets
+    fetch("/analytics/data")
+    .then(response => response.json())
+    .then(data => {
+        // Study Hours Line Chart
+        new Chart(document.getElementById('hoursChart'), {
+            type: 'line',
+            data: {
+                labels: data.labels,
+                datasets: [{
+                    label: 'Hours Studied',
+                    data: data.weekly_hours,
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13, 110, 253, 0.1)',
+                    tension: 0.3,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+
+        // Scores Bar Chart
+        new Chart(document.getElementById('scoresChart'), {
+            type: 'bar',
+            data: {
+                labels: data.labels,
+                datasets: [
+                    {
+                        label: 'Quiz Avg',
+                        data: data.quiz_performance,
+                        backgroundColor: '#198754'
+                    },
+                    {
+                        label: 'Coding Avg',
+                        data: data.coding_performance,
+                        backgroundColor: '#ffc107'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                scales: { y: { beginAtZero: true, max: 100 } }
+            }
+        });
+    });
+</script>
+{% endblock %}

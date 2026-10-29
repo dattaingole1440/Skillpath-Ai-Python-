@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}SkillPath AI - Personalized Adaptive Learning{% endblock %}</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    
+    <!-- Main Style Sheet -->
+    <link rel="stylesheet" href="/static/css/style.css">
+    
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <!-- Theme Toggler Head Script (Prevents Flashing) -->
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem("theme") || "dark";
+            const savedPreset = localStorage.getItem("theme_preset") || "emerald";
+            document.documentElement.setAttribute("data-bs-theme", savedTheme);
+            document.documentElement.setAttribute("data-theme-preset", savedPreset);
+        })();
+    </script>
+    
+    {% block extra_head %}{% endblock %}
+    {% block head %}{% endblock %}
+</head>
+<body>
+
+    <!-- Sidebar -->
+    <div class="sidebar d-none d-lg-block">
+        <div class="d-flex align-items-center mb-4 gap-2">
+            <i class="bi-flower1 fs-3" style="color: #2ECC71;"></i>
+            <span class="fs-4 fw-bold" style="font-family: 'Outfit', sans-serif; color: #0D5C3A;">SkillPath <span style="color: #2ECC71;">Ai</span></span>
+        </div>
+        
+        <nav class="nav flex-column">
+            {% if user %}
+                {% if user.role in ['super_admin', 'admin'] %}
+                    <!-- Super Admin Sidebar -->
+                    <div class="text-xs text-muted uppercase fw-bold mb-2">👑 SUPER ADMIN APP CONTROL</div>
+                    <a href="/admin" class="nav-link-custom {% if request.url.path == '/admin' %}active{% endif %}">
+                        <i class="bi-speedometer2"></i> ⚙️ App Dashboard
+                    </a>
+                    <a href="/college/manage" class="nav-link-custom {% if '/college/manage' in request.url.path %}active{% endif %}">
+                        <i class="bi-building"></i> 🏛️ Manage Colleges
+                    </a>
+                    <a href="/admin/users" class="nav-link-custom {% if '/admin/users' in request.url.path %}active{% endif %}">
+                        <i class="bi-people"></i> 👥 Manage All Users
+                    </a>
+                    <a href="/admin/careers" class="nav-link-custom {% if '/admin/careers' in request.url.path %}active{% endif %}">
+                        <i class="bi-briefcase"></i> 💼 Manage Careers
+                    </a>
+                    <a href="/admin/quizzes" class="nav-link-custom {% if '/admin/quizzes' in request.url.path %}active{% endif %}">
+                        <i class="bi-question-square"></i> ❓ Quizzes & Questions
+                    </a>
+                    <a href="/reports" class="nav-link-custom {% if '/reports' in request.url.path %}active{% endif %}">
+                        <i class="bi-file-earmark-pdf"></i> 📊 System Reports
+                    </a>
+
+                    <div class="text-xs text-muted uppercase fw-bold my-2">🌐 COMMUNITY & TOOLS</div>
+                    <a href="/resources" class="nav-link-custom {% if request.url.path == '/resources' %}active{% endif %}">
+                        <i class="bi-collection-play"></i> 📚 Resource Library
+                    </a>
+                    <a href="/leaderboard" class="nav-link-custom {% if '/leaderboard' in request.url.path %}active{% endif %}">
+                        <i class="bi-trophy"></i> 🏆 Leaderboard
+                    </a>
+                    <a href="/forum" class="nav-link-custom {% if '/forum' in request.url.path %}active{% endif %}">
+                        <i class="bi-chat-square-text"></i> 💬 Community Forum
+                    </a>
+
+                    <div class="mt-auto pt-3 border-top">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="small text-muted fw-semibold">Role</span>
+                            <span class="badge bg-danger bg-opacity-10 text-danger border border-danger rounded-pill px-2.5 py-1 text-uppercase fw-bold" style="font-size: 0.7rem;">SUPER ADMIN</span>
+                        </div>
+                        <a href="/auth/logout" class="btn btn-danger bg-danger bg-opacity-10 text-danger border-0 w-100 rounded-pill py-2 fw-semibold d-flex align-items-center justify-content-center gap-2">
+                            <i class="bi-box-arrow-right"></i> Sign Out
+                        </a>
+                    </div>
+
+                {% elif user.role in ['principal', 'college_admin'] %}
+                    <!-- Principal Sidebar -->
+                    <div class="text-xs text-muted uppercase fw-bold mb-2">🎓 PRINCIPAL PORTAL</div>
+                    <a href="/principal/dashboard" class="nav-link-custom {% if request.url.path == '/principal/dashboard' or request.url.path == '/principal' %}active{% endif %}">
+                        <i class="bi-speedometer2"></i> 📊 Principal Dashboard
+                    </a>
+                    <a href="/principal/departments" class="nav-link-custom {% if '/principal/departments' in request.url.path %}active{% endif %}">
+                        <i class="bi-diagram-3"></i> 🏛️ College Departments
+                    </a>
+                    <a href="/principal/faculty" class="nav-link-custom {% if '/principal/faculty' in request.url.path %}active{% endif %}">
+                        <i class="bi-person-badge"></i> 👨‍🏫 Faculty Directory
+                    </a>
+                    <a href="/principal/students" class="nav-link-custom {% if '/principal/students' in request.url.path %}active{% endif %}">
+                        <i class="bi-people"></i> 🎓 Student Roster
+                    </a>
+                    <a href="/principal/subjects" class="nav-link-custom {% if '/principal/subjects' in request.url.path %}active{% endif %}">
+                        <i class="bi-book"></i> 📖 Subjects & Curriculum
+                    </a>
+                    <a href="/reports" class="nav-link-custom {% if '/reports' in request.url.path %}active{% endif %}">
+                        <i class="bi-file-earmark-pdf"></i> 📑 Academic Reports
+                    </a>
+
+                    <div class="text-xs text-muted uppercase fw-bold my-2">🌐 COMMUNITY & MEDIA</div>
+                    <a href="/resources" class="nav-link-custom {% if request.url.path == '/resources' %}active{% endif %}">
+                        <i class="bi-collection-play"></i> 📚 Resource Library
+                    </a>
+                    <a href="/leaderboard" class="nav-link-custom {% if '/leaderboard' in request.url.path %}active{% endif %}">
+                        <i class="bi-trophy"></i> 🏆 Leaderboard
+                    </a>
+                    <a href="/forum" class="nav-link-custom {% if '/forum' in request.url.path %}active{% endif %}">
+                        <i class="bi-chat-square-text"></i> 💬 Community Forum
+                    </a>
+
+                    <div class="mt-auto pt-3 border-top">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="small text-muted fw-semibold">Role</span>
+                            <span class="badge bg-primary bg-opacity-10 text-primary border border-primary rounded-pill px-2.5 py-1 text-uppercase fw-bold" style="font-size: 0.7rem;">PRINCIPAL</span>
+                        </div>
+                        <a href="/auth/logout" class="btn btn-danger bg-danger bg-opacity-10 text-danger border-0 w-100 rounded-pill py-2 fw-semibold d-flex align-items-center justify-content-center gap-2">
+                            <i class="bi-box-arrow-right"></i> Sign Out
+                        </a>
+                    </div>
+
+                {% elif user.role == 'hod' %}
+                    <!-- HOD Sidebar -->
+                    <div class="text-xs text-muted uppercase fw-bold mb-2">⭐ HOD HUB</div>
+                    <a href="/hod/dashboard" class="nav-link-custom {% if request.url.path == '/hod/dashboard' or request.url.path == '/hod' %}active{% endif %}">
+                        <i class="bi-speedometer2"></i> 📊 HOD Dashboard
+                    </a>
+                    <a href="/hod/subjects" class="nav-link-custom {% if '/hod/subjects' in request.url.path %}active{% endif %}">
+                        <i class="bi-book"></i> 📖 Department Subjects
+                    </a>
+                    <a href="/hod/faculty" class="nav-link-custom {% if '/hod/faculty' in request.url.path %}active{% endif %}">
+                        <i class="bi-person-badge"></i> 👨‍🏫 Department Faculty
+                    </a>
+                    <a href="/hod/students" class="nav-link-custom {% if '/hod/students' in request.url.path %}active{% endif %}">
+                        <i class="bi-people"></i> 🎓 Department Students
+                    </a>
+                    <a href="/teacher/assignments" class="nav-link-custom {% if '/teacher/assignments' in request.url.path %}active{% endif %}">
+                        <i class="bi-journal-check"></i> 📝 Assignments & Grading
+                    </a>
+                    <a href="/teacher/knowledge-videos" class="nav-link-custom {% if '/teacher/knowledge-videos' in request.url.path %}active{% endif %}">
+                        <i class="bi-camera-reels"></i> 🎬 Curate Knowledge Videos
+                    </a>
+                    <a href="/teacher/early-warning" class="nav-link-custom {% if '/teacher/early-warning' in request.url.path %}active{% endif %}">
+                        <i class="bi-exclamation-triangle"></i> ⚠️ Early Warning Alerts
+                    </a>
+                    <a href="/teacher/notifications" class="nav-link-custom {% if '/teacher/notifications' in request.url.path %}active{% endif %}">
+                        <i class="bi-send"></i> 📢 Broadcast Notices
+                    </a>
+                    <a href="/reports" class="nav-link-custom {% if '/reports' in request.url.path %}active{% endif %}">
+                        <i class="bi-file-earmark-pdf"></i> 📑 Academic Reports
+                    </a>
+
+
+                    <div class="text-xs text-muted uppercase fw-bold my-2">🌐 COMMUNITY & MEDIA</div>
+                    <a href="/resources" class="nav-link-custom {% if request.url.path == '/resources' %}active{% endif %}">
+                        <i class="bi-collection-play"></i> 📚 Resource Library
+                    </a>
+                    <a href="/leaderboard" class="nav-link-custom {% if '/leaderboard' in request.url.path %}active{% endif %}">
+                        <i class="bi-trophy"></i> 🏆 Leaderboard
+                    </a>
+                    <a href="/forum" class="nav-link-custom {% if '/forum' in request.url.path %}active{% endif %}">
+                        <i class="bi-chat-square-text"></i> 💬 Community Forum
+                    </a>
+
+                    <div class="mt-auto pt-3 border-top">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="small text-muted fw-semibold">Role</span>
+                            <span class="badge bg-warning bg-opacity-20 text-dark border border-warning rounded-pill px-2.5 py-1 text-uppercase fw-bold" style="font-size: 0.7rem;">⭐ HOD</span>
+                        </div>
+                        <a href="/auth/logout" class="btn btn-danger bg-danger bg-opacity-10 text-danger border-0 w-100 rounded-pill py-2 fw-semibold d-flex align-items-center justify-content-center gap-2">
+                            <i class="bi-box-arrow-right"></i> Sign Out
+                        </a>
+                    </div>
+
+                {% elif user.role == 'teacher' %}
+                    <!-- Teacher Sidebar -->
+                    <div class="text-xs text-muted uppercase fw-bold mb-2">👨‍🏫 TEACHER WORKSPACE</div>
+                    <a href="/teacher/dashboard" class="nav-link-custom {% if '/teacher/dashboard' in request.url.path %}active{% endif %}">
+                        <i class="bi-speedometer2"></i> 📊 Teacher Dashboard
+                    </a>
+                    <a href="/teacher/performance" class="nav-link-custom {% if '/teacher/performance' in request.url.path %}active{% endif %}">
+                        <i class="bi-bar-chart-line"></i> 📈 Student Marks & Attempts
+                    </a>
+                    <a href="/teacher/knowledge-videos" class="nav-link-custom {% if '/teacher/knowledge-videos' in request.url.path %}active{% endif %}">
+                        <i class="bi-camera-reels"></i> 🎬 Curate Knowledge Videos
+                    </a>
+                    <a href="/teacher/assignments" class="nav-link-custom {% if '/teacher/assignments' in request.url.path %}active{% endif %}">
+                        <i class="bi-journal-check"></i> 📝 Assignments & Grading
+                    </a>
+                    <a href="/teacher/resources" class="nav-link-custom {% if '/teacher/resources' in request.url.path %}active{% endif %}">
+                        <i class="bi-briefcase"></i> 📖 Extra Work & Lectures
+                    </a>
+                    <a href="/teacher/early-warning" class="nav-link-custom {% if '/teacher/early-warning' in request.url.path %}active{% endif %}">
+                        <i class="bi-exclamation-triangle"></i> ⚠️ Early Warning Alerts
+                    </a>
+                    <a href="/teacher/notifications" class="nav-link-custom {% if '/teacher/notifications' in request.url.path %}active{% endif %}">
+                        <i class="bi-send"></i> 📢 Send Notifications
+                    </a>
+                    <a href="/reports" class="nav-link-custom {% if '/reports' in request.url.path %}active{% endif %}">
+                        <i class="bi-file-earmark-pdf"></i> 📑 PDF Reports
+                    </a>
+
+                    <div class="text-xs text-muted uppercase fw-bold my-2">🌐 COMMUNITY & MEDIA</div>
+                    <a href="/resources" class="nav-link-custom {% if request.url.path == '/resources' %}active{% endif %}">
+                        <i class="bi-collection-play"></i> 📚 Resource Library
+                    </a>
+                    <a href="/leaderboard" class="nav-link-custom {% if '/leaderboard' in request.url.path %}active{% endif %}">
+                        <i class="bi-trophy"></i> 🏆 Leaderboard
+                    </a>
+                    <a href="/forum" class="nav-link-custom {% if '/forum' in request.url.path %}active{% endif %}">
+                        <i class="bi-chat-square-text"></i> 💬 Community Forum
+                    </a>
+                    <a href="/chat" class="nav-link-custom {% if request.url.path == '/chat' %}active{% endif %}">
+                        <i class="bi-cpu-fill"></i> 🤖 AI Tutor
+                    </a>
+
+                    <div class="mt-auto pt-3 border-top">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="small text-muted fw-semibold">Role</span>
+                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2.5 py-1 text-uppercase fw-bold" style="font-size: 0.7rem;">TEACHER</span>
+                        </div>
+                        <a href="/auth/logout" class="btn btn-danger bg-danger bg-opacity-10 text-danger border-0 w-100 rounded-pill py-2 fw-semibold d-flex align-items-center justify-content-center gap-2">
+                            <i class="bi-box-arrow-right"></i> Sign Out
+                        </a>
+                    </div>
+
+                {% else %}
+                    <!-- Student Sidebar -->
+                    <div class="text-xs text-muted uppercase fw-bold mb-2">📚 CORE LEARNING</div>
+                    <a href="/dashboard" class="nav-link-custom {% if request.url.path == '/dashboard' %}active{% endif %}">
+                        <i class="bi-grid-1x2"></i> 🏠 Dashboard
+                    </a>
+                    <a href="/roadmap/view" class="nav-link-custom {% if '/roadmap' in request.url.path %}active{% endif %}">
+                        <i class="bi-signpost-split"></i> 🗺️ Learning Roadmap
+                    </a>
+                    <a href="/student/assignments" class="nav-link-custom {% if '/student/assignments' in request.url.path %}active{% endif %}">
+                        <i class="bi-journal-check"></i> 📝 Assignments & Grades
+                    </a>
+                    <a href="/student/practicals" class="nav-link-custom {% if '/student/practicals' in request.url.path %}active{% endif %}">
+                        <i class="bi-laptop"></i> 🔬 Practicals & Labs
+                    </a>
+                    <a href="/code-editor" class="nav-link-custom {% if '/code-editor' in request.url.path or '/coding' in request.url.path %}active{% endif %}">
+                        <i class="bi-terminal"></i> 💻 Coding Sandbox
+                    </a>
+                    <a href="/code-reviewer" class="nav-link-custom {% if '/code-reviewer' in request.url.path %}active{% endif %}">
+                        <i class="bi-code-slash"></i> 🔍 AI Code Reviewer
+                    </a>
+                    <a href="/quiz" class="nav-link-custom {% if '/quiz' in request.url.path %}active{% endif %}">
+                        <i class="bi-question-circle"></i> 🧠 Quiz Assessments
+                    </a>
+                    <a href="/student/resources" class="nav-link-custom {% if '/student/resources' in request.url.path %}active{% endif %}">
+                        <i class="bi-briefcase"></i> 🎥 Extra Work & Videos
+                    </a>
+                    <a href="/resources" class="nav-link-custom {% if request.url.path == '/resources' %}active{% endif %}">
+                        <i class="bi-collection-play"></i> 📚 Resource Library
+                    </a>
+                    <a href="/study-planner" class="nav-link-custom {% if '/study-planner' in request.url.path %}active{% endif %}">
+                        <i class="bi-alarm"></i> ⏰ Study Planner & Alarms
+                    </a>
+                    <a href="/notes" class="nav-link-custom {% if '/notes' in request.url.path %}active{% endif %}">
+                        <i class="bi-card-list"></i> 📒 Smart Notes
+                    </a>
+
+                    <div class="text-xs text-muted uppercase fw-bold my-2">🤖 AI & CAREER SUITE</div>
+                    <a href="/chat" class="nav-link-custom {% if request.url.path == '/chat' %}active{% endif %}">
+                        <i class="bi-chat-dots-fill"></i> 💡 AI Coding Tutor
+                    </a>
+                    <a href="/resume/builder" class="nav-link-custom {% if '/resume/builder' in request.url.path %}active{% endif %}">
+                        <i class="bi-file-earmark-person"></i> 📄 ATS Resume Builder
+                    </a>
+                    <a href="/resume/analyzer" class="nav-link-custom {% if '/resume/analyzer' in request.url.path %}active{% endif %}">
+                        <i class="bi-search-heart"></i> 🔎 Resume Analyzer
+                    </a>
+                    <a href="/mock-interview" class="nav-link-custom {% if '/mock-interview' in request.url.path %}active{% endif %}">
+                        <i class="bi-mic"></i> 🎙️ AI Mock Interview
+                    </a>
+                    <a href="/recommendation" class="nav-link-custom {% if '/recommendation' in request.url.path %}active{% endif %}">
+                        <i class="bi-magic"></i> 🎯 Career Guidance
+                    </a>
+
+                    <div class="text-xs text-muted uppercase fw-bold my-2">🏆 COMMUNITY & RANKS</div>
+                    <a href="/leaderboard" class="nav-link-custom {% if '/leaderboard' in request.url.path %}active{% endif %}">
+                        <i class="bi-trophy"></i> 🏆 Leaderboard
+                    </a>
+                    <a href="/projects" class="nav-link-custom {% if '/projects' in request.url.path %}active{% endif %}">
+                        <i class="bi-diagram-3"></i> 🚀 Projects Showcase
+                    </a>
+                    <a href="/forum" class="nav-link-custom {% if '/forum' in request.url.path %}active{% endif %}">
+                        <i class="bi-chat-square-text"></i> 💬 Community Forum
+                    </a>
+                    <a href="/study-groups" class="nav-link-custom {% if '/study-groups' in request.url.path %}active{% endif %}">
+                        <i class="bi-people"></i> 👥 Study Groups
+                    </a>
+                    <div class="mt-auto pt-3 border-top">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <span class="small text-muted fw-semibold">Role</span>
+                            <span class="badge bg-success bg-opacity-10 text-success rounded-pill px-2.5 py-1 text-uppercase fw-bold" style="font-size: 0.7rem;">STUDENT</span>
+                        </div>
+                        <a href="/auth/logout" class="btn btn-danger bg-danger bg-opacity-10 text-danger border-0 w-100 rounded-pill py-2 fw-semibold d-flex align-items-center justify-content-center gap-2">
+                            <i class="bi-box-arrow-right"></i> Sign Out
+                        </a>
+                    </div>
+                {% endif %}
+            {% else %}
+                <a href="/auth/login" class="nav-link-custom">
+                    <i class="bi-box-arrow-in-right"></i> Log In
+                </a>
+                <a href="/auth/register" class="nav-link-custom">
+                    <i class="bi-person-plus"></i> Register
+                </a>
+            {% endif %}
+        </nav>
+    </div>
+
+    <!-- Main Wrapper -->
+    <div class="main-content page-fade-in">
+        <!-- Top bar -->
+        <div class="topbar shadow-sm">
+            <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-outline-secondary d-lg-none" type="button" data-bs-toggle="offcanvas" data-bs-target="#sidebarOffcanvas">
+                    <i class="bi-list"></i>
+                </button>
+                <h4 class="m-0 fw-bold">{% block page_title %}Dashboard{% endblock %}</h4>
+            </div>
+            
+            <div class="d-flex align-items-center gap-3">
+                <!-- Smart Search Trigger -->
+                <button class="btn btn-light rounded-pill px-3 text-secondary border d-none d-md-inline-block" data-bs-toggle="modal" data-bs-target="#smartSearchModal">
+                    <i class="bi-search me-1"></i> 🔍 Smart Search...
+                </button>
+
+                <!-- Language Switcher -->
+                <select class="form-select form-select-sm rounded-pill border" id="languageSelect" style="width: 100px;">
+                    <option value="en">English</option>
+                    <option value="hi">हिंदी</option>
+                    <option value="mr">मराठी</option>
+                </select>
+
+                {% if user %}
+                <!-- Notifications Bell -->
+                <a href="/notifications" class="btn btn-light rounded-circle position-relative" title="Notifications">
+                    🔔
+                    <span id="unreadNotifBadge" class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" style="font-size: 0.65rem;">
+                        0
+                    </span>
+                </a>
+                {% endif %}
+
+                <!-- Theme Preset Dropdown Selector -->
+                <div class="dropdown">
+                    <button class="btn btn-light rounded-pill px-3 py-1.5 border dropdown-toggle d-flex align-items-center gap-1 text-xs fw-semibold shadow-xs" type="button" id="themePresetDropdown" data-bs-toggle="dropdown" aria-expanded="false" title="Choose Color Theme">
+                        🎨 <span id="currentPresetName">Theme</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-lg rounded-3 p-2 border-0" aria-labelledby="themePresetDropdown" style="min-width: 175px;">
+                        <li><button class="dropdown-item rounded-2 small d-flex align-items-center gap-2 py-2" onclick="setThemePreset('emerald')">🌲 Forest Emerald</button></li>
+                        <li><button class="dropdown-item rounded-2 small d-flex align-items-center gap-2 py-2" onclick="setThemePreset('cosmic')">🌌 Cosmic Indigo</button></li>
+                        <li><button class="dropdown-item rounded-2 small d-flex align-items-center gap-2 py-2" onclick="setThemePreset('cyberpunk')">⚡ Cyberpunk Neon</button></li>
+                        <li><button class="dropdown-item rounded-2 small d-flex align-items-center gap-2 py-2" onclick="setThemePreset('sapphire')">🌊 Sapphire Breeze</button></li>
+                    </ul>
+                </div>
+
+                <!-- Theme Toggle Button -->
+                <button class="btn btn-light rounded-circle p-2 d-flex align-items-center justify-content-center" id="themeToggleBtn" title="Toggle Light/Dark Mode" style="width: 38px; height: 38px;">
+                    <i class="bi-sun-fill" id="themeIcon"></i>
+                </button>
+                
+                {% if user %}
+                    <div class="d-flex align-items-center gap-2">
+                        <div class="text-end d-none d-sm-block">
+                            <div class="fw-bold text-dark d-flex align-items-center justify-content-end gap-1">
+                                {{ user.name }}
+                            </div>
+                            <span class="sticker-badge sticker-trophy py-0.5 px-2" style="font-size: 0.65rem;">
+                                🏆 {{ user.rank }} • {{ user.xp }} XP
+                            </span>
+                        </div>
+                        <img src="{{ user.profile_photo or '/static/uploads/avatars/default.png' }}" alt="Avatar" class="avatar-circle border shadow-xs" onerror="this.src='/static/uploads/avatars/default.png'">
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Smart Search Modal -->
+        <div class="modal fade" id="smartSearchModal" tabindex="-1" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg">
+                <div class="modal-content rounded-4 border-0 shadow-lg">
+                    <div class="modal-body p-4">
+                        <div class="input-group mb-3">
+                            <span class="input-group-text bg-body border-end-0 fs-5"><i class="bi bi-search"></i></span>
+                            <input type="text" class="form-control form-control-lg bg-body border-start-0" id="smartSearchInput" placeholder="Global search across Topics, Projects, Quizzes, Challenges, Resources...">
+                        </div>
+                        <div id="smartSearchResults" class="list-group list-group-flush" style="max-height: 350px; overflow-y: auto;">
+                            <p class="text-muted text-center py-4">Type a query to search SkillPath AI platform...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Offcanvas Mobile Sidebar -->
+        <div class="offcanvas offcanvas-start" tabindex="-1" id="sidebarOffcanvas" aria-labelledby="sidebarOffcanvasLabel">
+            <div class="offcanvas-header">
+                <div class="d-flex align-items-center gap-2">
+                    <i class="bi-flower1 fs-4" style="color: #2ECC71;"></i>
+                    <h5 class="offcanvas-title fw-bold m-0" id="sidebarOffcanvasLabel" style="color: #0D5C3A;">SkillPath <span style="color: #2ECC71;">Ai</span></h5>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+            </div>
+            <div class="offcanvas-body">
+                <nav class="nav flex-column">
+                    {% if user %}
+                        <a href="/dashboard" class="nav-link-custom"><i class="bi-grid"></i> 🏠 Dashboard</a>
+                        <a href="/roadmap/view" class="nav-link-custom"><i class="bi-signpost-split"></i> 🗺️ Learning Path</a>
+                        <a href="/study-planner" class="nav-link-custom"><i class="bi-calendar-range"></i> ⏰ AI Study Planner</a>
+                        <a href="/chat" class="nav-link-custom"><i class="bi-cpu-fill"></i> 🤖 AI Doubt Solver</a>
+                        <a href="/code-reviewer" class="nav-link-custom"><i class="bi-code-slash"></i> 🔍 AI Code Reviewer</a>
+                        <a href="/code-editor" class="nav-link-custom"><i class="bi-terminal"></i> 💻 Online Code Editor</a>
+                        <a href="/mock-interview" class="nav-link-custom"><i class="bi-mic"></i> 🎙️ AI Mock Interview</a>
+                        <a href="/resume/builder" class="nav-link-custom"><i class="bi-file-earmark-person"></i> 📄 Resume Builder</a>
+                        <a href="/leaderboard" class="nav-link-custom"><i class="bi-trophy"></i> 🏆 Leaderboard</a>
+                        <a href="/projects" class="nav-link-custom"><i class="bi-diagram-3"></i> 🚀 Projects</a>
+                        <a href="/forum" class="nav-link-custom"><i class="bi-chat-square-text"></i> 💬 Forum</a>
+                        <a href="/study-groups" class="nav-link-custom"><i class="bi-people"></i> 👥 Study Groups</a>
+                        <a href="/notes" class="nav-link-custom"><i class="bi-journal-bookmark"></i> 📒 Notes</a>
+                        <a href="/resources" class="nav-link-custom"><i class="bi-collection"></i> 📚 Resources</a>
+                        <a href="/auth/logout" class="nav-link-custom text-danger mt-3"><i class="bi-box-arrow-right"></i> 🚪 Log Out</a>
+                    {% endif %}
+                </nav>
+            </div>
+        </div>
+
+        <!-- Page Content -->
+        <div class="animated-fade-in">
+            {% block content %}{% endblock %}
+        </div>
+    </div>
+
+
+    <!-- Bootstrap 5 Bundle JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <!-- Theme Toggler Action Script -->
+    <script>
+        const themeToggleBtn = document.getElementById("themeToggleBtn");
+        const themeIcon = document.getElementById("themeIcon");
+
+        const presetNames = {
+            'emerald': '🌲 Emerald',
+            'cosmic': '🌌 Cosmic',
+            'cyberpunk': '⚡ Cyberpunk',
+            'sapphire': '🌊 Sapphire'
+        };
+
+        function updateThemeIcon(theme) {
+            if (theme === "dark") {
+                themeIcon.className = "bi-moon-stars-fill text-warning";
+            } else {
+                themeIcon.className = "bi-sun-fill text-primary";
+            }
+        }
+
+        function setThemePreset(preset) {
+            document.documentElement.setAttribute("data-theme-preset", preset);
+            localStorage.setItem("theme_preset", preset);
+            const presetSpan = document.getElementById("currentPresetName");
+            if (presetSpan) {
+                presetSpan.innerText = presetNames[preset] || 'Theme';
+            }
+        }
+
+        // Initialize preset & theme state
+        const currentTheme = document.documentElement.getAttribute("data-bs-theme") || "dark";
+        const currentPreset = document.documentElement.getAttribute("data-theme-preset") || "emerald";
+        updateThemeIcon(currentTheme);
+        setThemePreset(currentPreset);
+
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener("click", () => {
+                let activeTheme = document.documentElement.getAttribute("data-bs-theme");
+                let nextTheme = activeTheme === "dark" ? "light" : "dark";
+                
+                document.documentElement.setAttribute("data-bs-theme", nextTheme);
+                localStorage.setItem("theme", nextTheme);
+                updateThemeIcon(nextTheme);
+            });
+        }
+    </script>
+
+    {% if user %}
+    <!-- Floating AI Assistant Button -->
+    <button class="btn btn-primary rounded-circle shadow-lg position-fixed d-flex align-items-center justify-content-center" id="aiAssistantBtn" style="bottom: 25px; right: 25px; width: 55px; height: 55px; z-index: 1050; font-size: 1.5rem;" title="Ask Gemini Assistant">
+        <i class="bi-chat-left-dots-fill"></i>
+    </button>
+
+    <!-- AI Assistant Chat Popup -->
+    <div class="card shadow-lg position-fixed d-none" id="aiChatWindow" style="bottom: 90px; right: 25px; width: 330px; height: 420px; z-index: 1050; border-radius: 1rem; border: 1px solid var(--border-color); display: flex; flex-direction: column;">
+        <div class="card-header bg-primary text-white d-flex align-items-center justify-content-between py-2.5" style="border-top-left-radius: 1rem; border-top-right-radius: 1rem;">
+            <h6 class="m-0 fw-bold"><i class="bi-cpu-fill"></i> Gemini AI Assistant</h6>
+            <button type="button" class="btn-close btn-close-white" id="closeAiChatBtn" aria-label="Close"></button>
+        </div>
+        <div class="card-body p-3 overflow-y-auto flex-grow-1" id="aiChatBody" style="background-color: var(--bg-primary); display: flex; flex-direction: column; gap: 10px;">
+            <div class="bg-body p-2 rounded shadow-sm border-start border-3 border-primary text-secondary small align-self-start" style="max-width: 85%;">
+                Hello! I am your <strong>Gemini AI Coach</strong>. Ask me any programming queries (e.g. "What is OOP?", "Write loops in Java")!
+            </div>
+        </div>
+        <div class="card-footer bg-body p-2" style="border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem;">
+            <form id="aiChatForm" class="input-group">
+                <input type="text" class="form-control form-control-sm rounded-pill px-3" id="aiChatInput" required placeholder="Ask a question...">
+                <button class="btn btn-primary btn-sm rounded-circle ms-2" type="submit" style="width: 32px; height: 32px;"><i class="bi-send-fill"></i></button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script Chat Handler -->
+    <script>
+        const aiAssistantBtn = document.getElementById("aiAssistantBtn");
+        const aiChatWindow = document.getElementById("aiChatWindow");
+        const closeAiChatBtn = document.getElementById("closeAiChatBtn");
+        const aiChatForm = document.getElementById("aiChatForm");
+        const aiChatInput = document.getElementById("aiChatInput");
+        const aiChatBody = document.getElementById("aiChatBody");
+
+        aiAssistantBtn.addEventListener("click", () => {
+            aiChatWindow.classList.toggle("d-none");
+            aiChatInput.focus();
+        });
+
+        closeAiChatBtn.addEventListener("click", () => {
+            aiChatWindow.classList.add("d-none");
+        });
+
+        aiChatForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const promptText = aiChatInput.value.trim();
+            if (!promptText) return;
+
+            aiChatInput.value = "";
+
+            // User message bubble
+            const userMsgDiv = document.createElement("div");
+            userMsgDiv.className = "bg-primary text-white p-2.5 rounded shadow-sm align-self-end small";
+            userMsgDiv.style.maxWidth = "85%";
+            userMsgDiv.innerText = promptText;
+            aiChatBody.appendChild(userMsgDiv);
+            aiChatBody.scrollTop = aiChatBody.scrollHeight;
+
+            // Loading bubble
+            const loaderDiv = document.createElement("div");
+            loaderDiv.className = "bg-body p-2 rounded shadow-sm text-secondary small align-self-start";
+            loaderDiv.style.maxWidth = "85%";
+            loaderDiv.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> thinking...`;
+            aiChatBody.appendChild(loaderDiv);
+            aiChatBody.scrollTop = aiChatBody.scrollHeight;
+
+            // Call API with JSON payload
+            fetch("/api/ai/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: promptText })
+            })
+            .then(res => {
+                return res.json().then(data => {
+                    if (!res.ok) {
+                        throw new Error(data.detail || "Assistant query failed.");
+                    }
+                    return data;
+                });
+            })
+            .then(data => {
+                aiChatBody.removeChild(loaderDiv);
+
+                let formatted = data.reply
+                    .replace(/\*\*(.*?)\*\_/g, '<strong>$1</strong>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\n/g, '<br>')
+                    .replace(/```(.*?)\n(.*?)```/gs, '<pre class="bg-dark text-white p-2 rounded small my-2" style="font-family: monospace; white-space: pre-wrap;">$2</pre>');
+
+                const replyDiv = document.createElement("div");
+                replyDiv.className = "bg-body p-2.5 rounded shadow-sm border-start border-3 border-primary text-dark small align-self-start";
+                replyDiv.style.maxWidth = "85%";
+                replyDiv.innerHTML = formatted;
+                aiChatBody.appendChild(replyDiv);
+                aiChatBody.scrollTop = aiChatBody.scrollHeight;
+            })
+            .catch((err) => {
+                if (aiChatBody.contains(loaderDiv)) {
+                    aiChatBody.removeChild(loaderDiv);
+                }
+                const errDiv = document.createElement("div");
+                errDiv.className = "bg-danger bg-opacity-10 text-danger p-2 rounded small align-self-start";
+                errDiv.innerText = `Error: ${err.message || "Assistant query failed."}`;
+                aiChatBody.appendChild(errDiv);
+                aiChatBody.scrollTop = aiChatBody.scrollHeight;
+            });
+        });
+    </script>
+    {% endif %}
+
+    <!-- Smart Search & PWA Service Worker Registration Scripts -->
+    <script>
+        // Ensure Bootstrap modals are attached to body to prevent backdrop dark overlay issues
+        document.addEventListener('show.bs.modal', function (e) {
+            if (e.target.parentNode !== document.body) {
+                document.body.appendChild(e.target);
+            }
+        });
+
+        // Register PWA Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js').catch(err => console.log('SW reg error:', err));
+            });
+        }
+
+        // Smart Search Live Handler
+        const searchInput = document.getElementById('smartSearchInput');
+        const searchResults = document.getElementById('smartSearchResults');
+        if (searchInput && searchResults) {
+            let searchTimeout = null;
+            searchInput.addEventListener('input', function() {
+                clearTimeout(searchTimeout);
+                const q = this.value.trim();
+                if (q.length < 2) {
+                    searchResults.innerHTML = '<p class="text-muted text-center py-4">Type a query to search SkillPath AI platform...</p>';
+                    return;
+                }
+                searchTimeout = setTimeout(() => {
+                    fetch(`/api/search?q=${encodeURIComponent(q)}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.results && data.results.length > 0) {
+                            searchResults.innerHTML = data.results.map(r => `
+                                <a href="${r.link}" class="list-group-item list-group-item-action py-3">
+                                    <div class="d-flex w-100 justify-content-between align-items-center mb-1">
+                                        <strong class="text-primary">${r.title}</strong>
+                                        <span class="badge bg-secondary bg-opacity-10 text-body rounded-pill text-xs">${r.category}</span>
+                                    </div>
+                                    <small class="text-muted d-block">${r.description}</small>
+                                </a>
+                            `).join('');
+                        } else {
+                            searchResults.innerHTML = '<p class="text-muted text-center py-4">No matching results found.</p>';
+                        }
+                    });
+                }, 300);
+            });
+        }
+        // Live Unread Notifications Badge Updater
+        function updateUnreadNotifBadge() {
+            const badge = document.getElementById('unreadNotifBadge');
+            if (!badge) return;
+            fetch('/notifications/api/unread')
+            .then(res => res.json())
+            .then(data => {
+                if (data.unread_count && data.unread_count > 0) {
+                    badge.innerText = data.unread_count > 99 ? '99+' : data.unread_count;
+                    badge.classList.remove('d-none');
+                } else {
+                    badge.classList.add('d-none');
+                }
+            })
+            .catch(() => {});
+        }
+        document.addEventListener('DOMContentLoaded', updateUnreadNotifBadge);
+        setInterval(updateUnreadNotifBadge, 15000);
+    </script>
+
+    {% block scripts %}{% endblock %}
+</body>
+</html>
+

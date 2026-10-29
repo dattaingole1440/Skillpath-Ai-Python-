@@ -1,0 +1,515 @@
+{% extends "base.html" %}
+
+{% block title %}Real-World ATS Resume Builder - SkillPath AI{% endblock %}
+{% block page_title %}Real-World ATS Resume Builder{% endblock %}
+
+{% block extra_head %}
+<style>
+    /* Resume Paper Styling */
+    .resume-sheet {
+        background: #FFFFFF;
+        color: #1A1A1A;
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+        border: 1px solid #E2E8F0;
+        border-radius: 8px;
+        padding: 38px 42px;
+        min-height: 780px;
+        transition: all 0.25s ease;
+    }
+
+    [data-bs-theme="dark"] .resume-sheet {
+        background: #181716;
+        color: #F3F1EC;
+        border-color: #332F2B;
+    }
+
+    .resume-header-name {
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        color: #0F172A;
+    }
+
+    [data-bs-theme="dark"] .resume-header-name {
+        color: #F8FAFC;
+    }
+
+    .resume-header-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #D97706;
+        margin-top: 2px;
+    }
+
+    .resume-contacts {
+        font-size: 12.5px;
+        color: #64748B;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
+        margin-top: 8px;
+    }
+
+    [data-bs-theme="dark"] .resume-contacts {
+        color: #94A3B8;
+    }
+
+    .resume-section-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #D97706;
+        border-bottom: 2px solid rgba(217, 119, 6, 0.25);
+        padding-bottom: 4px;
+        margin-top: 20px;
+        margin-bottom: 12px;
+    }
+
+    .resume-summary-text {
+        font-size: 13px;
+        line-height: 1.6;
+        color: #334155;
+    }
+
+    [data-bs-theme="dark"] .resume-summary-text {
+        color: #CBD5E1;
+    }
+
+    .resume-skill-cat {
+        font-size: 13px;
+        margin-bottom: 6px;
+    }
+
+    .resume-skill-label {
+        font-weight: 700;
+        color: #1E293B;
+        min-width: 175px;
+        display: inline-block;
+    }
+
+    [data-bs-theme="dark"] .resume-skill-label {
+        color: #F1F5F9;
+    }
+
+    .resume-skill-pill {
+        display: inline-block;
+        background: rgba(217, 119, 6, 0.1);
+        color: #B45309;
+        font-size: 11.5px;
+        font-weight: 600;
+        padding: 2px 8px;
+        border-radius: 6px;
+        margin: 2px 3px 2px 0;
+        border: 1px solid rgba(217, 119, 6, 0.2);
+    }
+
+    [data-bs-theme="dark"] .resume-skill-pill {
+        background: rgba(217, 119, 6, 0.18);
+        color: #FBBF24;
+        border-color: rgba(217, 119, 6, 0.35);
+    }
+
+    .resume-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        margin-bottom: 2px;
+    }
+
+    .resume-item-title {
+        font-size: 13.5px;
+        font-weight: 700;
+        color: #0F172A;
+    }
+
+    [data-bs-theme="dark"] .resume-item-title {
+        color: #F8FAFC;
+    }
+
+    .resume-item-role {
+        font-size: 12.5px;
+        font-weight: 600;
+        color: #475569;
+    }
+
+    [data-bs-theme="dark"] .resume-item-role {
+        color: #94A3B8;
+    }
+
+    .resume-item-date {
+        font-size: 12px;
+        font-weight: 600;
+        color: #64748B;
+    }
+
+    .resume-bullets {
+        margin: 6px 0 14px 18px;
+        padding: 0;
+        font-size: 12.5px;
+        line-height: 1.55;
+        color: #334155;
+    }
+
+    [data-bs-theme="dark"] .resume-bullets {
+        color: #CBD5E1;
+    }
+
+    .resume-bullets li {
+        margin-bottom: 4px;
+    }
+
+    /* Print & Export Formatting */
+    @media print {
+        body * {
+            visibility: hidden;
+        }
+        .resume-sheet, .resume-sheet * {
+            visibility: visible;
+        }
+        .resume-sheet {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            border: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            background: #FFFFFF !important;
+            color: #000000 !important;
+        }
+        .sidebar, .topbar, .btn, .nav, .card-header, #resumeFormColumn {
+            display: none !important;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+        <div>
+            <h3 class="fw-bold m-0 d-flex align-items-center gap-2">
+                <i class="bi bi-file-earmark-person-fill text-warning"></i> Real-World ATS Resume Generator
+            </h3>
+            <p class="text-secondary small mb-0">Format an authentic, recruiter-grade single-page resume with high-impact bullets, skills taxonomy, and instant print/PDF export.</p>
+        </div>
+        <div class="d-flex gap-2">
+            <button class="btn btn-outline-secondary rounded-pill px-3 fw-semibold" onclick="window.print()">
+                <i class="bi bi-printer me-1"></i> Print / PDF
+            </button>
+            <button class="btn btn-primary rounded-pill px-4 fw-bold shadow-sm" id="generateResumeBtn">
+                <i class="bi bi-magic me-1"></i> Generate ATS Resume
+            </button>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Editor Input Form Column -->
+        <div class="col-xl-5 col-lg-5" id="resumeFormColumn">
+            <div class="card border-0 rounded-4 shadow-sm custom-card p-4">
+                <h5 class="fw-bold mb-3 d-flex align-items-center gap-2 text-primary">
+                    <i class="bi bi-sliders"></i> Resume Information
+                </h5>
+
+                <form id="resumeForm">
+                    <!-- Personal Info -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Full Name</label>
+                        <input type="text" class="form-control rounded-3" id="inp_name" name="personal_name" value="{{ user.name }}" required>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Email Address</label>
+                            <input type="email" class="form-control rounded-3" id="inp_email" name="email" value="{{ user.email }}" required>
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">Phone Number</label>
+                            <input type="text" class="form-control rounded-3" id="inp_phone" name="phone" value="{{ user.phone_number or '+1 (555) 019-2834' }}">
+                        </div>
+                    </div>
+
+                    <div class="row g-2 mb-3">
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">LinkedIn URL / Handle</label>
+                            <input type="text" class="form-control rounded-3" id="inp_linkedin" name="linkedin" placeholder="linkedin.com/in/username">
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label small fw-bold">GitHub URL / Handle</label>
+                            <input type="text" class="form-control rounded-3" id="inp_github" name="github" placeholder="github.com/username">
+                        </div>
+                    </div>
+
+                    <!-- Skills -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Technical Skills (Comma-separated)</label>
+                        <textarea class="form-control rounded-3" id="inp_skills" name="skills_csv" rows="2" placeholder="Python, Java, C++, FastAPI, MySQL, PostgreSQL, Docker, Git, REST APIs, HTML5, CSS3, JavaScript"></textarea>
+                        <div class="form-text text-muted text-xs">Categorized automatically into Languages, Frameworks, Tools, and Databases.</div>
+                    </div>
+
+                    <!-- Projects -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Projects (Title - Description, 1 per line)</label>
+                        <textarea class="form-control rounded-3" id="inp_projects" name="projects_text" rows="3" placeholder="SkillPath AI - Adaptive Learning & Assessment Platform with Python & FastAPI&#10;E-Commerce Backend REST API - Microservice architecture with MySQL and Docker"></textarea>
+                    </div>
+
+                    <!-- Certificates & Achievements -->
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Certificates (1 per line)</label>
+                        <textarea class="form-control rounded-3" id="inp_certs" name="certificates_text" rows="2" placeholder="Certified Python Developer - SkillPath AI Academy&#10;SQL & Relational Database Mastery Certification"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label small fw-bold">Honors & Achievements (1 per line)</label>
+                        <textarea class="form-control rounded-3" id="inp_achieve" name="achievements_text" rows="2" placeholder="Maintained 88%+ quiz and coding average across all advanced modules&#10;Won 1st prize at Inter-College Hackathon 2025"></textarea>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Live Document Preview Column -->
+        <div class="col-xl-7 col-lg-7">
+            <!-- Template Bar -->
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <div class="d-flex align-items-center gap-2">
+                    <span class="small fw-bold text-secondary">Layout Theme:</span>
+                    <select class="form-select form-select-sm rounded-pill" id="templatePicker" style="width: 170px;" onchange="changeResumeLayout(this.value)">
+                        <option value="modern" selected>Modern Tech</option>
+                        <option value="classic">Classic Executive</option>
+                        <option value="minimal">Clean Minimalist</option>
+                    </select>
+                </div>
+                <div class="badge bg-success-subtle text-success px-3 py-2 rounded-pill fw-semibold">
+                    <i class="bi bi-shield-check me-1"></i> ATS Compliant
+                </div>
+            </div>
+
+            <!-- Resume Document Paper -->
+            <div class="resume-sheet" id="resumeSheet">
+                <!-- Header -->
+                <div class="border-bottom pb-3 mb-2" id="resHeader">
+                    <div class="resume-header-name" id="resName">{{ user.name or 'Jane Doe' }}</div>
+                    <div class="resume-header-title" id="resTitle">Software Engineer / Full-Stack Developer</div>
+                    <div class="resume-contacts" id="resContacts">
+                        <span><i class="bi bi-envelope me-1"></i> <span id="resEmail">{{ user.email }}</span></span>
+                        <span><i class="bi bi-telephone me-1"></i> <span id="resPhone">{{ user.phone_number or '+1 (555) 019-2834' }}</span></span>
+                        <span><i class="bi bi-linkedin me-1"></i> <span id="resLinkedin">linkedin.com/in/{{ user.name.lower().replace(' ', '-') if user.name else 'developer' }}</span></span>
+                        <span><i class="bi bi-github me-1"></i> <span id="resGithub">github.com/{{ user.name.lower().replace(' ', '') if user.name else 'developer' }}</span></span>
+                    </div>
+                </div>
+
+                <!-- Professional Summary -->
+                <div>
+                    <div class="resume-section-title">Professional Summary</div>
+                    <p class="resume-summary-text mb-0" id="resSummary">
+                        Dedicated and analytical Software Developer with expertise in designing modular REST APIs, full-stack web applications, and database architectures. Proven ability in writing clean, well-tested code, optimizing backend queries, and deploying reliable cloud microservices.
+                    </p>
+                </div>
+
+                <!-- Technical Skills -->
+                <div>
+                    <div class="resume-section-title">Technical Skills</div>
+                    <div id="resSkillsContainer">
+                        <div class="resume-skill-cat">
+                            <span class="resume-skill-label">Languages:</span>
+                            <span id="resLangPills">
+                                <span class="resume-skill-pill">Python</span>
+                                <span class="resume-skill-pill">Java</span>
+                                <span class="resume-skill-pill">C++</span>
+                                <span class="resume-skill-pill">SQL</span>
+                                <span class="resume-skill-pill">JavaScript</span>
+                            </span>
+                        </div>
+                        <div class="resume-skill-cat">
+                            <span class="resume-skill-label">Frameworks & Libs:</span>
+                            <span id="resFwPills">
+                                <span class="resume-skill-pill">FastAPI</span>
+                                <span class="resume-skill-pill">React</span>
+                                <span class="resume-skill-pill">SQLAlchemy</span>
+                                <span class="resume-skill-pill">Bootstrap 5</span>
+                            </span>
+                        </div>
+                        <div class="resume-skill-cat">
+                            <span class="resume-skill-label">Developer Tools:</span>
+                            <span id="resToolPills">
+                                <span class="resume-skill-pill">Git / GitHub</span>
+                                <span class="resume-skill-pill">Docker</span>
+                                <span class="resume-skill-pill">VS Code</span>
+                                <span class="resume-skill-pill">Postman</span>
+                            </span>
+                        </div>
+                        <div class="resume-skill-cat">
+                            <span class="resume-skill-label">Databases & Cloud:</span>
+                            <span id="resDbPills">
+                                <span class="resume-skill-pill">MySQL</span>
+                                <span class="resume-skill-pill">SQLite</span>
+                                <span class="resume-skill-pill">PostgreSQL</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projects & Experience -->
+                <div>
+                    <div class="resume-section-title">Key Projects & Experience</div>
+                    <div id="resProjectsContainer">
+                        <div class="mb-2">
+                            <div class="resume-item-header">
+                                <span class="resume-item-title">SkillPath AI — Adaptive Learning & Roadmap Engine</span>
+                                <span class="resume-item-date">2024 – Present</span>
+                            </div>
+                            <div class="resume-item-role">Lead Full-Stack Developer | Python, FastAPI, SQLite, Jinja2</div>
+                            <ul class="resume-bullets">
+                                <li>Engineered an adaptive learning platform with automated code analysis, algorithmic quizzes, and JWT auth.</li>
+                                <li>Built real-time broadcast and notification pipelines serving students, teachers, and college administrators.</li>
+                                <li>Optimized backend queries and cached learning roadmap state, reducing average page load time by 40%.</li>
+                            </ul>
+                        </div>
+                        <div class="mb-2">
+                            <div class="resume-item-header">
+                                <span class="resume-item-title">E-Commerce Microservices REST API</span>
+                                <span class="resume-item-date">2024</span>
+                            </div>
+                            <div class="resume-item-role">Backend Engineer | Python, MySQL, Docker, Redis</div>
+                            <ul class="resume-bullets">
+                                <li>Designed high-throughput payment and inventory endpoints handling concurrent transactions with ACID compliance.</li>
+                                <li>Implemented Docker containerization and automated CI/CD unit testing pipelines with 90%+ code coverage.</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Education -->
+                <div>
+                    <div class="resume-section-title">Education</div>
+                    <div id="resEducationContainer">
+                        <div class="resume-item-header">
+                            <span class="resume-item-title">Bachelor of Technology in Computer Science & Engineering</span>
+                            <span class="resume-item-date">2022 – 2026</span>
+                        </div>
+                        <div class="resume-item-role">Institute of Technology & Science • GPA: 3.85 / 4.00 (Distinction)</div>
+                    </div>
+                </div>
+
+                <!-- Certifications & Awards -->
+                <div>
+                    <div class="resume-section-title">Certifications & Honors</div>
+                    <ul class="resume-bullets" id="resCertAwards">
+                        <li><strong>Certified Python Developer</strong> — SkillPath AI Academy (2025)</li>
+                        <li><strong>Algorithmic Problem Solving Mastery</strong> — Verified Achievement with 85%+ Cumulative Score</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.getElementById('generateResumeBtn').addEventListener('click', function() {
+        const btn = document.getElementById('generateResumeBtn');
+        const originalText = btn.innerHTML;
+        btn.disabled = true;
+        btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Formatting Resume...';
+
+        const form = document.getElementById('resumeForm');
+        const formData = new FormData(form);
+
+        fetch('/resume/generate', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+
+            if (data.status === 'success' && data.resume_data) {
+                const rd = data.resume_data;
+                const pi = rd.personal_info;
+
+                // Update Header
+                document.getElementById('resName').innerText = pi.name || 'Candidate Name';
+                document.getElementById('resTitle').innerText = pi.title || 'Software Engineer';
+                document.getElementById('resEmail').innerText = pi.email || '';
+                document.getElementById('resPhone').innerText = pi.phone || '';
+                document.getElementById('resLinkedin').innerText = pi.linkedin || '';
+                document.getElementById('resGithub').innerText = pi.github || '';
+
+                // Update Summary
+                document.getElementById('resSummary').innerText = rd.summary;
+
+                // Update Skills
+                if (rd.skills) {
+                    const makePills = list => (list || []).map(s => `<span class="resume-skill-pill">${s}</span>`).join('');
+                    document.getElementById('resLangPills').innerHTML = makePills(rd.skills['Programming Languages']);
+                    document.getElementById('resFwPills').innerHTML = makePills(rd.skills['Frameworks & Libraries']);
+                    document.getElementById('resToolPills').innerHTML = makePills(rd.skills['Developer Tools']);
+                    document.getElementById('resDbPills').innerHTML = makePills(rd.skills['Databases & Cloud']);
+                }
+
+                // Update Projects
+                if (rd.projects && rd.projects.length > 0) {
+                    const projHtml = rd.projects.map(p => `
+                        <div class="mb-2">
+                            <div class="resume-item-header">
+                                <span class="resume-item-title">${p.title}</span>
+                                <span class="resume-item-date">${p.date}</span>
+                            </div>
+                            <div class="resume-item-role">${p.role} | ${p.tech_stack}</div>
+                            <ul class="resume-bullets">
+                                ${(p.bullets || []).map(b => `<li>${b}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `).join('');
+                    document.getElementById('resProjectsContainer').innerHTML = projHtml;
+                }
+
+                // Update Certs & Awards
+                let certHtml = '';
+                if (rd.certificates) {
+                    certHtml += rd.certificates.map(c => `<li><strong>${c.name}</strong> — ${c.issuer} (${c.year})</li>`).join('');
+                }
+                if (rd.achievements) {
+                    certHtml += rd.achievements.map(a => `<li>${a}</li>`).join('');
+                }
+                if (certHtml) {
+                    document.getElementById('resCertAwards').innerHTML = certHtml;
+                }
+
+                // Highlight sheet animation
+                const sheet = document.getElementById('resumeSheet');
+                sheet.style.transform = 'scale(0.99)';
+                setTimeout(() => { sheet.style.transform = 'scale(1)'; }, 200);
+
+            } else {
+                alert(data.detail || 'Resume generation failed.');
+            }
+        })
+        .catch(err => {
+            btn.disabled = false;
+            btn.innerHTML = originalText;
+            alert('Error formatting resume: ' + err.message);
+        });
+    });
+
+    function changeResumeLayout(theme) {
+        const sheet = document.getElementById('resumeSheet');
+        if (theme === 'classic') {
+            sheet.style.fontFamily = "'Times New Roman', Times, serif";
+            sheet.querySelectorAll('.resume-section-title').forEach(el => el.style.borderBottom = '1px solid #1A1A1A');
+        } else if (theme === 'minimal') {
+            sheet.style.fontFamily = "'Inter', sans-serif";
+            sheet.querySelectorAll('.resume-section-title').forEach(el => el.style.borderBottom = 'none');
+        } else {
+            sheet.style.fontFamily = "'Plus Jakarta Sans', sans-serif";
+            sheet.querySelectorAll('.resume-section-title').forEach(el => el.style.borderBottom = '2px solid rgba(217, 119, 6, 0.25)');
+        }
+    }
+</script>
+{% endblock %}
+

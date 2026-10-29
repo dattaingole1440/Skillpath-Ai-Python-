@@ -1,0 +1,373 @@
+{% extends "base.html" %}
+
+{% block title %}AI Coding Tutor - SkillPath AI{% endblock %}
+{% block page_title %}🤖 AI Coding Tutor{% endblock %}
+
+{% block head %}
+<style>
+    .chat-container {
+        display: flex;
+        flex-direction: column;
+        height: calc(100vh - 160px);
+        background-color: var(--bg-secondary);
+        border: 1px solid var(--border-color);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+    }
+    
+    .chat-header {
+        background-color: var(--bg-secondary);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .chat-messages {
+        flex: 1;
+        overflow-y: auto;
+        padding: 1.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.25rem;
+        background-image: radial-gradient(var(--border-color) 0.8px, transparent 0.8px);
+        background-size: 16px 16px;
+        background-color: var(--bg-primary);
+    }
+    
+    .message-bubble {
+        max-width: 80%;
+        padding: 1rem 1.25rem;
+        border-radius: 1.25rem;
+        box-shadow: var(--shadow-sm);
+        position: relative;
+        animation: bubbleFadeIn 0.3s ease-out forwards;
+    }
+    
+    @keyframes bubbleFadeIn {
+        from { opacity: 0; transform: translateY(15px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .message-user {
+        align-self: flex-end;
+        background: linear-gradient(135deg, var(--accent-blue) 0%, #1d4ed8 100%);
+        color: #FFFFFF;
+        border-bottom-right-radius: 0.25rem;
+    }
+    
+    .message-tutor {
+        align-self: flex-start;
+        background-color: var(--bg-secondary);
+        color: var(--text-primary);
+        border: 1px solid var(--border-color);
+        border-bottom-left-radius: 0.25rem;
+    }
+    
+    .chat-input-area {
+        background-color: var(--bg-secondary);
+        border-top: 1px solid var(--border-color);
+        padding: 1.25rem 1.5rem;
+    }
+    
+    .suggestion-card {
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 1px solid var(--border-color);
+        border-radius: 0.75rem;
+        background-color: var(--bg-secondary);
+    }
+    
+    .suggestion-card:hover {
+        border-color: var(--accent-blue);
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-sm);
+        background-color: rgba(13, 110, 253, 0.04);
+    }
+    
+    .code-block-wrapper {
+        border: 1px solid var(--border-color);
+    }
+    
+    .code-block-header {
+        font-size: 0.75rem;
+        font-family: monospace;
+    }
+    
+    .text-xs {
+        font-size: 0.75rem;
+    }
+    
+    .font-monospace {
+        font-family: var(--bs-font-monospace);
+    }
+
+    .tutor-status-badge {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background-color: #198754;
+        display: inline-block;
+        margin-right: 6px;
+        animation: pulseGreen 2s infinite;
+    }
+
+    @keyframes pulseGreen {
+        0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(25, 135, 84, 0.7); }
+        70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(25, 135, 84, 0); }
+        100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(25, 135, 84, 0); }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+    <!-- Suggestion Panel (Visible only when chat is empty) -->
+    <div id="suggestionsPanel" class="row mb-4">
+        <div class="col-12">
+            <div class="card border-0 shadow-sm p-4 rounded-4" style="background: linear-gradient(135deg, rgba(13,110,253,0.02) 0%, rgba(30,41,59,0.02) 100%);">
+                <div class="text-center mb-4">
+                    <h3 class="fw-bold"><i class="bi-cpu text-primary"></i> Learn Coding with AI</h3>
+                    <p class="text-muted">Ask questions about Python, Java, C++, frontend tools, algorithms, SQL, or career paths.</p>
+                </div>
+                <div class="row g-3">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="suggestion-card p-3 h-100" onclick="sendSuggestion('Explain variables and pointers in C++ with examples')">
+                            <h6 class="fw-bold text-primary mb-2"><i class="bi-code-slash"></i> C++ Pointers</h6>
+                            <p class="text-muted small m-0">"Explain variables and pointers in C++ with examples"</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="suggestion-card p-3 h-100" onclick="sendSuggestion('Write a quick Python script to call a FastAPI endpoint')">
+                            <h6 class="fw-bold text-success mb-2"><i class="bi-server"></i> FastAPI Script</h6>
+                            <p class="text-muted small m-0">"Write a quick Python script to call a FastAPI endpoint"</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="suggestion-card p-3 h-100" onclick="sendSuggestion('How does Object-Oriented Programming work in Java?')">
+                            <h6 class="fw-bold text-warning mb-2"><i class="bi-boxes"></i> Java OOP</h6>
+                            <p class="text-muted small m-0">"How does Object-Oriented Programming work in Java?"</p>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-lg-3">
+                        <div class="suggestion-card p-3 h-100" onclick="sendSuggestion('Explain Binary Search algorithm and its complexity')">
+                            <h6 class="fw-bold text-danger mb-2"><i class="bi-list-ol"></i> Algorithms</h6>
+                            <p class="text-muted small m-0">"Explain Binary Search algorithm and its complexity"</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Interface Container -->
+    <div class="chat-container">
+        <!-- Chat Header -->
+        <div class="chat-header">
+            <div class="d-flex align-items-center">
+                <span class="tutor-status-badge"></span>
+                <div>
+                    <h5 class="fw-bold m-0">🤖 Gemini Programming Coach</h5>
+                    <small class="text-muted">Online &bull; Google Gemini API Active</small>
+                </div>
+            </div>
+            <div>
+                <button type="button" class="btn btn-outline-danger btn-sm rounded-pill px-3" id="clearChatBtn" title="Reset Chat History">
+                    🗑️ Reset Chat
+                </button>
+            </div>
+        </div>
+
+        <!-- Scrollable Messages Window -->
+        <div class="chat-messages" id="chatMessages">
+            <div class="message-bubble message-tutor">
+                👋 Hi {{ user.name }}! I am your <strong>Intelligent Programming Tutor</strong> powered by Google Gemini. 
+                Ask me questions about Python, Java, C++, Web Development, Databases, Algorithms, Career prep, or interview guidelines. How can I help you learn today?
+            </div>
+        </div>
+
+        <!-- Chat Input Form -->
+        <div class="chat-input-area">
+            <form id="chatForm" class="d-flex align-items-center gap-2">
+                <input type="text" class="form-control form-control-lg rounded-pill px-4" id="chatInput" placeholder="Ask your programming question here..." required autocomplete="off">
+                <button type="submit" class="btn btn-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;" id="sendBtn">
+                    <i class="bi-send-fill fs-5"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+    const chatForm = document.getElementById("chatForm");
+    const chatInput = document.getElementById("chatInput");
+    const chatMessages = document.getElementById("chatMessages");
+    const clearChatBtn = document.getElementById("clearChatBtn");
+    const suggestionsPanel = document.getElementById("suggestionsPanel");
+
+    // Copy to Clipboard Utility
+    function copyCode(button) {
+        const pre = button.closest('.code-block-wrapper').querySelector('pre');
+        navigator.clipboard.writeText(pre.innerText).then(() => {
+            const icon = button.querySelector('i');
+            button.innerHTML = '<i class="bi-check-lg"></i> Copied!';
+            button.classList.replace('text-secondary', 'text-success');
+            setTimeout(() => {
+                button.innerHTML = '<i class="bi-copy"></i> Copy';
+                button.classList.replace('text-success', 'text-secondary');
+            }, 2000);
+        });
+    }
+
+    // Custom Markdown Formatting Parser
+    function formatMarkdown(text) {
+        let escaped = text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+
+        // Headers formatting (### and ####)
+        escaped = escaped.replace(/^####\s+(.*?)$/gm, '<h6 class="fw-bold text-dark mt-2 mb-1">$1</h6>');
+        escaped = escaped.replace(/^###\s+(.*?)$/gm, '<h5 class="fw-bold text-primary mt-2 mb-1">$1</h5>');
+        escaped = escaped.replace(/^##\s+(.*?)$/gm, '<h4 class="fw-bold text-primary mt-3 mb-2">$1</h4>');
+
+        // Code blocks: ```lang\ncode\n```
+        escaped = escaped.replace(/```(\w*)\n([\s\S]*?)```/g, function(match, lang, code) {
+            return `<div class="code-block-wrapper my-3 rounded-3 overflow-hidden border shadow-sm">
+                <div class="code-block-header d-flex justify-content-between align-items-center bg-dark text-secondary px-3 py-2 text-xs font-monospace">
+                    <span class="text-uppercase fw-bold text-light">${lang || 'code'}</span>
+                    <button class="btn btn-link btn-xs text-secondary text-decoration-none p-0" onclick="copyCode(this)"><i class="bi-copy"></i> Copy</button>
+                </div>
+                <pre class="bg-dark text-white p-3 m-0 text-sm font-monospace" style="white-space: pre-wrap; overflow-x: auto;"><code>${code.trim()}</code></pre>
+            </div>`;
+        });
+
+        // Inline code: `code`
+        escaped = escaped.replace(/`([^`]+)`/g, '<code class="bg-body-secondary px-1.5 py-0.5 rounded text-danger small font-monospace">$1</code>');
+
+        // Bold: **text**
+        escaped = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+        // Bullet lists: - item or * item
+        escaped = escaped.replace(/^\s*[-*]\s+(.+)$/gm, '<li>$1</li>');
+        // Wrap consecutive list items in <ul>
+        escaped = escaped.replace(/(<li>[\s\S]*?<\/li>)/g, '<ul class="ps-3 my-2">$1</ul>');
+        escaped = escaped.replace(/<\/ul>\s*<ul class="ps-3 my-2">/g, '');
+
+        // Line breaks
+        escaped = escaped.replace(/\n/g, '<br>');
+
+        return escaped;
+    }
+
+    // Append Message to UI
+    function appendMessage(role, text) {
+        const bubble = document.createElement("div");
+        bubble.className = `message-bubble ${role === 'user' ? 'message-user' : 'message-tutor'}`;
+        
+        if (role === 'user') {
+            bubble.innerText = text;
+        } else {
+            bubble.innerHTML = formatMarkdown(text);
+        }
+        
+        chatMessages.appendChild(bubble);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Send Message Trigger
+    async function sendMessage(messageText) {
+        if (!messageText.trim()) return;
+
+        // Hide suggestions panel once the conversation starts
+        suggestionsPanel.style.display = "none";
+
+        // Append user message
+        appendMessage('user', messageText);
+        chatInput.value = "";
+        
+        // Show Loading Animation
+        const loader = document.createElement("div");
+        loader.className = "message-bubble message-tutor d-flex align-items-center gap-2";
+        loader.id = "tutorLoader";
+        loader.innerHTML = `
+            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+            <span>Thinking...</span>
+        `;
+        chatMessages.appendChild(loader);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+
+        try {
+            const response = await fetch("/api/ai/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: messageText })
+            });
+
+            const data = await response.json();
+            
+            // Remove Loader
+            const loaderEl = document.getElementById("tutorLoader");
+            if (loaderEl) chatMessages.removeChild(loaderEl);
+
+            if (!response.ok) {
+                // Return actual error message as requested
+                appendMessage('tutor', `⚠️ **Error (${response.status})**: ${data.detail || 'An unknown error occurred.'}`);
+            } else {
+                appendMessage('tutor', data.reply);
+            }
+        } catch (error) {
+            // Remove Loader
+            const loaderEl = document.getElementById("tutorLoader");
+            if (loaderEl) chatMessages.removeChild(loaderEl);
+            
+            appendMessage('tutor', `⚠️ **Connection Error**: Failed to query Gemini API. Detail: ${error.message}`);
+        }
+    }
+
+    // Suggestion Clicks
+    function sendSuggestion(text) {
+        sendMessage(text);
+    }
+
+    // Submit Form
+    chatForm.addEventListener("submit", function(e) {
+        e.preventDefault();
+        const msg = chatInput.value.trim();
+        if (msg) {
+            sendMessage(msg);
+        }
+    });
+
+    // Reset Chat Trigger
+    clearChatBtn.addEventListener("click", async function() {
+        if (confirm("Are you sure you want to clear your conversation history?")) {
+            try {
+                const response = await fetch("/api/ai/chat/reset", {
+                    method: "POST"
+                });
+                
+                if (response.ok) {
+                    // Reset UI State
+                    chatMessages.innerHTML = `
+                        <div class="message-bubble message-tutor">
+                            Conversation history reset. Ask me a programming question to get started!
+                        </div>
+                    `;
+                    suggestionsPanel.style.display = "flex";
+                } else {
+                    const data = await response.json();
+                    alert(`Failed to reset chat history: ${data.detail || 'Unknown error'}`);
+                }
+            } catch (err) {
+                alert(`Error resetting chat: ${err.message}`);
+            }
+        }
+    });
+</script>
+{% endblock %}
+

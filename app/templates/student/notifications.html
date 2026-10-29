@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block page_title %}Notifications & Announcements{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <h3 class="fw-bold mb-1"><i class="bi-bell text-primary me-2"></i>Notifications & Broadcasts</h3>
+        <p class="text-muted mb-0">Messages, Greetings, Assignment Reminders, and Exam Alerts sent by your teachers.</p>
+    </div>
+
+    <div class="card card-custom shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="list-group list-group-flush">
+                {% for n in notifications %}
+                <div class="list-group-item p-4 border-bottom">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div class="d-flex align-items-center gap-2">
+                            {% if n.type == 'congratulations' or n.type == 'greeting' %}
+                                <span class="badge bg-success-subtle text-success text-uppercase"><i class="bi-gift me-1"></i>{{ n.type }}</span>
+                            {% elif n.type == 'warning' %}
+                                <span class="badge bg-danger-subtle text-danger text-uppercase"><i class="bi-exclamation-triangle me-1"></i>{{ n.type }}</span>
+                            {% else %}
+                                <span class="badge bg-primary-subtle text-primary text-uppercase"><i class="bi-info-circle me-1"></i>{{ n.type }}</span>
+                            {% endif %}
+                            <h6 class="fw-bold mb-0 ms-2">{{ n.title }}</h6>
+                        </div>
+                        <span class="small text-muted">{{ n.sent_at.strftime('%Y-%m-%d %H:%M') }}</span>
+                    </div>
+                    <p class="text-dark mb-1 opacity-90">{{ n.message }}</p>
+                    <div class="small text-muted"><i class="bi-person me-1"></i>Sent by: {{ n.sender_teacher.name if n.sender_teacher else 'Instructor' }}</div>
+                </div>
+                {% else %}
+                <div class="p-5 text-center text-muted">
+                    <i class="bi-bell-slash fs-1 mb-2"></i>
+                    <p class="mb-0">No new notifications or announcements.</p>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

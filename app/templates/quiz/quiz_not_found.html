@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Quiz Not Found — SkillPath AI{% endblock %}
+{% block page_title %}Quiz Checkpoint{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 text-center">
+            <div class="card border-0 rounded-4 shadow-sm p-5 bg-white">
+                <div class="display-1 text-warning mb-3">
+                    <i class="bi-compass"></i>
+                </div>
+                <h3 class="fw-bold text-dark">Quiz Checkpoint Not Located</h3>
+                <p class="text-muted mt-2 mb-4">
+                    The requested quiz checkpoint (ID #{{ requested_id }}) could not be found or has been updated in the active curriculum. Let's get you back on track!
+                </p>
+                <div class="d-flex justify-content-center gap-3 flex-wrap">
+                    <a href="/quiz" class="btn btn-success rounded-pill px-4 py-2 fw-semibold">
+                        <i class="bi-collection-play-fill me-1"></i> Browse All Quizzes
+                    </a>
+                    <a href="/roadmap/view" class="btn btn-outline-primary rounded-pill px-4 py-2 fw-semibold">
+                        <i class="bi-signpost-split me-1"></i> Learning Roadmap
+                    </a>
+                    <a href="/dashboard" class="btn btn-light rounded-pill px-4 py-2 fw-semibold">
+                        <i class="bi-speedometer2 me-1"></i> Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

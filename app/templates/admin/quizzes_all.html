@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% block title %}Manage Quizzes & Checkpoints — SkillPath AI Admin{% endblock %}
+{% block page_title %}Checkpoint Quizzes & Questions Administration{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Banner -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="p-4 rounded-4 shadow-sm text-white position-relative overflow-hidden" 
+                 style="background: linear-gradient(135deg, #0A4329 0%, #0D5C3A 50%, #10B981 100%);">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill">
+                                🧠 Checkpoint Controller
+                            </span>
+                        </div>
+                        <h2 class="fw-bold m-0 text-white display-6">
+                            Manage All Learning Quizzes
+                        </h2>
+                        <p class="m-0 text-white-50 mt-1">
+                            Configure passing thresholds, write multiple-choice questions, and monitor checkpoint standards across all topics.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quizzes Table Card -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 bg-white">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <h5 class="fw-bold m-0 text-dark">
+                <i class="bi-question-square-fill text-success me-2"></i> All Topic Checkpoints ({{ quiz_data|length }})
+            </h5>
+            <input type="text" id="adminQuizSearch" class="form-control form-control-sm rounded-pill px-3" placeholder="🔍 Search by topic or quiz..." style="width: 250px;" onkeyup="filterAdminQuizzes()">
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Quiz ID</th>
+                        <th>Topic Checkpoint</th>
+                        <th>Questions</th>
+                        <th>Passing Threshold</th>
+                        <th class="text-end pe-3">Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="adminQuizzesTableBody">
+                    {% for qd in quiz_data %}
+                    <tr class="admin-quiz-row" data-topic="{{ qd.topic.title|lower if qd.topic else '' }}">
+                        <td class="ps-3 fw-bold text-muted">#{{ qd.quiz.id }}</td>
+                        <td>
+                            <div class="fw-bold text-dark">{{ qd.topic.title if qd.topic else 'Unlinked Topic' }}</div>
+                            <small class="text-muted">Topic ID: #{{ qd.quiz.topic_id }}</small>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold rounded-pill px-2.5 py-1">
+                                📝 {{ qd.questions_count }} Questions
+                            </span>
+                        </td>
+                        <td>
+                            <span class="badge bg-success-subtle text-success fw-bold px-3 py-1">
+                                {{ qd.quiz.passing_percentage }}% Required
+                            </span>
+                        </td>
+                        <td class="text-end pe-3">
+                            <a href="/admin/questions/{{ qd.quiz.id }}" class="btn btn-sm btn-outline-primary rounded-pill px-3 py-1 me-1">
+                                <i class="bi-pencil-square me-1"></i> Manage Questions
+                            </a>
+                            <a href="/quiz/take/{{ qd.quiz.id }}" target="_blank" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1">
+                                <i class="bi-play-circle me-1"></i> Test Quiz
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center text-muted py-5">No quizzes found.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script>
+function filterAdminQuizzes() {
+    const q = document.getElementById("adminQuizSearch").value.toLowerCase();
+    document.querySelectorAll(".admin-quiz-row").forEach(row => {
+        const topic = row.getAttribute("data-topic") || "";
+        if (topic.includes(q)) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+}
+</script>
+{% endblock %}

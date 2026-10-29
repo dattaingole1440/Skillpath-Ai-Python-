@@ -1,0 +1,258 @@
+{% extends "base.html" %}
+{% block title %}Quiz Assessments Hub — SkillPath AI{% endblock %}
+{% block page_title %}Checkpoint Quiz Assessments{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Hero Banner with Animated Gradient & Sticker Badges -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="p-4 p-md-5 rounded-4 shadow-lg text-white position-relative overflow-hidden vibrant-banner-hero">
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 position-relative" style="z-index: 2;">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2 flex-wrap">
+                            <span class="sticker-badge sticker-trophy">🧠 CHECKPOINT MASTERY</span>
+                            <span class="sticker-badge sticker-fire">🎯 75% PASS THRESHOLD</span>
+                            <span class="sticker-badge sticker-neon">⚡ {{ cleared_count }}/{{ total_quizzes }} COMPLETED</span>
+                        </div>
+                        <h2 class="fw-bold m-0 text-white display-6">
+                            Checkpoint Quiz Assessments 🧠
+                        </h2>
+                        <p class="m-0 text-white-50 mt-1" style="max-width: 680px;">
+                            Test your comprehension at every learning milestone. Clear topic quizzes to validate knowledge, unlock subsequent pathway modules, and boost your campus ranking.
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="/roadmap/view" class="btn btn-warning rounded-pill px-4 py-3 fw-bold text-dark shadow-lg d-flex align-items-center gap-2" style="background: #F59E0B; border: none;">
+                            <i class="bi-signpost-split-fill fs-5"></i> View Learning Roadmap
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stat Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 rounded-4 shadow-sm p-3.5 bg-white hover-lift">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Checkpoints Cleared</span>
+                        <h3 class="fw-bold text-success mt-1 mb-0">{{ cleared_count }} / {{ total_quizzes }}</h3>
+                    </div>
+                    <div class="p-3 bg-success-subtle text-success rounded-4 fs-3">
+                        <i class="bi-patch-check-fill"></i>
+                    </div>
+                </div>
+                <div class="progress mt-3" style="height: 6px;">
+                    <div class="progress-bar bg-success rounded-pill" role="progressbar" style="width: {{ cleared_pct }}%;"></div>
+                </div>
+                <div class="small text-muted mt-2 d-flex justify-content-between">
+                    <span>{{ cleared_pct }}% Pathway Completed</span>
+                    <span class="fw-bold text-success">{{ cleared_count }} Done</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 rounded-4 shadow-sm p-3.5 bg-white hover-lift">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Your Quiz Average</span>
+                        <h3 class="fw-bold text-dark mt-1 mb-0">{{ user.quiz_avg or 0.0 }}%</h3>
+                    </div>
+                    <div class="p-3 bg-primary-subtle text-primary rounded-4 fs-3">
+                        <i class="bi-graph-up-arrow"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">
+                    <span class="text-primary fw-semibold"><i class="bi-award-fill"></i> Live Accuracy Score</span> across all attempts
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 rounded-4 shadow-sm p-3.5 bg-white hover-lift">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Total Quiz Attempts</span>
+                        <h3 class="fw-bold text-warning mt-1 mb-0">{{ total_attempts_count }}</h3>
+                    </div>
+                    <div class="p-3 bg-warning-subtle text-warning rounded-4 fs-3">
+                        <i class="bi-lightning-charge-fill"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">
+                    <span class="text-dark fw-semibold"><i class="bi-arrow-repeat"></i> Unlimited Retries</span> allowed to achieve 100%
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 rounded-4 shadow-sm p-3.5 bg-white hover-lift">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Active Track</span>
+                        <h3 class="fw-bold text-info mt-1 mb-0 fs-5 line-clamp-1" title="{{ career.title if career else 'General Pathway' }}">
+                            {{ career.title if career else 'General Pathway' }}
+                        </h3>
+                    </div>
+                    <div class="p-3 bg-info-subtle text-info rounded-4 fs-3">
+                        <i class="bi-mortarboard-fill"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">
+                    <span class="text-info fw-semibold"><i class="bi-check-all"></i> Industry-aligned</span> curriculum questions
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter & Search Toolbar -->
+    <div class="card border-0 rounded-4 shadow-sm bg-white p-3 mb-4">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+            <div class="d-flex gap-2 flex-wrap">
+                <button class="btn btn-sm btn-outline-success active rounded-pill px-3 filter-btn" onclick="filterQuizStatus('all', this)">
+                    🌐 All Quizzes ({{ quiz_items|length }})
+                </button>
+                <button class="btn btn-sm btn-outline-success rounded-pill px-3 filter-btn" onclick="filterQuizStatus('passed', this)">
+                    ✅ Cleared ({{ cleared_count }})
+                </button>
+                <button class="btn btn-sm btn-outline-success rounded-pill px-3 filter-btn" onclick="filterQuizStatus('ready', this)">
+                    🚀 Ready to Take ({{ quiz_items|length - cleared_count }})
+                </button>
+            </div>
+            <div>
+                <input type="text" id="quizSearchInput" class="form-control form-control-sm rounded-pill px-3" placeholder="🔍 Search topic quizzes..." style="width: 260px;" onkeyup="searchQuizzes()">
+            </div>
+        </div>
+    </div>
+
+    <!-- Quizzes Grid -->
+    <div class="row g-4" id="quizzesGrid">
+        {% for item in quiz_items %}
+        <div class="col-md-6 col-lg-4 quiz-grid-card" 
+             data-title="{{ item.topic.title|lower }}" 
+             data-status="{% if item.has_passed %}passed{% else %}ready{% endif %}">
+            <div class="card border rounded-4 p-4 h-100 shadow-sm transition-all hover-card-quiz bg-white d-flex flex-column justify-content-between">
+                <div>
+                    <!-- Card Top Header -->
+                    <div class="d-flex align-items-center justify-content-between mb-2">
+                        <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1 small">
+                            Checkpoint #{{ loop.index }}
+                        </span>
+
+                        {% if item.has_passed %}
+                            <span class="badge bg-success-subtle text-success fw-bold rounded-pill px-3 py-1 shadow-xs">
+                                <i class="bi-check-circle-fill me-1"></i> Cleared ({{ item.best_score }}%)
+                            </span>
+                        {% elif item.attempts_count > 0 %}
+                            <span class="badge bg-warning-subtle text-dark fw-bold rounded-pill px-3 py-1">
+                                <i class="bi-arrow-clockwise me-1"></i> Retake (High: {{ item.best_score }}%)
+                            </span>
+                        {% else %}
+                            <span class="badge bg-primary-subtle text-primary fw-bold rounded-pill px-3 py-1">
+                                <i class="bi-play-circle me-1"></i> Ready
+                            </span>
+                        {% endif %}
+                    </div>
+
+                    <h5 class="fw-bold text-dark mb-2 mt-2" title="{{ item.topic.title }}">
+                        {{ item.topic.title }}
+                    </h5>
+                    <p class="text-muted small mb-3 line-clamp-2">
+                        {{ item.topic.description or 'Complete this checkpoint quiz to test your command of key concepts and progress to the next module.' }}
+                    </p>
+                </div>
+
+                <div class="pt-3 border-top">
+                    <div class="d-flex align-items-center justify-content-between small text-muted mb-3">
+                        <span><i class="bi-card-checklist text-primary me-1"></i> {{ item.questions_count }} MCQs</span>
+                        <span><i class="bi-shield-check text-success me-1"></i> Pass: {{ item.passing_percentage }}%</span>
+                        <span><i class="bi-arrow-repeat text-secondary me-1"></i> {{ item.attempts_count }} Tries</span>
+                    </div>
+
+                    <a href="/quiz/take/{{ item.quiz.id }}" class="btn btn-sm w-100 rounded-pill py-2 fw-semibold d-flex align-items-center justify-content-center gap-2 {% if item.has_passed %}btn-outline-success{% else %}btn-primary text-white{% endif %} shadow-xs">
+                        {% if item.has_passed %}
+                            <i class="bi-arrow-clockwise"></i> Retake to Improve Score
+                        {% elif item.attempts_count > 0 %}
+                            <i class="bi-lightning-fill"></i> Retake Checkpoint Quiz
+                        {% else %}
+                            <i class="bi-play-circle-fill"></i> Start Checkpoint Quiz
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="col-12 text-center py-5">
+            <i class="bi-question-square display-1 text-muted opacity-50"></i>
+            <h4 class="fw-bold text-dark mt-3">No Checkpoint Quizzes Found</h4>
+            <p class="text-muted">Explore your roadmap to see available checkpoints or contact your teacher.</p>
+            <a href="/roadmap/view" class="btn btn-primary rounded-pill px-4">Go to Roadmap</a>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+
+<style>
+.hover-lift {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(13, 92, 58, 0.1) !important;
+}
+.hover-card-quiz {
+    transition: all 0.25s ease;
+}
+.hover-card-quiz:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 25px rgba(13, 92, 58, 0.12) !important;
+    border-color: #2ECC71 !important;
+}
+.line-clamp-1 {
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+.line-clamp-2 {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+</style>
+
+<script>
+function searchQuizzes() {
+    const q = document.getElementById("quizSearchInput").value.toLowerCase();
+    const cards = document.querySelectorAll(".quiz-grid-card");
+    cards.forEach(card => {
+        const title = card.getAttribute("data-title") || "";
+        if (title.includes(q)) {
+            card.style.display = "";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+
+function filterQuizStatus(status, btn) {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    const cards = document.querySelectorAll(".quiz-grid-card");
+    cards.forEach(card => {
+        const cardStatus = card.getAttribute("data-status");
+        if (status === 'all' || cardStatus === status) {
+            card.style.display = "";
+        } else {
+            card.style.display = "none";
+        }
+    });
+}
+</script>
+{% endblock %}

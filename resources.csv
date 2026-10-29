@@ -1,0 +1,93 @@
+Stage,Type,Title,Channel/Source,URL
+Stage 1: How the Web Works,Video,How The Web Works — Web Development In 2024,Traversy Media,https://www.youtube.com/watch?v=kYJ65_pL_Yw
+Stage 1: How the Web Works,Video,How does the Internet work?,freeCodeCamp,https://www.youtube.com/watch?v=zN8YNNHcaZc
+Stage 1: How the Web Works,Video,100+ Web Development Things You Should Know,Fireship,https://www.youtube.com/watch?v=erEgovG9WBs
+Stage 1: How the Web Works,Notes,How the Web Works,MDN Web Docs,https://developer.mozilla.org/en-US/docs/Learn/Getting_started_with_the_web/How_the_Web_works
+Stage 1: How the Web Works,Notes,Frontend Developer Roadmap,roadmap.sh,https://roadmap.sh/frontend
+Stage 1: How the Web Works,Notes,How Browsers Work,web.dev,https://web.dev/articles/howbrowserswork
+Stage 2: Developer Setup,Video,VS Code Tutorial for Beginners,freeCodeCamp,https://www.youtube.com/watch?v=B-s71n0dHUk
+Stage 2: Developer Setup,Video,Git and GitHub for Beginners - Crash Course,freeCodeCamp,https://www.youtube.com/watch?v=RGOj5yH7evk
+Stage 2: Developer Setup,Video,Command Line Crash Course,Traversy Media,https://www.youtube.com/watch?v=uwAqEzhyjtw
+Stage 2: Developer Setup,Notes,VS Code Docs — Getting Started,Microsoft,https://code.visualstudio.com/docs
+Stage 2: Developer Setup,Notes,Git Handbook,GitHub Docs,https://docs.github.com/en/get-started/using-git
+Stage 2: Developer Setup,Notes,The Odin Project — Installations,The Odin Project,https://www.theodinproject.com/lessons/foundations-installations
+Stage 3: HTML5,Video,Learn HTML — Full Tutorial for Beginners,freeCodeCamp (Dave Gray),https://www.youtube.com/watch?v=kUMe1FH4CHE
+Stage 3: HTML5,Video,HTML Crash Course For Absolute Beginners,Traversy Media,https://www.youtube.com/watch?v=UB1O30fR-EE
+Stage 3: HTML5,Video,HTML Tutorial for Beginners (Hindi),CodeWithHarry,https://www.youtube.com/watch?v=BsDoLVMnmZs
+Stage 3: HTML5,Notes,HTML — Structuring the Web,MDN Web Docs,https://developer.mozilla.org/en-US/docs/Learn/HTML
+Stage 3: HTML5,Notes,HTML Tutorial,W3Schools,https://www.w3schools.com/html/
+Stage 3: HTML5,Notes,Learn HTML,web.dev,https://web.dev/learn/html
+Stage 4: CSS3,Video,CSS Tutorial — Full Course for Beginners,freeCodeCamp (Dave Gray),https://www.youtube.com/watch?v=1Rs2ND1ryYc
+Stage 4: CSS3,Video,Learn Flexbox in 15 Minutes,Web Dev Simplified,https://www.youtube.com/watch?v=fYq5PXgSsbE
+Stage 4: CSS3,Video,Learn CSS Grid — A 13 Minute Deep Dive,Fireship,https://www.youtube.com/watch?v=EiNiSFIPIQE
+Stage 4: CSS3,Notes,CSS — Styling the Web,MDN Web Docs,https://developer.mozilla.org/en-US/docs/Learn/CSS
+Stage 4: CSS3,Notes,Learn CSS,web.dev,https://web.dev/learn/css
+Stage 4: CSS3,Notes,CSS Flexbox Guide,CSS-Tricks,https://css-tricks.com/snippets/css/a-guide-to-flexbox/
+Stage 5: CSS Frameworks,Video,Tailwind CSS Crash Course — Project From Scratch,Traversy Media,https://www.youtube.com/watch?v=dFgzHOX84xQ
+Stage 5: CSS Frameworks,Video,Tailwind CSS Tutorial Playlist,The Net Ninja,https://www.youtube.com/playlist?list=PL4cUxeGkcC9gpXORlEHjc5aGDiZHEGZ6m
+Stage 5: CSS Frameworks,Video,Tailwind in 100 Seconds,Fireship,https://www.youtube.com/watch?v=mr15Xzb1Ook
+Stage 5: CSS Frameworks,Notes,Official Tailwind CSS Documentation,Tailwind Labs,https://tailwindcss.com/docs
+Stage 5: CSS Frameworks,Notes,Tailwind CSS Cheat Sheet,nerdcave.com,https://nerdcave.com/tailwind-cheat-sheet
+Stage 6: JavaScript Fundamentals,Video,JavaScript Programming — Full Course,freeCodeCamp,https://www.youtube.com/watch?v=jS4aFq5-91M
+Stage 6: JavaScript Fundamentals,Video,JavaScript Tutorial for Beginners,Programming with Mosh,https://www.youtube.com/watch?v=W6NZfCO5SIk
+Stage 6: JavaScript Fundamentals,Video,JavaScript Course for Beginners (Hindi),CodeWithHarry,https://www.youtube.com/watch?v=ER9SspLe4Hg
+Stage 6: JavaScript Fundamentals,Notes,JavaScript — Dynamic client-side scripting,MDN Web Docs,https://developer.mozilla.org/en-US/docs/Learn/JavaScript
+Stage 6: JavaScript Fundamentals,Notes,The Modern JavaScript Tutorial,javascript.info,https://javascript.info/
+Stage 6: JavaScript Fundamentals,Notes,JavaScript Tutorial,W3Schools,https://www.w3schools.com/js/
+Stage 7: Advanced JavaScript,Video,JavaScript DOM Manipulation — Full Course,freeCodeCamp,https://www.youtube.com/watch?v=5fb2aPlgoys
+Stage 7: Advanced JavaScript,Video,"Async JavaScript — Promises, Async/Await",Traversy Media,https://www.youtube.com/watch?v=PoRJizFvM7s
+Stage 7: Advanced JavaScript,Video,JavaScript ES6+ Features,Web Dev Simplified,https://www.youtube.com/watch?v=NCwa_xi0Uuc
+Stage 7: Advanced JavaScript,Notes,"Promises, async/await",javascript.info,https://javascript.info/async
+Stage 7: Advanced JavaScript,Notes,Document Object Model (DOM),MDN Web Docs,https://developer.mozilla.org/en-US/docs/Web/API/Document_Object_Model
+Stage 7: Advanced JavaScript,Notes,Fetch API,MDN Web Docs,https://developer.mozilla.org/en-US/docs/Web/API/Fetch_API
+Stage 8: Git & GitHub In Depth,Video,Git & GitHub — Full Course for Beginners,freeCodeCamp,https://www.youtube.com/watch?v=RGOj5yH7evk
+Stage 8: Git & GitHub In Depth,Video,Git Branching and Merging — Detailed Tutorial,The Net Ninja,https://www.youtube.com/playlist?list=PL4cUxeGkcC9goXbgTDQ0n_4TBzOO0ocPR
+Stage 8: Git & GitHub In Depth,Video,Git for Professionals,Fireship,https://www.youtube.com/watch?v=Uszj_k0DGsg
+Stage 8: Git & GitHub In Depth,Notes,Pro Git Book (free),git-scm.com,https://git-scm.com/book/en/v2
+Stage 8: Git & GitHub In Depth,Notes,GitHub Skills,GitHub,https://skills.github.com/
+Stage 9: React.js,Video,React Course — Beginner's Tutorial (with Practice Projects),freeCodeCamp (Bob Ziroll),https://www.youtube.com/watch?v=bMknfKXIFA8
+Stage 9: React.js,Video,Full Modern React Tutorial,The Net Ninja,https://www.youtube.com/playlist?list=PL4cUxeGkcC9gZD-Tvwfod2gaISzfRiP9d
+Stage 9: React.js,Video,React JS Crash Course,Traversy Media,https://www.youtube.com/watch?v=LDB4uaJ87e0
+Stage 9: React.js,Notes,Official React Documentation,react.dev,https://react.dev/learn
+Stage 9: React.js,Notes,React Tutorial,W3Schools,https://www.w3schools.com/react/
+Stage 9: React.js,Notes,React Hooks Reference,react.dev,https://react.dev/reference/react
+Stage 10: TypeScript Basics,Video,Learn TypeScript — Full Course for Beginners,freeCodeCamp,https://www.youtube.com/watch?v=ahCwqrYpxkE
+Stage 10: TypeScript Basics,Video,TypeScript Tutorial Series,The Net Ninja,https://www.youtube.com/playlist?list=PL4cUxeGkcC9gUgr39Q_yD6v-b4MwKPvgo
+Stage 10: TypeScript Basics,Video,TypeScript Tutorial for Beginners,Programming with Mosh,https://www.youtube.com/watch?v=d56mG7DezGs
+Stage 10: TypeScript Basics,Notes,TypeScript Handbook,TypeScript Official,https://www.typescriptlang.org/docs/handbook/
+Stage 10: TypeScript Basics,Notes,TypeScript for JavaScript Programmers,TypeScript Official,https://www.typescriptlang.org/docs/handbook/typescript-in-5-minutes.html
+Stage 11: State Management,Video,Redux Toolkit Tutorial,The Net Ninja,https://www.youtube.com/playlist?list=PL4cUxeGkcC9ij8CfkAY2RAGb-tmkNwQHG
+Stage 11: State Management,Video,React Query Tutorial for Beginners,The Net Ninja,https://www.youtube.com/playlist?list=PL4cUxeGkcC9jpi7Ptjl5b50p9gLjOFani
+Stage 11: State Management,Video,Zustand — Simple State Management,Jack Herrington,https://www.youtube.com/watch?v=KEc0LLQjyfQ
+Stage 11: State Management,Notes,Redux Toolkit Official Docs,Redux,https://redux-toolkit.js.org/introduction/getting-started
+Stage 11: State Management,Notes,TanStack Query Docs,TanStack,https://tanstack.com/query/latest/docs/react/overview
+Stage 11: State Management,Notes,Zustand Documentation,GitHub,https://github.com/pmndrs/zustand
+Stage 12: Testing & Tools,Video,Testing React Apps — Vitest & React Testing Library,The Net Ninja,https://www.youtube.com/playlist?list=PL4cUxeGkcC9gm4_-5UsNmLqMosM-dzuvQ
+Stage 12: Testing & Tools,Video,Chrome DevTools — Full Course,freeCodeCamp,https://www.youtube.com/watch?v=gTVpBbFWry8
+Stage 12: Testing & Tools,Video,Vite in 100 Seconds,Fireship,https://www.youtube.com/watch?v=KCrXgy8qtjM
+Stage 12: Testing & Tools,Notes,Vitest Documentation,vitest.dev,https://vitest.dev/guide/
+Stage 12: Testing & Tools,Notes,Testing Library Docs,testing-library.com,https://testing-library.com/docs/react-testing-library/intro/
+Stage 12: Testing & Tools,Notes,Chrome DevTools Docs,Google,https://developer.chrome.com/docs/devtools
+Stage 13: Performance & SEO,Video,Web Performance — 21 Key Optimizations,Fireship,https://www.youtube.com/watch?v=0fONene3OIA
+Stage 13: Performance & SEO,Video,Web Accessibility for Beginners,freeCodeCamp,https://www.youtube.com/watch?v=e2nkq3h1P68
+Stage 13: Performance & SEO,Video,SEO for Developers,Fireship,https://www.youtube.com/watch?v=-B58GgsehKQ
+Stage 13: Performance & SEO,Notes,Web Accessibility,MDN Web Docs,https://developer.mozilla.org/en-US/docs/Web/Accessibility
+Stage 13: Performance & SEO,Notes,Learn Performance,web.dev,https://web.dev/learn/performance
+Stage 13: Performance & SEO,Notes,SEO Starter Guide,Google,https://developers.google.com/search/docs/fundamentals/seo-starter-guide
+Stage 14: Next.js,Video,Next.js Tutorial for Beginners,The Net Ninja,https://www.youtube.com/playlist?list=PL4cUxeGkcC9jZIVqmy_QhfQdi6mzQvJnT
+Stage 14: Next.js,Video,Next.js Full Course 2024,JavaScript Mastery,https://www.youtube.com/watch?v=wm5gMKuwSYk
+Stage 14: Next.js,Video,Next.js in 100 Seconds + Full Tutorial,Fireship,https://www.youtube.com/watch?v=Sklc_fQBmcs
+Stage 14: Next.js,Notes,Next.js Documentation,Vercel,https://nextjs.org/docs
+Stage 14: Next.js,Notes,Next.js Learn (Interactive),Vercel,https://nextjs.org/learn
+Stage 15: Deployment,Video,Deploy React App to Netlify & Vercel,Traversy Media,https://www.youtube.com/watch?v=lCMFwUt0vSo
+Stage 15: Deployment,Video,GitHub Actions Tutorial,freeCodeCamp,https://www.youtube.com/watch?v=R8_veQiYBjI
+Stage 15: Deployment,Video,How to Deploy Your Website,Fireship,https://www.youtube.com/watch?v=OVvjcfmOyrM
+Stage 15: Deployment,Notes,Vercel Documentation,Vercel,https://vercel.com/docs
+Stage 15: Deployment,Notes,Netlify Documentation,Netlify,https://docs.netlify.com/
+Stage 15: Deployment,Notes,GitHub Pages Docs,GitHub,https://pages.github.com/
+Stage 16: Portfolio & Interview,Video,Frontend Developer Interview Questions,freeCodeCamp,https://www.youtube.com/watch?v=oluY633rkgI
+Stage 16: Portfolio & Interview,Video,Build a Dev Portfolio That Gets You Hired,Traversy Media,https://www.youtube.com/watch?v=xV7S8BhIeBo
+Stage 16: Portfolio & Interview,Video,JavaScript Interview Questions & Answers,Fireship,https://www.youtube.com/watch?v=DHjqpvDnNGE
+Stage 16: Portfolio & Interview,Notes,Frontend Interview Handbook,GitHub,https://www.frontendinterviewhandbook.com/
+Stage 16: Portfolio & Interview,Notes,JavaScript Questions,GitHub (lydiahallie),https://github.com/lydiahallie/javascript-questions
+Stage 16: Portfolio & Interview,Notes,Resume Guide for Developers,freeCodeCamp,https://www.freecodecamp.org/news/how-to-write-a-developer-resume/

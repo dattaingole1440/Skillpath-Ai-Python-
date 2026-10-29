@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block page_title %}Assignments & Coursework Manager{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi-journal-check text-primary me-2"></i>Assignments Manager</h3>
+            <p class="text-muted mb-0">Create Coding, PDF, Theory, and Project assignments for enrolled students.</p>
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createAssignmentModal">
+            <i class="bi-plus-circle me-1"></i> Create Assignment
+        </button>
+    </div>
+
+    <!-- Assignments List -->
+    <div class="card card-custom shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Title</th>
+                            <th>Subject</th>
+                            <th>Type</th>
+                            <th>Due Date</th>
+                            <th>Max Marks</th>
+                            <th>Submissions</th>
+                            <th class="pe-4 text-end">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for a in assignments %}
+                        <tr>
+                            <td class="ps-4 fw-semibold">{{ a.title }}</td>
+                            <td><span class="badge bg-primary-subtle text-primary">{{ a.subject.name if a.subject else 'General' }}</span></td>
+                            <td>
+                                <span class="badge bg-info-subtle text-info text-capitalize">{{ a.type }}</span>
+                            </td>
+                            <td>{{ a.due_date.strftime('%Y-%m-%d') if a.due_date else 'No limit' }}</td>
+                            <td>{{ a.max_marks }} pts</td>
+                            <td>
+                                <span class="fw-bold text-success">{{ a.submissions|length }}</span> submissions
+                            </td>
+                            <td class="pe-4 text-end">
+                                <a href="/teacher/submissions/{{ a.id }}" class="btn btn-sm btn-primary">
+                                    <i class="bi-eye me-1"></i> View Submissions & Grade
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="7" class="text-center text-muted py-4">No assignments created yet. Click 'Create Assignment' above.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Create Assignment -->
+<div class="modal fade" id="createAssignmentModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <form action="/teacher/assignments/create" method="POST" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Create Course Assignment</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Target Subject</label>
+                    <select name="subject_id" class="form-select" required>
+                        {% for s in subjects %}
+                            <option value="{{ s.id }}">{{ s.name }} ({{ s.code }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Assignment Title</label>
+                    <input type="text" name="title" class="form-control" placeholder="e.g. Implementation of Graph Traversal Algorithms" required>
+                </div>
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label fw-semibold">Assignment Type</label>
+                        <select name="type" class="form-select">
+                            <option value="coding">Coding Challenge</option>
+                            <option value="pdf">PDF Document Upload</option>
+                            <option value="theory">Theory Response</option>
+                            <option value="project">Mini Project Submission</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-semibold">Due in (Days)</label>
+                        <input type="number" name="due_days" value="7" class="form-control" required>
+                    </div>
+                    <div class="col-md-3 mb-3">
+                        <label class="form-label fw-semibold">Max Marks</label>
+                        <input type="number" name="max_marks" value="100" class="form-control" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Instructions & Prompt</label>
+                    <textarea name="description" class="form-control" rows="4" placeholder="Detailed requirements and constraints..." required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary"><i class="bi-check-lg me-1"></i>Publish Assignment</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

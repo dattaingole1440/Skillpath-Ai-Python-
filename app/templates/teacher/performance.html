@@ -1,0 +1,255 @@
+{% extends "base.html" %}
+{% block title %}Student Marks & Performance Tracking — Teacher Command Center{% endblock %}
+{% block page_title %}Student Marks, Quiz Attempts & Academic Analytics{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Banner -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="p-4 p-md-5 rounded-4 shadow-sm text-white position-relative overflow-hidden" 
+                 style="background: linear-gradient(135deg, #0A4329 0%, #0D5C3A 50%, #10B981 100%);">
+                <div class="position-absolute top-0 end-0 translate-middle rounded-circle bg-white opacity-10" style="width: 260px; height: 260px; pointer-events: none;"></div>
+
+                <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 position-relative" style="z-index: 2;">
+                    <div>
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-warning text-dark fw-bold px-3 py-1 rounded-pill">
+                                📊 Academic Assessment Center
+                            </span>
+                            <span class="badge bg-light text-success fw-bold px-3 py-1 rounded-pill">
+                                ⚡ Live Gradebook & Marks
+                            </span>
+                        </div>
+                        <h2 class="fw-bold m-0 text-white display-6">
+                            📈 Student Performance & Marks Analytics
+                        </h2>
+                        <p class="m-0 text-white-50 mt-1" style="max-width: 700px;">
+                            Monitor real-time checkpoint quiz marks, coding submission scores, assignment grades, and cumulative GPA rankings across all enrolled students.
+                        </p>
+                    </div>
+                    <div class="d-flex gap-2">
+                        <a href="/teacher/knowledge-videos" class="btn btn-warning rounded-pill px-4 py-2.5 fw-bold text-dark shadow-sm">
+                            <i class="bi-camera-reels-fill me-1"></i> Extra Knowledge Videos
+                        </a>
+                        <a href="/teacher/assignments" class="btn btn-light rounded-pill px-4 py-2.5 fw-bold text-dark shadow-sm">
+                            <i class="bi-journal-check me-1"></i> Evaluate Assignments
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Metrics -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 rounded-4 shadow-sm p-3.5 bg-white hover-lift">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Total Enrolled</span>
+                        <h3 class="fw-bold text-dark mt-1 mb-0">{{ student_stats|length }}</h3>
+                    </div>
+                    <div class="p-3 bg-primary-subtle text-primary rounded-4 fs-3">
+                        <i class="bi-people-fill"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">
+                    <span class="text-success fw-semibold"><i class="bi-check-circle-fill"></i> Active</span> learning profiles
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 rounded-4 shadow-sm p-3.5 bg-white hover-lift">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Quiz Marks Avg</span>
+                        <h3 class="fw-bold text-success mt-1 mb-0">
+                            {% if student_stats %}
+                                {{ "%.1f"|format(student_stats|map(attribute='quiz_avg')|sum / student_stats|length) }}%
+                            {% else %}
+                                0.0%
+                            {% endif %}
+                        </h3>
+                    </div>
+                    <div class="p-3 bg-success-subtle text-success rounded-4 fs-3">
+                        <i class="bi-patch-check-fill"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">
+                    <i class="bi-lightning-charge-fill text-warning me-1"></i> Minimum 75% required to pass
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 rounded-4 shadow-sm p-3.5 bg-white hover-lift">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Coding Mastery Avg</span>
+                        <h3 class="fw-bold text-warning mt-1 mb-0">
+                            {% if student_stats %}
+                                {{ "%.1f"|format(student_stats|map(attribute='coding_avg')|sum / student_stats|length) }}%
+                            {% else %}
+                                0.0%
+                            {% endif %}
+                        </h3>
+                    </div>
+                    <div class="p-3 bg-warning-subtle text-warning rounded-4 fs-3">
+                        <i class="bi-code-slash"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">
+                    <i class="bi-cpu text-primary me-1"></i> Automated test suite evaluations
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card border-0 rounded-4 shadow-sm p-3.5 bg-white hover-lift">
+                <div class="d-flex align-items-center justify-content-between">
+                    <div>
+                        <span class="text-muted small fw-semibold text-uppercase">Assignments Graded</span>
+                        <h3 class="fw-bold text-info mt-1 mb-0">
+                            {{ student_stats|map(attribute='assignments_count')|sum }}
+                        </h3>
+                    </div>
+                    <div class="p-3 bg-info-subtle text-info rounded-4 fs-3">
+                        <i class="bi-journal-bookmark-fill"></i>
+                    </div>
+                </div>
+                <div class="small text-muted mt-2">
+                    <i class="bi-stars text-info me-1"></i> Combined teacher & AI grading
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Students Performance Overview Table -->
+    <div class="card border-0 rounded-4 shadow-sm p-4 bg-white">
+        <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+            <div>
+                <h5 class="fw-bold m-0 text-dark d-flex align-items-center gap-2">
+                    <i class="bi-award text-success fs-4"></i> Student Marks & Attempt Registry
+                </h5>
+                <p class="text-muted small m-0">Click "View Complete Marks & History" to inspect every individual quiz attempt, coding submission, and assignment.</p>
+            </div>
+            <div>
+                <input type="text" id="studentFilterInput" class="form-control form-control-sm rounded-pill px-3" placeholder="🔍 Search student name or email..." style="width: 260px;" onkeyup="filterStudents()">
+            </div>
+        </div>
+
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0" id="studentPerformanceTable">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3">Student</th>
+                        <th>Quiz Marks</th>
+                        <th>Quiz Attempts</th>
+                        <th>Coding Marks</th>
+                        <th>Coding Subs</th>
+                        <th>Assignment Marks</th>
+                        <th>Academic Standing</th>
+                        <th class="text-end pe-3">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in student_stats %}
+                    <tr class="student-row" data-name="{{ item.student.name|lower }}" data-email="{{ item.student.email|lower }}">
+                        <td class="ps-3">
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="{{ item.student.profile_photo or '/static/uploads/avatars/default.png' }}" 
+                                     alt="Avatar" class="avatar-circle rounded-circle border shadow-xs" 
+                                     style="width: 36px; height: 36px; object-fit: cover;"
+                                     onerror="this.src='/static/uploads/avatars/default.png'">
+                                <div>
+                                    <div class="fw-bold text-dark">{{ item.student.name }}</div>
+                                    <div class="small text-muted">{{ item.student.email }}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-1.5">
+                                <span class="badge bg-success-subtle text-success fw-bold px-2.5 py-1 fs-6">
+                                    {{ item.quiz_avg }}%
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-primary bg-opacity-10 text-primary fw-semibold rounded-pill px-2.5 py-1">
+                                📝 {{ item.quiz_attempts_count }} Attempts
+                            </span>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-1.5">
+                                <span class="badge bg-warning-subtle text-dark fw-bold px-2.5 py-1 fs-6">
+                                    {{ item.coding_avg }}%
+                                </span>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="badge bg-warning bg-opacity-10 text-dark fw-semibold rounded-pill px-2.5 py-1">
+                                💻 {{ item.coding_submissions_count }} Subs
+                            </span>
+                        </td>
+                        <td>
+                            {% if item.assignment_avg > 0 %}
+                                <span class="badge bg-info-subtle text-info fw-bold px-2.5 py-1 fs-6">
+                                    {{ item.assignment_avg }}%
+                                </span>
+                            {% else %}
+                                <span class="text-muted small">No grades yet</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="badge {{ item.tier_badge }} rounded-pill px-3 py-1 fw-bold shadow-xs">
+                                {{ item.performance_tier }}
+                            </span>
+                        </td>
+                        <td class="text-end pe-3">
+                            <a href="/teacher/performance/{{ item.student.id }}" class="btn btn-sm btn-outline-success rounded-pill px-3 py-1 fw-semibold shadow-xs">
+                                <i class="bi-eye-fill me-1"></i> Marks & History
+                            </a>
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-5">
+                            <i class="bi-people fs-1 text-muted opacity-50"></i>
+                            <p class="mt-2 mb-0">No enrolled students found in system.</p>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.hover-lift {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.hover-lift:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 10px 20px rgba(13, 92, 58, 0.1) !important;
+}
+</style>
+
+<script>
+function filterStudents() {
+    const q = document.getElementById("studentFilterInput").value.toLowerCase();
+    const rows = document.querySelectorAll(".student-row");
+    rows.forEach(r => {
+        const name = r.getAttribute("data-name") || "";
+        const email = r.getAttribute("data-email") || "";
+        if (name.includes(q) || email.includes(q)) {
+            r.style.display = "";
+        } else {
+            r.style.display = "none";
+        }
+    });
+}
+</script>
+{% endblock %}

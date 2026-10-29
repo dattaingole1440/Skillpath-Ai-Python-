@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Online Code Editor - SkillPath AI{% endblock %}
+{% block page_title %}Online Code Editor{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="card border-0 rounded-4 shadow-sm mb-4 bg-body">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <h4 class="fw-bold m-0"><i class="bi bi-terminal-fill text-primary me-2"></i> Multi-Language Playground</h4>
+                    <select class="form-select rounded-pill px-3" id="editorLang">
+                        <option value="python" selected>Python 3.11</option>
+                        <option value="java">Java 17</option>
+                        <option value="cpp">C++ 20 (g++)</option>
+                        <option value="javascript">JavaScript (Node)</option>
+                    </select>
+                </div>
+                <div class="d-flex align-items-center gap-2">
+                    <button class="btn btn-outline-secondary rounded-pill px-3" id="resetEditorBtn"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                    <button class="btn btn-primary rounded-pill px-4 fw-bold" id="runCodeBtn"><i class="bi bi-play-fill me-1"></i> Run Code</button>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                <div class="col-lg-7">
+                    <div class="border rounded-3 overflow-hidden bg-dark">
+                        <div class="bg-secondary bg-opacity-20 px-3 py-2 text-white small d-flex justify-content-between align-items-center">
+                            <span><i class="bi bi-file-earmark-code me-1"></i> main.py</span>
+                            <span class="text-success small"><i class="bi bi-circle-fill me-1" style="font-size: 8px;"></i> Auto-Save Enabled</span>
+                        </div>
+                        <textarea class="form-control border-0 font-monospace bg-dark text-light p-3" id="monacoEditorText" rows="18" style="resize: vertical;" placeholder="# Type your code here...
+def main():
+    print('Hello from SkillPath AI Online Code Editor!')
+    
+if __name__ == '__main__':
+    main()"></textarea>
+                    </div>
+                </div>
+
+                <div class="col-lg-5">
+                    <div class="card border border-body rounded-3 p-3 h-100 bg-body">
+                        <h6 class="fw-bold text-secondary mb-3"><i class="bi bi-display me-2"></i> Execution Output & Console</h6>
+                        <pre class="bg-dark text-light p-3 rounded-3 font-monospace small flex-grow-1" id="consoleOutput" style="min-height: 280px; max-height: 380px; overflow-y: auto;">Console output will appear here after clicking 'Run Code'...</pre>
+                        
+                        <hr>
+                        <h6 class="fw-bold text-secondary mb-2"><i class="bi bi-clock-history me-2"></i> Recent Submissions</h6>
+                        <div class="table-responsive" style="max-height: 150px; overflow-y: auto;">
+                            <table class="table table-sm text-xs">
+                                <thead>
+                                    <tr>
+                                        <th>Status</th>
+                                        <th>Score</th>
+                                        <th>Submitted</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for sub in submissions %}
+                                    <tr>
+                                        <td>
+                                            <span class="badge {% if sub.status == 'passed' %}bg-success{% else %}bg-danger{% endif %}">
+                                                {{ sub.status }}
+                                            </span>
+                                        </td>
+                                        <td>{{ sub.score_earned }}%</td>
+                                        <td class="text-muted">{{ sub.submitted_at.strftime('%m-%d %H:%M') }}</td>
+                                    </tr>
+                                    {% else %}
+                                    <tr><td colspan="3" class="text-muted text-center">No submissions yet.</td></tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const templates = {
+        python: `def main():\n    print("Hello from Python!")\n\nif __name__ == "__main__":\n    main()`,
+        java: `public class Solution {\n    public static void main(String[] args) {\n        System.out.println("Hello from Java!");\n    }\n}`,
+        cpp: `#include <iostream>\n\nint main() {\n    std::cout << "Hello from C++!" << std::endl;\n    return 0;\n}`,
+        javascript: `console.log("Hello from JavaScript!");`
+    };
+
+    const editorLang = document.getElementById('editorLang');
+    const editorText = document.getElementById('monacoEditorText');
+
+    editorLang.addEventListener('change', function() {
+        if (templates[this.value]) {
+            editorText.value = templates[this.value];
+        }
+    });
+
+    document.getElementById('resetEditorBtn').addEventListener('click', function() {
+        editorText.value = templates[editorLang.value] || '';
+    });
+
+    document.getElementById('runCodeBtn').addEventListener('click', function() {
+        const code = editorText.value.trim();
+        const language = editorLang.value;
+        const consoleOut = document.getElementById('consoleOutput');
+
+        if (!code) {
+            alert('Code area is empty.');
+            return;
+        }
+
+        consoleOut.innerText = "Compiling and executing code...\n";
+
+        const formData = new FormData();
+        formData.append('code', code);
+        formData.append('language', language);
+
+        fetch('/code-editor/run', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            let out = `Status: ${data.status.toUpperCase()}\nScore: ${data.score}%\n\n`;
+            if (data.test_results && data.test_results.length > 0) {
+                data.test_results.forEach((t, i) => {
+                    out += `[Test ${i+1}] ${t.name}: ${t.passed ? 'PASSED' : 'FAILED'}\n  Details: ${t.message}\n\n`;
+                });
+            } else {
+                out += "Code executed cleanly with no runtime errors.";
+            }
+            consoleOut.innerText = out;
+        })
+        .catch(err => {
+            consoleOut.innerText = "Execution Error: " + err.message;
+        });
+    });
+</script>
+{% endblock %}

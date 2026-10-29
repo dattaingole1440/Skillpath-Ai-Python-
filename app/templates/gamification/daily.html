@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+
+{% block title %}Daily Challenges - SkillPath AI{% endblock %}
+{% block page_title %}📅 Daily Learning Challenges{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+    <div class="card border-0 rounded-4 shadow-sm mb-4 bg-body">
+        <div class="card-body p-4">
+            <div class="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+                <div>
+                    <h4 class="fw-bold m-0">🎯 <i class="bi bi-calendar-check-fill text-warning me-2"></i> Today's Daily Quests & Rewards</h4>
+                    <p class="text-secondary small mb-0">Complete daily challenges to earn XP points, coins, level up, and climb the global leaderboard ranks.</p>
+                </div>
+            </div>
+
+            <div class="row g-4">
+                {% for ch in challenges %}
+                <div class="col-md-4">
+                    <div class="card border border-body rounded-4 p-4 h-100 bg-body d-flex flex-column justify-content-between">
+                        <div>
+                            <div class="d-flex align-items-center justify-content-between mb-3">
+                                <span class="badge bg-warning bg-opacity-20 text-warning rounded-pill px-3 py-1 text-capitalize">
+                                    ⚡ {{ ch.challenge_type }}
+                                </span>
+                                <small class="text-success fw-bold">⚡ +{{ ch.reward_xp }} XP • 🪙 +{{ ch.reward_coins }} Coins</small>
+                            </div>
+                            <h5 class="fw-bold mb-2">🎯 {{ ch.title }}</h5>
+                            <p class="small text-secondary mb-3">{{ ch.description }}</p>
+                        </div>
+                        <div>
+                            {% if ch.id in completed_ids %}
+                            <button class="btn btn-success w-100 rounded-pill fw-bold" disabled>
+                                ✅ Challenge Completed
+                            </button>
+                            {% else %}
+                            <button class="btn btn-outline-primary w-100 rounded-pill fw-bold claim-btn" data-id="{{ ch.id }}">
+                                🎁 Complete & Claim (+{{ ch.reward_xp }} XP)
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    document.querySelectorAll('.claim-btn').forEach(btn => {
+        btn.addEventListener('click', function() {
+            const chId = this.getAttribute('data-id');
+            this.disabled = true;
+
+            fetch(`/api/gamification/complete-challenge/${chId}`, { method: 'POST' })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert(`Challenge Completed! Total XP: ${data.xp}, Coins: ${data.coins}, Rank: ${data.rank}`);
+                    window.location.reload();
+                } else {
+                    alert(data.message || 'Error claiming reward.');
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

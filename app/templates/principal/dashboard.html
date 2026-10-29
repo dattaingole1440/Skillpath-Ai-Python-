@@ -1,0 +1,398 @@
+{% extends "base.html" %}
+
+{% block title %}Principal Dashboard - {{ college.name if college else 'College Administration' }}{% endblock %}
+{% block page_title %}Principal Workspace{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-3">
+
+    {% if request.query_params.get('success') == 'hod_assigned' %}
+    <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-3" role="alert">
+        <i class="bi-check-circle-fill me-2"></i> HOD assigned to department successfully!
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% elif request.query_params.get('success') == 'dept_created' %}
+    <div class="alert alert-success alert-dismissible fade show rounded-4 border-0 shadow-sm mb-3" role="alert">
+        <i class="bi-check-circle-fill me-2"></i> Department created with 8 semesters automatically initialized!
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
+    <!-- Principal Hero Banner -->
+    <div class="card border-0 rounded-4 shadow-sm mb-4 bg-gradient text-white p-4" style="background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <div class="d-flex align-items-center gap-3 mb-2">
+                    <img src="{{ college.logo if college else 'https://cdn-icons-png.flaticon.com/512/2997/2997295.png' }}" alt="Logo" class="rounded-3 bg-white p-1" style="width: 54px; height: 54px; object-fit: contain;">
+                    <div>
+                        <h3 class="fw-bold m-0">{{ college.name if college else 'Institutional Portal' }}</h3>
+                        <span class="badge bg-white bg-opacity-20 text-white rounded-pill px-3 py-1">Campus Code: {{ college.code if college else 'MAIN' }}</span>
+                    </div>
+                </div>
+                <p class="mb-0 text-white-50">Welcome, <strong>{{ user.name }}</strong> (Principal). View and oversee all academic departments, faculty workloads, student metrics, and college reports.</p>
+            </div>
+            <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                <button class="btn btn-light rounded-pill px-4 font-semibold shadow-sm me-2" data-bs-toggle="modal" data-bs-target="#createDeptModal">
+                    <i class="bi-plus-circle me-1"></i> Add Department
+                </button>
+                <a href="/reports" class="btn btn-outline-light rounded-pill px-3">
+                    <i class="bi-file-earmark-pdf me-1"></i> College Reports
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stat Counters -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card border-0 rounded-4 shadow-sm p-3 text-center bg-white h-100">
+                <div class="text-primary mb-1"><i class="bi-diagram-3-fill fs-3"></i></div>
+                <h3 class="fw-bold m-0">{{ departments|length }}</h3>
+                <small class="text-muted fw-semibold">Departments</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card border-0 rounded-4 shadow-sm p-3 text-center bg-white h-100">
+                <div class="text-warning mb-1"><i class="bi-star-fill fs-3"></i></div>
+                <h3 class="fw-bold m-0">{{ hods|length }}</h3>
+                <small class="text-muted fw-semibold">Active HODs</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card border-0 rounded-4 shadow-sm p-3 text-center bg-white h-100">
+                <div class="text-success mb-1"><i class="bi-person-video3 fs-3"></i></div>
+                <h3 class="fw-bold m-0">{{ teachers|length }}</h3>
+                <small class="text-muted fw-semibold">Faculty Members</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card border-0 rounded-4 shadow-sm p-3 text-center bg-white h-100">
+                <div class="text-info mb-1"><i class="bi-mortarboard-fill fs-3"></i></div>
+                <h3 class="fw-bold m-0">{{ students|length }}</h3>
+                <small class="text-muted fw-semibold">Total Students</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card border-0 rounded-4 shadow-sm p-3 text-center bg-white h-100">
+                <div class="text-primary mb-1"><i class="bi-journal-code fs-3"></i></div>
+                <h3 class="fw-bold m-0">{{ subjects|length }}</h3>
+                <small class="text-muted fw-semibold">Active Courses</small>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-xl-2">
+            <div class="card border-0 rounded-4 shadow-sm p-3 text-center bg-white h-100">
+                <div class="text-danger mb-1"><i class="bi-exclamation-triangle-fill fs-3"></i></div>
+                <h3 class="fw-bold m-0">{{ early_warnings|length }}</h3>
+                <small class="text-muted fw-semibold">Early Alerts</small>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <ul class="nav nav-pills mb-4 gap-2 border-bottom pb-3" id="principalTabs" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="btn btn-outline-primary {% if active_tab == 'depts' or not active_tab %}active{% endif %} rounded-pill px-4" id="depts-tab" data-bs-toggle="tab" data-bs-target="#depts-pane" type="button" role="tab">
+                <i class="bi-building me-1"></i> Departments & HODs
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="btn btn-outline-primary {% if active_tab == 'faculty' %}active{% endif %} rounded-pill px-4" id="faculty-tab" data-bs-toggle="tab" data-bs-target="#faculty-pane" type="button" role="tab">
+                <i class="bi-person-badge me-1"></i> Faculty Directory ({{ teachers|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="btn btn-outline-primary {% if active_tab == 'students' %}active{% endif %} rounded-pill px-4" id="students-tab" data-bs-toggle="tab" data-bs-target="#students-pane" type="button" role="tab">
+                <i class="bi-people me-1"></i> College Students ({{ students|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="btn btn-outline-primary {% if active_tab == 'subjects' %}active{% endif %} rounded-pill px-4" id="subjects-tab" data-bs-toggle="tab" data-bs-target="#subjects-pane" type="button" role="tab">
+                <i class="bi-book me-1"></i> Subjects & Courses ({{ subjects|length }})
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="btn btn-outline-primary {% if active_tab == 'analytics' %}active{% endif %} rounded-pill px-4" id="analytics-tab" data-bs-toggle="tab" data-bs-target="#analytics-pane" type="button" role="tab">
+                <i class="bi-graph-up-arrow me-1"></i> Academic Performance
+            </button>
+        </li>
+    </ul>
+
+    <!-- Tab Contents -->
+    <div class="tab-content" id="principalTabsContent">
+
+        <!-- TAB 1: DEPARTMENTS & HODS -->
+        <div class="tab-pane fade {% if active_tab == 'depts' or not active_tab %}show active{% endif %}" id="depts-pane" role="tabpanel">
+            <div class="row g-4">
+                {% if departments %}
+                    {% for d in departments %}
+                        <div class="col-md-6 col-xl-4">
+                            <div class="card border-0 rounded-4 shadow-sm h-100 p-4 custom-card">
+                                <div class="d-flex justify-content-between align-items-start mb-3">
+                                    <div>
+                                        <span class="badge bg-primary-subtle text-primary fw-bold px-2.5 py-1 mb-2">{{ d.code }}</span>
+                                        <h5 class="fw-bold mb-1">{{ d.name }}</h5>
+                                    </div>
+                                    <button class="btn btn-sm btn-light rounded-circle" data-bs-toggle="modal" data-bs-target="#assignHodModal{{ d.id }}" title="Assign HOD">
+                                        <i class="bi-pencil-fill text-primary"></i>
+                                    </button>
+                                </div>
+                                <hr class="my-2">
+                                <div class="mb-3">
+                                    <small class="text-muted d-block fw-semibold">Head of Department (HOD)</small>
+                                    {% set hod_user = (teachers + hods)|selectattr("id", "equalto", d.hod_id)|first if d.hod_id else None %}
+                                    {% if hod_user %}
+                                        <div class="d-flex align-items-center gap-2 mt-1">
+                                            <span class="badge bg-warning-subtle text-dark border border-warning rounded-circle p-1">⭐</span>
+                                            <div>
+                                                <span class="fw-bold text-dark d-block">{{ hod_user.name }}</span>
+                                                <small class="text-muted d-block" style="font-size: 0.75rem;">{{ hod_user.email }}</small>
+                                            </div>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-danger small fw-semibold"><i class="bi-exclamation-circle me-1"></i>No HOD Assigned</span>
+                                        <button class="btn btn-link btn-sm p-0 ms-2" data-bs-toggle="modal" data-bs-target="#assignHodModal{{ d.id }}">Assign Now</button>
+                                    {% endif %}
+                                </div>
+                                <div class="row text-center g-2 mt-auto pt-2 border-top">
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Faculty</small>
+                                        <span class="fw-bold text-dark">{{ d.users|selectattr("role", "equalto", "teacher")|list|length }}</span>
+                                    </div>
+                                    <div class="col-6">
+                                        <small class="text-muted d-block">Students</small>
+                                        <span class="fw-bold text-dark">{{ d.users|selectattr("role", "equalto", "student")|list|length }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Modal Assign HOD -->
+                        <div class="modal fade" id="assignHodModal{{ d.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <form action="/principal/assign-hod" method="POST" class="modal-content rounded-4 border-0 shadow-lg">
+                                    <input type="hidden" name="department_id" value="{{ d.id }}">
+                                    <div class="modal-header border-bottom-0">
+                                        <h5 class="modal-title fw-bold">Assign HOD for {{ d.name }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body py-2">
+                                        <p class="text-muted small">Select a faculty member to set as Head of Department (HOD) for <strong>{{ d.name }}</strong>.</p>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">Faculty / Teacher</label>
+                                            <select name="user_id" class="form-select" required>
+                                                {% for t in teachers + hods %}
+                                                    <option value="{{ t.id }}" {% if d.hod_id == t.id %}selected{% endif %}>{{ t.name }} ({{ t.email }})</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer border-top-0">
+                                        <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                                        <button type="submit" class="btn btn-primary rounded-pill px-4">Set HOD</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="col-12 text-center py-5 text-muted">
+                        <i class="bi-building fs-1 d-block mb-2 text-secondary"></i>
+                        No departments registered in this college yet. Click "Add Department" above.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- TAB 2: FACULTY DIRECTORY -->
+        <div class="tab-pane fade {% if active_tab == 'faculty' %}show active{% endif %}" id="faculty-pane" role="tabpanel">
+            <div class="card border-0 rounded-4 shadow-sm p-4 custom-card">
+                <h5 class="fw-bold mb-3"><i class="bi-person-badge text-primary me-2"></i>College Faculty Directory</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Faculty Name</th>
+                                <th>Email Address</th>
+                                <th>Employee ID</th>
+                                <th>Department</th>
+                                <th>Phone</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if teachers or hods %}
+                                {% for t in teachers + hods %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <img src="{{ t.profile_photo or 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }}" class="rounded-circle border" width="34" height="34" style="object-fit: cover;">
+                                                <span class="fw-bold text-dark">{{ t.name }}</span>
+                                                {% if t.role == 'hod' %}<span class="badge bg-warning-subtle text-dark border border-warning rounded-pill px-2">⭐ HOD</span>{% endif %}
+                                            </div>
+                                        </td>
+                                        <td><code class="text-primary">{{ t.email }}</code></td>
+                                        <td><span class="badge bg-light text-muted border">{{ t.employee_id or 'N/A' }}</span></td>
+                                        <td>{{ t.department.name if t.department else 'General Faculty' }}</td>
+                                        <td>{{ t.phone_number or 'Not listed' }}</td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td colspan="5" class="text-center text-muted py-4">No faculty members found.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 3: COLLEGE STUDENTS -->
+        <div class="tab-pane fade {% if active_tab == 'students' %}show active{% endif %}" id="students-pane" role="tabpanel">
+            <div class="card border-0 rounded-4 shadow-sm p-4 custom-card">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold m-0"><i class="bi-people text-primary me-2"></i>Enrolled Students Directory</h5>
+                    <span class="badge bg-primary rounded-pill px-3 py-1.5">{{ students|length }} Enrolled</span>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Roll Number</th>
+                                <th>Department</th>
+                                <th>Quiz Avg</th>
+                                <th>Coding Avg</th>
+                                <th>Daily Streak</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if students %}
+                                {% for s in students %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center gap-2">
+                                                <img src="{{ s.profile_photo or 'https://cdn-icons-png.flaticon.com/512/3135/3135715.png' }}" class="rounded-circle border" width="34" height="34" style="object-fit: cover;">
+                                                <div>
+                                                    <span class="fw-bold text-dark d-block">{{ s.name }}</span>
+                                                    <small class="text-muted d-block" style="font-size: 0.72rem;">{{ s.email }}</small>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td><span class="badge bg-light text-dark border">{{ s.roll_number or 'N/A' }}</span></td>
+                                        <td>{{ s.department.name if s.department else 'Unassigned' }}</td>
+                                        <td>
+                                            <span class="badge bg-success-subtle text-success border border-success px-2 py-1">{{ s.quiz_avg }}%</span>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-info-subtle text-info border border-info px-2 py-1">{{ s.coding_avg }}%</span>
+                                        </td>
+                                        <td><span class="fw-bold text-warning">⚡ {{ s.daily_streak }} Days</span></td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td colspan="6" class="text-center text-muted py-4">No students enrolled yet.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 4: SUBJECTS -->
+        <div class="tab-pane fade {% if active_tab == 'subjects' %}show active{% endif %}" id="subjects-pane" role="tabpanel">
+            <div class="card border-0 rounded-4 shadow-sm p-4 custom-card">
+                <h5 class="fw-bold mb-3"><i class="bi-book text-primary me-2"></i>College Course Curriculum & Subjects</h5>
+                <div class="table-responsive">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Subject Code</th>
+                                <th>Subject Name</th>
+                                <th>Department</th>
+                                <th>Semester</th>
+                                <th>Assigned Faculty</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if subjects %}
+                                {% for subj in subjects %}
+                                    <tr>
+                                        <td><span class="badge bg-primary-subtle text-primary fw-bold">{{ subj.code }}</span></td>
+                                        <td class="fw-bold text-dark">{{ subj.name }}</td>
+                                        <td>{{ subj.department.name if subj.department else '—' }}</td>
+                                        <td>{{ subj.semester.name if subj.semester else '—' }}</td>
+                                        <td>
+                                            {% if subj.teacher %}
+                                                <span class="fw-semibold text-dark">{{ subj.teacher.name }}</span>
+                                            {% else %}
+                                                <span class="text-muted italic small">Unassigned</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                {% endfor %}
+                            {% else %}
+                                <tr><td colspan="5" class="text-center text-muted py-4">No subjects registered yet.</td></tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB 5: ACADEMIC PERFORMANCE -->
+        <div class="tab-pane fade {% if active_tab == 'analytics' %}show active{% endif %}" id="analytics-pane" role="tabpanel">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card border-0 rounded-4 shadow-sm p-4 custom-card text-center">
+                        <h6 class="fw-bold text-muted mb-2">College Average Quiz Grade</h6>
+                        <h1 class="display-4 fw-extrabold text-success mb-2">{{ avg_quiz }}%</h1>
+                        <p class="text-muted small">Based on evaluation across {{ students|length }} active students.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card border-0 rounded-4 shadow-sm p-4 custom-card text-center">
+                        <h6 class="fw-bold text-muted mb-2">College Average Coding Proficiency</h6>
+                        <h1 class="display-4 fw-extrabold text-info mb-2">{{ avg_coding }}%</h1>
+                        <p class="text-muted small">Based on test case passing performance in coding challenges.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal Create Department -->
+<div class="modal fade" id="createDeptModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="/college/department/create" method="POST" class="modal-content rounded-4 border-0 shadow-lg">
+            <input type="hidden" name="college_id" value="{{ college.id if college else 1 }}">
+            <div class="modal-header border-bottom-0">
+                <h5 class="modal-title fw-bold">Create New Department</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body py-2">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Department Name</label>
+                    <input type="text" name="name" class="form-control" placeholder="e.g. Computer Science & Engineering" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Department Code</label>
+                    <input type="text" name="code" class="form-control" placeholder="e.g. CSE" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Select Head of Department (HOD) - Optional</label>
+                    <select name="hod_id" class="form-select">
+                        <option value="">Assign Later</option>
+                        {% for t in teachers + hods %}
+                            <option value="{{ t.id }}">{{ t.name }} ({{ t.email }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer border-top-0">
+                <button type="button" class="btn btn-light rounded-pill" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary rounded-pill px-4">Create Department</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

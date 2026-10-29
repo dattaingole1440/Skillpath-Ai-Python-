@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% block page_title %}Send Notifications & Greetings{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h3 class="fw-bold mb-1"><i class="bi-send text-primary me-2"></i>Send Notifications & Greetings</h3>
+            <p class="text-muted mb-0">Dispatch Announcements, Greetings, Birthday Wishes, Congratulations, and Exam Reminders.</p>
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sendNotificationModal">
+            <i class="bi-plus-circle me-1"></i> Compose Notification
+        </button>
+    </div>
+
+    <!-- Sent History -->
+    <div class="card card-custom shadow-sm border-0">
+        <div class="card-header bg-transparent border-0 pt-4 px-4">
+            <h5 class="fw-bold mb-0"><i class="bi-clock-history me-2"></i>Sent Broadcast History</h5>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Type</th>
+                            <th>Title</th>
+                            <th>Recipient</th>
+                            <th>Message Content</th>
+                            <th>Sent At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for n in notifications %}
+                        <tr>
+                            <td class="ps-4">
+                                <span class="badge bg-primary-subtle text-primary text-uppercase">{{ n.type }}</span>
+                            </td>
+                            <td class="fw-semibold">{{ n.title }}</td>
+                            <td>{{ n.recipient_student.name if n.recipient_student else 'All Enrolled Students' }}</td>
+                            <td style="max-width: 300px;" class="small text-muted">{{ n.message }}</td>
+                            <td>{{ n.sent_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center text-muted py-4">No notifications sent yet.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Compose Notification -->
+<div class="modal fade" id="sendNotificationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <form action="/teacher/notifications/send" method="POST" class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title fw-bold">Compose Student Broadcast</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Notification Category</label>
+                    <select name="type" class="form-select" required>
+                        <option value="greeting">Greeting / Welcome</option>
+                        <option value="congratulations">Congratulations / Praise</option>
+                        <option value="warning">Academic Warning Message</option>
+                        <option value="assignment_reminder">Assignment Reminder</option>
+                        <option value="exam_reminder">Exam / Mock Test Reminder</option>
+                        <option value="placement_update">Placement News Update</option>
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Recipient Student</label>
+                    <select name="recipient_student_id" class="form-select">
+                        <option value="">-- Send to ALL Enrolled Students --</option>
+                        {% for s in students %}
+                            <option value="{{ s.id }}">{{ s.name }} ({{ s.email }})</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Title / Subject</label>
+                    <input type="text" name="title" class="form-control" placeholder="e.g. Outstanding Achievement in Coding Lab!" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label fw-semibold">Message</label>
+                    <textarea name="message" class="form-control" rows="4" placeholder="Write your personalized notification message here..." required></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="submit" class="btn btn-primary"><i class="bi-send me-1"></i> Dispatch Notification</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

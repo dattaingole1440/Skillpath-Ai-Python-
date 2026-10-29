@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Coding Challenges - SkillPath AI{% endblock %}
+{% block page_title %}Challenges Editor: {{ topic.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-2">
+    <!-- Breadcrumbs -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/admin/careers" class="text-decoration-none">Careers</a></li>
+                    <li class="breadcrumb-item"><a href="/admin/topics/{{ topic.roadmap.id }}" class="text-decoration-none">Topics</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Coding Challenges</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold">Manage Coding Challenges</h3>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="/admin/topics/{{ topic.roadmap_id }}" class="btn btn-outline-secondary rounded-pill">Back to Topics</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- List Challenges -->
+        <div class="col-lg-6">
+            <div class="card custom-card border-0 p-4 shadow-sm h-100">
+                <h5 class="fw-bold mb-4 text-primary"><i class="bi-code-slash"></i> Configured Challenges</h5>
+                
+                {% if challenges %}
+                    {% for chal in challenges %}
+                        <div class="card border rounded-3 p-4 mb-3 bg-body">
+                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                <div>
+                                    <h6 class="fw-bold m-0 text-dark">{{ chal.title }}</h6>
+                                    <span class="badge bg-warning-subtle text-warning px-2.5 py-1 text-capitalize mt-1" style="font-size: 0.72rem;">{{ chal.difficulty }}</span>
+                                </div>
+                                <div class="d-flex gap-1">
+                                    <button type="button" class="btn btn-xs btn-primary rounded-pill px-2 py-0.5" style="font-size: 0.72rem;"
+                                            onclick='openEditChallengeModal({{ chal.id }}, {{ chal.title | tojson }}, {{ chal.score_points }}, {{ chal.difficulty | tojson }}, {{ chal.description | tojson }}, {{ (chal.template_code or "") | tojson }}, {{ (chal.test_cases or "[]") | tojson }})'>
+                                        <i class="bi-pencil"></i> Edit
+                                    </button>
+                                    <form action="/admin/challenges/delete/{{ chal.id }}" method="POST" onsubmit="return confirm('Delete this challenge?');" style="display:inline;">
+                                        <button type="submit" class="btn btn-xs btn-outline-danger rounded-pill px-2 py-0.5" style="font-size: 0.72rem;">
+                                            <i class="bi-trash"></i>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                            <div class="text-muted small mb-3">{{ chal.description[:150] | safe }}...</div>
+                            <div class="bg-light-subtle p-2 rounded small">
+                                <strong>Points:</strong> {{ chal.score_points }} | <strong>Test Cases:</strong> {{ chal.test_cases[:100] }}...
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-5 border rounded bg-white h-100 d-flex flex-column align-items-center justify-content-center">
+                        <i class="bi-braces display-4 text-muted"></i>
+                        <h5 class="fw-bold mt-3">No Challenges Configured</h5>
+                        <p class="text-muted small">Fill out the workspace editor on the side to write challenge parameters.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Add Challenge Form -->
+        <div class="col-lg-6">
+            <div class="card custom-card border-0 p-4 shadow-sm">
+                <h5 class="fw-bold mb-3"><i class="bi-plus-circle text-primary"></i> Create Coding Challenge</h5>
+                
+                <form action="/admin/challenges/add" method="POST">
+                    <input type="hidden" name="topic_id" value="{{ topic.id }}">
+                    
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label for="title" class="form-label fw-semibold">Challenge Title</label>
+                            <input type="text" class="form-control form-control-sm" id="title" name="title" required placeholder="e.g. Factorial Calculator">
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="score_points" class="form-label fw-semibold">Score Points</label>
+                            <input type="number" class="form-control form-control-sm" id="score_points" name="score_points" required value="10" min="5">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="description" class="form-label fw-semibold">Description (HTML or Text)</label>
+                        <textarea class="form-control form-control-sm" id="description" name="description" rows="3" required placeholder="Write guidelines, constraints, and task definitions..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="difficulty" class="form-label fw-semibold">Difficulty</label>
+                        <select class="form-select form-select-sm" id="difficulty" name="difficulty">
+                            <option value="easy">Easy</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="template_code" class="form-label fw-semibold">Boilerplate Template Code</label>
+                        <textarea class="form-control form-control-sm" style="font-family: monospace;" id="template_code" name="template_code" rows="4" placeholder="def solution(n):&#10;    # Write code here&#10;    pass"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="test_cases" class="form-label fw-semibold">Test Cases (JSON Format)</label>
+                        <textarea class="form-control form-control-sm" style="font-family: monospace;" id="test_cases" name="test_cases" rows="4" required>[
+  {"function_name": "solution", "args": [5], "expected": 120},
+  {"function_name": "solution", "args": [3], "expected": 6}
+]</textarea>
+                        <div class="form-text small" style="font-size: 0.72rem;">Ensure array layout: each object must map a "function_name" (matching template function), "args" (list of function parameters), and "expected" return value.</div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary w-100 py-2 rounded-pill fw-bold">Save Challenge</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Challenge Modal -->
+<div class="modal fade" id="editChallengeModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow rounded-4">
+            <div class="modal-header border-bottom">
+                <h5 class="modal-title fw-bold text-primary"><i class="bi-pencil-square"></i> Edit Coding Challenge</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="editChallengeForm" method="POST">
+                <div class="modal-body p-4">
+                    <div class="row">
+                        <div class="col-md-8 mb-3">
+                            <label class="form-label fw-semibold">Challenge Title</label>
+                            <input type="text" class="form-control form-control-sm" id="edit_chal_title" name="title" required>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label fw-semibold">Score Points</label>
+                            <input type="number" class="form-control form-control-sm" id="edit_chal_score_points" name="score_points" required min="5">
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Description (HTML or Text)</label>
+                        <textarea class="form-control form-control-sm" id="edit_chal_description" name="description" rows="3" required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Difficulty</label>
+                        <select class="form-select form-select-sm" id="edit_chal_difficulty" name="difficulty">
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Boilerplate Template Code</label>
+                        <textarea class="form-control form-control-sm" style="font-family: monospace;" id="edit_chal_template_code" name="template_code" rows="4"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label fw-semibold">Test Cases (JSON Format)</label>
+                        <textarea class="form-control form-control-sm" style="font-family: monospace;" id="edit_chal_test_cases" name="test_cases" rows="4" required></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer border-top">
+                    <button type="button" class="btn btn-light rounded-pill px-4" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script>
+function openEditChallengeModal(id, title, points, diff, desc, tmpl, cases) {
+    document.getElementById('editChallengeForm').action = '/admin/challenges/edit/' + id;
+    document.getElementById('edit_chal_title').value = title || '';
+    document.getElementById('edit_chal_score_points').value = points || 10;
+    document.getElementById('edit_chal_difficulty').value = diff || 'medium';
+    document.getElementById('edit_chal_description').value = desc || '';
+    document.getElementById('edit_chal_template_code').value = tmpl || '';
+    document.getElementById('edit_chal_test_cases').value = typeof cases === 'string' ? cases : JSON.stringify(cases, null, 2);
+    new bootstrap.Modal(document.getElementById('editChallengeModal')).show();
+}
+</script>
+{% endblock %}

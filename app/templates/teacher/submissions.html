@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block page_title %}Evaluate Submissions{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="mb-4">
+        <a href="/teacher/assignments" class="btn btn-sm btn-outline-secondary mb-2"><i class="bi-arrow-left me-1"></i>Back to Assignments</a>
+        <h3 class="fw-bold mb-1">{{ assignment.title }}</h3>
+        <p class="text-muted mb-0">Submissions for <b>{{ assignment.subject.name if assignment.subject else 'Subject' }}</b> | Max Marks: {{ assignment.max_marks }} pts</p>
+    </div>
+
+    <div class="card card-custom shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-4">Student</th>
+                            <th>Submitted At</th>
+                            <th>Submission Content</th>
+                            <th>Marks</th>
+                            <th>AI Feedback</th>
+                            <th class="pe-4 text-end">Action / Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for sub in submissions %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="fw-bold">{{ sub.student.name if sub.student else 'Unknown' }}</div>
+                                <div class="small text-muted">{{ sub.student.email if sub.student else '' }}</div>
+                            </td>
+                            <td>{{ sub.submitted_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>
+                                {% if sub.code %}
+                                    <pre class="bg-light p-2 rounded small mb-0" style="max-height: 80px; overflow-y: auto;"><code>{{ sub.code }}</code></pre>
+                                {% elif sub.submission_text %}
+                                    <div class="small text-dark" style="max-width: 250px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">{{ sub.submission_text }}</div>
+                                {% elif sub.file_url %}
+                                    <a href="{{ sub.file_url }}" target="_blank" class="btn btn-xs btn-outline-primary"><i class="bi-file-earmark me-1"></i>View File</a>
+                                {% else %}
+                                    <span class="text-muted">No content</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if sub.marks_obtained != None %}
+                                    <span class="badge bg-success fs-6">{{ sub.marks_obtained }} / {{ assignment.max_marks }}</span>
+                                {% else %}
+                                    <span class="badge bg-warning text-dark">Ungraded</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if sub.ai_feedback %}
+                                    <span class="small text-primary"><i class="bi-cpu me-1"></i>{{ sub.ai_feedback|truncate(60) }}</span>
+                                {% else %}
+                                    <button onclick="triggerAIGrade('{{ sub.id }}')" class="btn btn-xs btn-outline-purple" id="ai-btn-{{ sub.id }}">
+                                        <i class="bi-magic me-1"></i>Generate AI Feedback
+                                    </button>
+                                {% endif %}
+                            </td>
+                            <td class="pe-4 text-end">
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#gradeModal-{{ sub.id }}">
+                                    <i class="bi-pencil-square me-1"></i> Grade
+                                </button>
+                            </td>
+                        </tr>
+
+                        <!-- Modal Grade -->
+                        <div class="modal fade" id="gradeModal-{{ sub.id }}" tabindex="-1">
+                            <div class="modal-dialog">
+                                <form action="/teacher/submissions/grade" method="POST" class="modal-content">
+                                    <input type="hidden" name="submission_id" value="{{ sub.id }}">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title fw-bold">Grade Student Submission</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">Marks Obtained (Out of {{ assignment.max_marks }})</label>
+                                            <input type="number" step="0.5" name="marks_obtained" value="{{ sub.marks_obtained or 80 }}" class="form-control" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-semibold">Teacher Feedback</label>
+                                            <textarea name="feedback" class="form-control" rows="3" required>{{ sub.feedback or 'Good submission. Meets key requirements.' }}</textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="submit" class="btn btn-success"><i class="bi-check-circle me-1"></i> Save Grade</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-4">No student submissions received yet for this assignment.</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function triggerAIGrade(subId) {
+    const btn = document.getElementById(`ai-btn-${subId}`);
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm me-1"></span>Analyzing...`;
+    btn.disabled = true;
+
+    fetch(`/teacher/submissions/ai-grade/${subId}`, { method: 'POST' })
+        .then(r => r.json())
+        .then(data => {
+            alert(`AI Feedback Generated:\n\n${data.ai_feedback}`);
+            window.location.reload();
+        })
+        .catch(err => {
+            alert('AI Evaluation error: ' + err);
+            btn.innerHTML = `<i class="bi-magic me-1"></i>Generate AI Feedback`;
+            btn.disabled = false;
+        });
+}
+</script>
+{% endblock %}

@@ -1,0 +1,550 @@
+{% extends "base.html" %}
+
+{% block title %}{{ topic.title }} - SkillPath AI{% endblock %}
+{% block page_title %}{{ topic.title }}{% endblock %}
+
+{% block head %}
+<style>
+    .code-block-wrapper {
+        border: 1px solid var(--border-color);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-2">
+    <!-- Header Context -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/roadmap/view" class="text-decoration-none">Roadmap</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">{{ topic.title }}</li>
+                </ol>
+            </nav>
+            <h2 class="fw-bold">{{ topic.title }}</h2>
+            <div class="d-flex gap-2 align-items-center flex-wrap">
+                <span class="badge bg-primary-subtle text-primary px-3 py-1 rounded text-capitalize">{{ topic.difficulty }}</span>
+                <span class="text-muted"><i class="bi-clock"></i> Est. Time: {{ topic.estimated_time }} hours</span>
+                <span class="badge bg-success-subtle text-success px-3 py-1 rounded ms-md-2"><i class="bi-stopwatch"></i> Active Study: <span id="studyTimer">0 min</span></span>
+                {% if youtube_videos_list and youtube_videos_list|length > 0 %}
+                    <button class="btn btn-xs btn-danger rounded-pill px-3 py-1 shadow-sm ms-auto" onclick="document.getElementById('resources-tab').click(); document.getElementById('resources').scrollIntoView({behavior:'smooth'});">
+                        <i class="bi-play-circle-fill me-1"></i> Watch Video Lecture ({{ youtube_videos_list|length }})
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <a href="/roadmap/view" class="btn btn-outline-secondary rounded-pill"><i class="bi-arrow-left"></i> Back to Path</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Main Resource Panels -->
+        <div class="col-lg-8">
+            <div class="card custom-card border-0 p-4 shadow-sm mb-4">
+                <!-- Navigation Tabs -->
+                <ul class="nav nav-pills mb-4 gap-2 flex-wrap" id="resourceTabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                        <button class="btn btn-outline-primary active rounded-pill px-4 mb-2" id="overview-tab" data-bs-toggle="tab" data-bs-target="#overview" type="button" role="tab">Overview</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="btn btn-outline-primary rounded-pill px-4 mb-2" id="resources-tab" data-bs-toggle="tab" data-bs-target="#resources" type="button" role="tab">
+                            <i class="bi-youtube text-danger me-1"></i> Videos & Docs {% if youtube_videos_list %}<span class="badge bg-danger rounded-pill ms-1" style="font-size: 0.65rem;">{{ youtube_videos_list|length }}</span>{% endif %}
+                        </button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="btn btn-outline-primary rounded-pill px-4 mb-2" id="notes-tab" data-bs-toggle="tab" data-bs-target="#notes" type="button" role="tab">Notes & Cheat Sheet</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="btn btn-outline-primary rounded-pill px-4 mb-2" id="practice-tab" data-bs-toggle="tab" data-bs-target="#practice" type="button" role="tab">Practice & Projects</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                        <button class="btn btn-outline-primary rounded-pill px-4 mb-2" id="ai-tab" data-bs-toggle="tab" data-bs-target="#aiAssistant" type="button" role="tab"><i class="bi-cpu-fill"></i> AI Assistant</button>
+                    </li>
+                </ul>
+
+                <!-- Tabs Content -->
+                <div class="tab-content" id="resourceTabsContent">
+                    <!-- Overview Tab -->
+                    <div class="tab-pane fade show active" id="overview" role="tabpanel">
+                        <h5 class="fw-bold mb-3 text-dark">Topic Description</h5>
+                        <p class="text-secondary" style="line-height: 1.7;">{{ topic.description }}</p>
+                        
+                        <h5 class="fw-bold mt-4 mb-3 text-dark">Learning Objectives</h5>
+                        <ul class="list-group list-group-flush bg-transparent">
+                            {% if topic.learning_objectives %}
+                                {% for objective in topic.learning_objectives.split('\n') %}
+                                    {% if objective.strip() %}
+                                        <li class="list-group-item bg-transparent text-secondary border-0 px-0 d-flex gap-2">
+                                            <i class="bi-check-circle-fill text-success mt-1"></i> 
+                                            <span>{{ objective.strip() }}</span>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                            {% else %}
+                                <li class="list-group-item bg-transparent text-muted border-0">No specific learning objectives listed.</li>
+                            {% endif %}
+                        </ul>
+                    </div>
+
+                    <!-- Videos & Docs Tab -->
+                    <div class="tab-pane fade" id="resources" role="tabpanel">
+                        <!-- Embedded Video Player with Anti-Skip Action -->
+                        <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
+                            <h5 class="fw-bold m-0 text-dark"><i class="bi-play-btn-fill text-danger me-1"></i> Topic Video Lecture</h5>
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge bg-warning text-dark px-2.5 py-1 rounded-pill small fw-semibold" title="Fast-forwarding disabled">
+                                    <i class="bi-shield-lock-fill me-1"></i> Anti-Skip Active
+                                </span>
+                                <span id="videoCompletionBadge" class="badge bg-success-subtle text-success px-2.5 py-1 rounded-pill small fw-bold d-none">
+                                    <i class="bi-check-circle-fill me-1"></i> 75% Watched
+                                </span>
+                                <span id="activeVideoTitle" class="badge bg-danger-subtle text-danger px-3 py-1 fw-semibold small">
+                                    {% if youtube_videos_list %}{{ youtube_videos_list[0].title }}{% else %}No Video Attached{% endif %}
+                                </span>
+                            </div>
+                        </div>
+
+                        {% if youtube_videos_list and youtube_videos_list|length > 0 %}
+                            {% if '/static/uploads/videos' in youtube_videos_list[0].url or youtube_videos_list[0].url.endswith('.mp4') %}
+                                <div id="videoPlayerContainer" class="ratio ratio-16x9 mb-4 rounded-3 overflow-hidden border shadow bg-black">
+                                    <video id="localVideoPlayer" controls controlsList="nodownload" class="w-100 h-100">
+                                        <source src="{{ youtube_videos_list[0].url }}" type="video/mp4">
+                                        Your browser does not support the video tag.
+                                    </video>
+                                </div>
+                            {% else %}
+                                <div id="videoPlayerContainer" class="ratio ratio-16x9 mb-4 rounded-3 overflow-hidden border shadow bg-black">
+                                    <iframe id="mainYoutubeIframe" src="{% if 'v=' in youtube_videos_list[0].url %}https://www.youtube.com/embed/{{ youtube_videos_list[0].url.split('v=')[1].split('&')[0] }}{% elif 'youtu.be/' in youtube_videos_list[0].url %}https://www.youtube.com/embed/{{ youtube_videos_list[0].url.split('youtu.be/')[1].split('?')[0] }}{% else %}{{ youtube_videos_list[0].url }}{% endif %}?enablejsapi=1" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" allowfullscreen></iframe>
+                                </div>
+                            {% endif %}
+
+                            <h6 class="fw-bold text-dark mb-2"><i class="bi-collection-play-fill text-primary"></i> Module Video Playlist ({{ youtube_videos_list|length }})</h6>
+                            <div id="videosBox" class="mb-4">
+                                {% for v in youtube_videos_list %}
+                                <div class="video-playlist-item d-flex align-items-center justify-content-between p-3 border rounded-3 mb-2 bg-light-subtle cursor-pointer hover-shadow transition-all"
+                                     onclick="loadYoutubeVideo('{{ v.url }}', '{{ v.title | escape }}', this)">
+                                    <div class="d-flex align-items-center gap-3">
+                                        <div class="rounded-circle bg-danger-subtle p-2 d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                            <i class="bi-play-fill text-danger fs-4"></i>
+                                        </div>
+                                        <div>
+                                            <div class="fw-bold text-dark mb-0.5" style="font-size: 0.92rem;">{{ v.title }}</div>
+                                            <small class="text-muted" style="font-size: 0.75rem;"><i class="bi-shield-check"></i> Mandatory 75% Watch Required</small>
+                                        </div>
+                                    </div>
+                                    <a href="{{ v.url }}" target="_blank" onclick="event.stopPropagation();" class="btn btn-xs btn-outline-secondary rounded-pill px-2.5 py-1" title="Open video link in new tab">
+                                        <i class="bi-box-arrow-up-right"></i>
+                                    </a>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="mb-4 p-4 text-center border rounded-3 bg-light">
+                                <i class="bi-play-btn display-4 text-muted"></i>
+                                <h6 class="fw-bold mt-2">No Video Lectures Attached</h6>
+                                <p class="text-secondary small mb-0">The administrator can add YouTube video links or upload local video files in the Super Admin dashboard.</p>
+                            </div>
+                        {% endif %}
+
+                        <h5 class="fw-bold mt-4 mb-3 text-dark"><i class="bi-file-earmark-text-fill text-primary"></i> Official Documentation</h5>
+                        <div id="docsBox">
+                            {% if docs_list and docs_list|length > 0 %}
+                                {% for d in docs_list %}
+                                <div class="d-flex align-items-center justify-content-between p-2.5 border rounded-3 mb-2 bg-light-subtle">
+                                    <div class="d-flex align-items-center gap-2">
+                                        <i class="bi-file-earmark-text-fill text-primary fs-5"></i>
+                                        <a href="{{ d.url }}" target="_blank" class="fw-semibold text-decoration-none text-dark">{{ d.title }}</a>
+                                    </div>
+                                    <a href="{{ d.url }}" target="_blank" class="btn btn-xs btn-outline-primary rounded-pill px-2 py-0.5" style="font-size: 0.72rem;">Open <i class="bi-box-arrow-up-right"></i></a>
+                                </div>
+                                {% endfor %}
+                            {% else %}
+                                <p class="text-secondary small">No official documentation links loaded for this topic.</p>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Notes & Cheat Sheet Tab -->
+                    <div class="tab-pane fade" id="notes" role="tabpanel">
+                        <h5 class="fw-bold mb-2 text-dark">Study Notes</h5>
+                        <div class="bg-light p-3 rounded mb-4 text-dark" style="white-space: pre-wrap; font-family: monospace;">{{ topic.notes or 'No study notes provided.' }}</div>
+
+                        <h5 class="fw-bold mb-2 text-dark">Cheat Sheet Reference</h5>
+                        <div class="bg-light p-3 rounded text-dark" style="white-space: pre-wrap; font-family: monospace;">{{ topic.cheat_sheet or 'No cheat sheet reference provided.' }}</div>
+                    </div>
+
+                    <!-- Practice & Projects Tab -->
+                    <div class="tab-pane fade" id="practice" role="tabpanel">
+                        <h5 class="fw-bold mb-3 text-dark">Practice Questions</h5>
+                        <div id="practiceBox" class="mb-4">
+                            <p class="text-muted small">No practice questions set for this topic.</p>
+                        </div>
+
+                        <h5 class="fw-bold mt-4 mb-2 text-dark">Mini Project Guidelines</h5>
+                        <div class="bg-light p-3 rounded text-dark border-start border-3 border-success" style="white-space: pre-wrap;">{{ topic.mini_project or 'Implement a simple code script executing the logic presented in this module.' }}</div>
+                    </div>
+
+                    <!-- AI Study Assistant Tab -->
+                    <div class="tab-pane fade" id="aiAssistant" role="tabpanel">
+                        <h5 class="fw-bold mb-2 text-dark"><i class="bi-cpu-fill text-primary"></i> Chat with Topic Assistant</h5>
+                        <p class="text-secondary small">Ask any technical questions about <strong>{{ topic.title }}</strong>. Get simple explanations, code samples, or error analysis.</p>
+                        
+                        <div class="border rounded-4 bg-light-subtle d-flex flex-column overflow-hidden mt-3" style="height: 380px;">
+                            <!-- Chat Screen -->
+                            <div class="p-3 overflow-y-auto flex-grow-1 d-flex flex-column gap-2" id="assistantChatBody" style="background-color: var(--bg-primary);">
+                                <div class="bg-body p-2.5 rounded shadow-sm text-secondary small align-self-start border-start border-3 border-primary" style="max-width: 85%;">
+                                    Hi! I am your AI study assistant. Ask me anything about **{{ topic.title }}**!
+                                </div>
+                            </div>
+                            <!-- Chat Input -->
+                            <div class="border-top p-2 bg-body">
+                                <form id="assistantChatForm" class="d-flex align-items-center gap-2">
+                                    <input type="text" class="form-control form-control-sm rounded-pill px-3" id="assistantChatInput" placeholder="Ask a question..." required autocomplete="off">
+                                    <button class="btn btn-primary btn-sm rounded-circle d-flex align-items-center justify-content-center" type="submit" style="width: 32px; height: 32px;"><i class="bi-send-fill"></i></button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Checkpoint Tasklist (Quizzes, Code challenges, and Progress) -->
+        <div class="col-lg-4">
+            <!-- Topic Progress Card -->
+            <div class="card custom-card border-0 p-4 shadow-sm mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="fw-bold m-0"><i class="bi-check-circle text-primary"></i> Progress Status</h5>
+                    {% if progress.status == "Completed" %}
+                        <span class="badge bg-success-subtle text-success rounded-pill px-2.5 py-1">Completed</span>
+                    {% else %}
+                        <span class="badge bg-warning-subtle text-warning rounded-pill px-2.5 py-1">In Progress</span>
+                    {% endif %}
+                </div>
+                
+                <p class="text-muted small mb-3">
+                    {% if progress.status == "Completed" %}
+                        You have successfully completed this topic module! All related checkpoints are unlocked.
+                    {% else %}
+                        Complete the quizzes, challenges, or mark this topic completed manually once you finish studying.
+                    {% endif %}
+                </p>
+
+                {% if progress.status != "Completed" %}
+                    <button type="button" class="btn btn-success w-100 rounded-pill py-2.5 fw-bold" id="completeTopicBtn">
+                        <i class="bi-patch-check-fill me-1"></i> Mark as Completed
+                    </button>
+                {% else %}
+                    <div class="text-center py-2 text-success">
+                        <i class="bi-patch-check-fill fs-2"></i>
+                        <div class="small fw-bold mt-1 text-uppercase">Module Completed!</div>
+                    </div>
+                {% endif %}
+            </div>
+
+            <div class="card custom-card border-0 p-4 shadow-sm">
+                <h5 class="fw-bold mb-3"><i class="bi-shield-check text-primary"></i> Checkpoints</h5>
+                <p class="text-muted small">Pass the checkpoints below to unlock the subsequent learning roadmap milestones.</p>
+                
+                <!-- Quiz Check -->
+                <div class="card border rounded-3 p-3 mb-3 bg-body">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h6 class="fw-bold m-0"><i class="bi-question-circle text-primary"></i> Topic MCQ Quiz</h6>
+                        {% if progress.status == "Completed" %}
+                            <span class="badge bg-success-subtle text-success rounded-pill px-2.5 py-1">Passed</span>
+                        {% else %}
+                            <span class="badge bg-warning-subtle text-warning rounded-pill px-2.5 py-1">Incomplete</span>
+                        {% endif %}
+                    </div>
+                    {% if quiz %}
+                        <a href="/quiz/take/{{ quiz.id }}" class="btn btn-primary btn-sm w-100 rounded-pill py-2">
+                            Take Quiz <i class="bi-arrow-right-short"></i>
+                        </a>
+                    {% else %}
+                        <button class="btn btn-outline-secondary btn-sm w-100 rounded-pill" disabled>No Quiz Available</button>
+                    {% endif %}
+                </div>
+
+                <!-- Code Challenges Check -->
+                <div class="card border rounded-3 p-3 bg-body">
+                    <h6 class="fw-bold mb-3"><i class="bi-code-slash text-primary"></i> Coding Challenges</h6>
+                    {% if challenges %}
+                        <div class="d-grid gap-2">
+                            {% for chal in challenges %}
+                                <a href="/coding/challenge/{{ chal.id }}" class="btn btn-outline-primary btn-sm text-start d-flex justify-content-between align-items-center px-3 py-2 rounded-3 text-decoration-none">
+                                    <span>{{ chal.title }}</span>
+                                    <span class="badge bg-secondary text-capitalize">{{ chal.difficulty }}</span>
+                                </a>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <button class="btn btn-outline-secondary btn-sm w-100 rounded-pill" disabled>No Code Challenges</button>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+    const topicId = "{{ topic.id }}";
+    let activeMinutes = {{ progress.study_time_minutes }};
+    document.getElementById("studyTimer").innerText = `${activeMinutes} min`;
+
+    // 1. Live Study Heartbeat Loop (Runs every 60 seconds when user is active on the page)
+    setInterval(() => {
+        fetch(`/roadmap/topic/${topicId}/heartbeat`, {
+            method: "POST",
+            headers: {
+                "Accept": "application/json",
+                "Content-Type": "application/json"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                activeMinutes = data.minutes_studied;
+                document.getElementById("studyTimer").innerText = `${activeMinutes} min`;
+            }
+        })
+        .catch(err => console.log("Heartbeat update failed."));
+    }, 60000);
+
+    // 2. Parse YouTube video URL to build embedded iframe player
+    function getYoutubeEmbedUrl(url) {
+        if (!url) return '';
+        let videoId = '';
+        if (url.includes('v=')) {
+            videoId = url.split('v=')[1].split('&')[0];
+        } else if (url.includes('youtu.be/')) {
+            videoId = url.split('youtu.be/')[1].split('?')[0];
+        } else if (url.includes('embed/')) {
+            videoId = url.split('embed/')[1].split('?')[0];
+        }
+        return videoId ? `https://www.youtube.com/embed/${videoId}` : '';
+    }
+
+    // Practice questions display fallback if present
+    const practiceBox = document.getElementById("practiceBox");
+    if (practiceBox && practiceBox.children.length === 0) {
+        practiceBox.innerHTML = "<p class='text-muted small'>No practice questions set for this module.</p>";
+    }
+
+    // 4. Handle manual topic completion trigger
+    const completeTopicBtn = document.getElementById("completeTopicBtn");
+    if (completeTopicBtn) {
+        completeTopicBtn.addEventListener("click", function() {
+            completeTopicBtn.disabled = true;
+            completeTopicBtn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> Updating...`;
+            
+            fetch(`/roadmap/topic/${topicId}/complete`, {
+                method: "POST",
+                headers: {
+                    "Accept": "application/json",
+                    "Content-Type": "application/json"
+                }
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === "success") {
+                    window.location.reload();
+                } else {
+                    alert(`Failed to complete topic: ${data.message || 'Unknown error'}`);
+                    completeTopicBtn.disabled = false;
+                    completeTopicBtn.innerHTML = `<i class="bi-patch-check-fill me-1"></i> Mark as Completed`;
+                }
+            })
+            .catch(err => {
+                alert(`Error: ${err.message}`);
+                completeTopicBtn.disabled = false;
+                completeTopicBtn.innerHTML = `<i class="bi-patch-check-fill me-1"></i> Mark as Completed`;
+            });
+        });
+    }
+
+    // 5. Handle Local AI Study Assistant chatbot
+    const assistantChatForm = document.getElementById("assistantChatForm");
+    const assistantChatInput = document.getElementById("assistantChatInput");
+    const assistantChatBody = document.getElementById("assistantChatBody");
+
+    function formatChatMarkdown(text) {
+        let escaped = text
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;");
+
+        // Headers formatting (### and ####)
+        escaped = escaped.replace(/^####\s+(.*?)$/gm, '<h6 class="fw-bold text-dark mt-2 mb-1">$1</h6>');
+        escaped = escaped.replace(/^###\s+(.*?)$/gm, '<h5 class="fw-bold text-primary mt-2 mb-1">$1</h5>');
+        escaped = escaped.replace(/^##\s+(.*?)$/gm, '<h4 class="fw-bold text-primary mt-3 mb-2">$1</h4>');
+
+        // Code blocks: ```lang\ncode\n```
+        escaped = escaped.replace(/```(\w*)\n([\s\S]*?)```/g, function(match, lang, code) {
+            return `<div class="code-block-wrapper my-3 rounded-3 overflow-hidden border shadow-sm">
+                <div class="code-block-header d-flex justify-content-between align-items-center bg-dark text-secondary px-3 py-2 text-xs font-monospace">
+                    <span class="text-uppercase fw-bold text-light">${lang || 'code'}</span>
+                    <button class="btn btn-link btn-xs text-secondary text-decoration-none p-0" onclick="copyTopicCode(this)"><i class="bi-copy"></i> Copy</button>
+                </div>
+                <pre class="bg-dark text-white p-3 m-0 text-sm font-monospace" style="white-space: pre-wrap; overflow-x: auto;"><code>${code.trim()}</code></pre>
+            </div>`;
+        });
+
+        // Inline code: `code`
+        escaped = escaped.replace(/`([^`]+)`/g, '<code class="bg-body-secondary px-1.5 py-0.5 rounded text-danger small font-monospace">$1</code>');
+
+        // Bold: **text**
+        escaped = escaped.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+        // Line breaks
+        escaped = escaped.replace(/\n/g, '<br>');
+
+        return escaped;
+    }
+
+    function loadYoutubeVideo(url, title, element) {
+        let embedUrl = url;
+        if (url.includes('v=')) {
+            const videoId = url.split('v=')[1].split('&')[0];
+            embedUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1';
+        } else if (url.includes('youtu.be/')) {
+            const videoId = url.split('youtu.be/')[1].split('?')[0];
+            embedUrl = 'https://www.youtube.com/embed/' + videoId + '?autoplay=1';
+        }
+        
+        const iframe = document.getElementById('mainYoutubeIframe');
+        if (iframe) {
+            iframe.src = embedUrl;
+        }
+
+        const titleBadge = document.getElementById('activeVideoTitle');
+        if (titleBadge && title) {
+            titleBadge.innerText = title;
+        }
+
+        // Highlight active playlist item
+        document.querySelectorAll('.video-playlist-item').forEach(el => {
+            el.classList.remove('border-danger', 'bg-danger-subtle');
+            el.classList.add('bg-light-subtle');
+        });
+        if (element) {
+            element.classList.remove('bg-light-subtle');
+            element.classList.add('border-danger', 'bg-danger-subtle');
+        }
+
+        const container = document.getElementById('videoPlayerContainer');
+        if (container) {
+            container.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+    }
+
+    // Anti-Skip Video Enforcement Script (75% Watch Requirement)
+    let maxWatchedTime = 0;
+    let is75PercentCompleted = false;
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const localVideo = document.getElementById('localVideoPlayer');
+        if (localVideo) {
+            localVideo.addEventListener('timeupdate', function() {
+                if (!localVideo.seeking && localVideo.currentTime > maxWatchedTime + 1.5) {
+                    localVideo.currentTime = maxWatchedTime;
+                    alert("⚠️ Anti-Skip Action: Fast-forwarding/skipping video is disabled. Complete 75% of the video without skipping to satisfy the requirement.");
+                } else {
+                    maxWatchedTime = Math.max(maxWatchedTime, localVideo.currentTime);
+                }
+
+                if (localVideo.duration > 0) {
+                    const watchPercent = (maxWatchedTime / localVideo.duration) * 100;
+                    if (watchPercent >= 75 && !is75PercentCompleted) {
+                        is75PercentCompleted = true;
+                        const badge = document.getElementById('videoCompletionBadge');
+                        if (badge) badge.classList.remove('d-none');
+                    }
+                }
+            });
+
+            localVideo.addEventListener('seeking', function() {
+                if (localVideo.currentTime > maxWatchedTime) {
+                    localVideo.currentTime = maxWatchedTime;
+                }
+            });
+        }
+    });
+
+    function copyTopicCode(button) {
+        const pre = button.closest('.code-block-wrapper').querySelector('pre');
+        navigator.clipboard.writeText(pre.innerText).then(() => {
+            button.innerHTML = '<i class="bi-check-lg"></i> Copied!';
+            setTimeout(() => {
+                button.innerHTML = '<i class="bi-copy"></i> Copy';
+            }, 2000);
+        });
+    }
+
+    if (assistantChatForm) {
+        assistantChatForm.addEventListener("submit", function(e) {
+            e.preventDefault();
+            const promptText = assistantChatInput.value.trim();
+            if (!promptText) return;
+
+            assistantChatInput.value = "";
+
+            // User bubble
+            const userMsgDiv = document.createElement("div");
+            userMsgDiv.className = "bg-primary text-white p-2.5 rounded shadow-sm align-self-end small";
+            userMsgDiv.style.maxWidth = "85%";
+            userMsgDiv.innerText = promptText;
+            assistantChatBody.appendChild(userMsgDiv);
+            assistantChatBody.scrollTop = assistantChatBody.scrollHeight;
+
+            // Loader bubble
+            const loaderDiv = document.createElement("div");
+            loaderDiv.className = "bg-body p-2 rounded shadow-sm text-secondary small align-self-start";
+            loaderDiv.style.maxWidth = "85%";
+            loaderDiv.innerHTML = `<span class="spinner-border spinner-border-sm" role="status"></span> thinking...`;
+            assistantChatBody.appendChild(loaderDiv);
+            assistantChatBody.scrollTop = assistantChatBody.scrollHeight;
+
+            // Prepend context to help the AI focus on the active topic
+            const contextMessage = `I am currently studying the learning topic: "${document.title.split(' - ')[0]}". Here is my question: ${promptText}`;
+
+            fetch("/api/ai/chat", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ message: contextMessage })
+            })
+            .then(res => {
+                return res.json().then(data => {
+                    if (!res.ok) throw new Error(data.detail || "Error querying Gemini API.");
+                    return data;
+                });
+            })
+            .then(data => {
+                assistantChatBody.removeChild(loaderDiv);
+
+                const replyDiv = document.createElement("div");
+                replyDiv.className = "bg-body p-2.5 rounded shadow-sm border-start border-3 border-primary text-dark small align-self-start";
+                replyDiv.style.maxWidth = "85%";
+                replyDiv.innerHTML = formatChatMarkdown(data.reply);
+                assistantChatBody.appendChild(replyDiv);
+                assistantChatBody.scrollTop = assistantChatBody.scrollHeight;
+            })
+            .catch(err => {
+                if (assistantChatBody.contains(loaderDiv)) {
+                    assistantChatBody.removeChild(loaderDiv);
+                }
+                const errDiv = document.createElement("div");
+                errDiv.className = "bg-danger bg-opacity-10 text-danger p-2 rounded small align-self-start";
+                errDiv.innerText = `Error: ${err.message}`;
+                assistantChatBody.appendChild(errDiv);
+                assistantChatBody.scrollTop = assistantChatBody.scrollHeight;
+            });
+        });
+    }
+</script>
+{% endblock %}

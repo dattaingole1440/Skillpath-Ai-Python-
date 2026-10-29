@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block title %}Audit Trail & Change History - SkillPath AI{% endblock %}
+{% block page_title %}Audit Trail & Change History{% endblock %}
+
+{% block content %}
+<div class="container py-2">
+    <!-- Breadcrumbs -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb">
+                    <li class="breadcrumb-item"><a href="/admin" class="text-decoration-none">Admin</a></li>
+                    <li class="breadcrumb-item active" aria-current="page">Audit Trail</li>
+                </ol>
+            </nav>
+            <h3 class="fw-bold"><i class="bi-shield-check text-primary"></i> Database Change History & Audit Logs</h3>
+            <p class="text-muted small">Real-time persistent record of administrator actions, content updates, video modifications, and soft deletions.</p>
+        </div>
+        <div class="col-md-4 text-md-end">
+            <a href="/admin" class="btn btn-outline-secondary rounded-pill"><i class="bi-arrow-left"></i> Admin Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Filters & Stats -->
+    <div class="card custom-card border-0 p-3 mb-4 shadow-sm">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div class="d-flex gap-2 align-items-center">
+                <span class="small fw-bold text-secondary">Filter by Entity:</span>
+                <a href="/admin/audit-logs" class="btn btn-sm rounded-pill {% if not active_filter %}btn-primary{% else %}btn-outline-secondary{% endif %} px-3">All</a>
+                <a href="/admin/audit-logs?entity_filter=roadmap" class="btn btn-sm rounded-pill {% if active_filter == 'roadmap' %}btn-primary{% else %}btn-outline-secondary{% endif %} px-3">Milestones</a>
+                <a href="/admin/audit-logs?entity_filter=module" class="btn btn-sm rounded-pill {% if active_filter == 'module' %}btn-primary{% else %}btn-outline-secondary{% endif %} px-3">Modules</a>
+                <a href="/admin/audit-logs?entity_filter=video" class="btn btn-sm rounded-pill {% if active_filter == 'video' %}btn-primary{% else %}btn-outline-secondary{% endif %} px-3">Videos</a>
+                <a href="/admin/audit-logs?entity_filter=question" class="btn btn-sm rounded-pill {% if active_filter == 'question' %}btn-primary{% else %}btn-outline-secondary{% endif %} px-3">Questions</a>
+                <a href="/admin/audit-logs?entity_filter=career" class="btn btn-sm rounded-pill {% if active_filter == 'career' %}btn-primary{% else %}btn-outline-secondary{% endif %} px-3">Careers</a>
+            </div>
+            <div class="small text-muted">
+                Showing latest {{ logs|length }} recorded events
+            </div>
+        </div>
+    </div>
+
+    <!-- Audit Table -->
+    <div class="card custom-card border-0 p-4 shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle small">
+                <thead>
+                    <tr>
+                        <th style="width: 14%;">Timestamp (UTC)</th>
+                        <th style="width: 12%;">User</th>
+                        <th style="width: 16%;">Action</th>
+                        <th style="width: 10%;">Entity</th>
+                        <th style="width: 8%;">ID</th>
+                        <th>Details / Changes</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% if logs %}
+                        {% for log in logs %}
+                            <tr>
+                                <td class="text-muted text-nowrap">{{ log.created_at.strftime('%Y-%m-%d %H:%M:%S') if log.created_at else 'N/A' }}</td>
+                                <td>
+                                    <span class="fw-semibold text-dark">{{ log.user_name or 'System' }}</span>
+                                    <div class="text-muted" style="font-size: 0.72rem;">{{ log.user_role or 'admin' }}</div>
+                                </td>
+                                <td>
+                                    <span class="badge 
+                                        {% if 'CREATED' in log.action %}bg-success-subtle text-success
+                                        {% elif 'UPDATED' in log.action %}bg-warning-subtle text-warning
+                                        {% elif 'DELETED' in log.action %}bg-danger-subtle text-danger
+                                        {% else %}bg-info-subtle text-info{% endif %} px-2 py-1 rounded-pill">
+                                        {{ log.action }}
+                                    </span>
+                                </td>
+                                <td class="text-capitalize"><span class="badge bg-light text-dark border">{{ log.entity_type }}</span></td>
+                                <td class="fw-bold text-secondary">#{{ log.entity_id or '-' }}</td>
+                                <td>
+                                    {% if log.new_data %}
+                                        <code class="d-block text-truncate" style="max-width: 450px;" title="{{ log.new_data }}">{{ log.new_data }}</code>
+                                    {% elif log.old_data %}
+                                        <code class="d-block text-truncate text-muted" style="max-width: 450px;">Old: {{ log.old_data }}</code>
+                                    {% else %}
+                                        <span class="text-muted">No state payload captured</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center text-muted py-5">
+                                <i class="bi-shield-check display-4 d-block mb-2 text-secondary opacity-50"></i>
+                                No audit events logged for this filter yet. All future administrative actions will appear here automatically.
+                            </td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

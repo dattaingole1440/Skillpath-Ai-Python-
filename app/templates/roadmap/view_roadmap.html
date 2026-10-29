@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Career Roadmap - SkillPath AI{% endblock %}
+{% block page_title %}🗺️ Learning Pathway: {{ career.name }}{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-2">
+    <div class="row mb-4 align-items-center">
+        <div class="col-md-8">
+            <h3 class="fw-bold m-0" style="color: #0D5C3A;">🗺️ Learning Pathway: {{ career.name }}</h3>
+            <p class="text-muted mb-0">Follow this structured path. Complete the quizzes and coding challenges inside each topic to master your skills.</p>
+        </div>
+        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+            <a href="/dashboard" class="btn btn-outline-secondary rounded-pill px-3">🏠 Dashboard</a>
+        </div>
+    </div>
+
+    <!-- Milestones Stack -->
+    <div class="row">
+        <div class="col-12">
+            {% if roadmaps %}
+                {% for milestone in roadmaps %}
+                    {% set topics_list = milestone.active_topics if milestone.active_topics is defined else milestone.topics %}
+                    {% set ns = namespace(completed=0) %}
+                    {% for t in topics_list %}
+                        {% if progress_map.get(t.id) == 'Completed' %}
+                            {% set ns.completed = ns.completed + 1 %}
+                        {% endif %}
+                    {% endfor %}
+
+                    <div class="card border-0 rounded-4 p-4 mb-4 shadow-sm" style="background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px);">
+                        <!-- Milestone Header -->
+                        <div class="d-flex flex-wrap align-items-center justify-content-between pb-2 mb-3 border-bottom border-light-subtle gap-2">
+                            <div class="d-flex align-items-center gap-2">
+                                <span class="badge rounded-pill px-3 py-2 fw-bold text-white" style="background-color: #059669; font-size: 0.85rem;">📌 Milestone {{ loop.index }}</span>
+                                <h4 class="m-0 fw-bold text-dark" style="font-family: 'Outfit', sans-serif;">{{ milestone.title }}</h4>
+                            </div>
+                            <span class="fw-bold text-secondary small">🏆 {{ ns.completed }} / {{ topics_list|length }} Completed</span>
+                        </div>
+                        
+                        <p class="text-muted small mb-3">{{ milestone.description or "Get started with setup, variables, data types, and basic arithmetic operators." }}</p>
+
+                        <!-- Topics List -->
+                        <div class="d-flex flex-column gap-3">
+                            {% for topic in topics_list %}
+                                {% set status = progress_map.get(topic.id, 'Unlocked' if loop.first else 'Locked') %}
+                                <div class="card border rounded-4 p-3 transition-all hover-shadow-sm {% if status == 'Locked' and user.role not in ['teacher', 'admin', 'super_admin'] %}bg-light bg-opacity-50{% else %}bg-white{% endif %}">
+                                    <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+                                        
+                                        <!-- Left Side: Number Circle + Title + Badges + Description -->
+                                        <div class="d-flex align-items-center gap-3 flex-grow-1" style="min-width: 280px;">
+                                            <div class="rounded-circle d-flex align-items-center justify-content-center fw-bold text-success flex-shrink-0" 
+                                                 style="width: 44px; height: 44px; background: #ECFDF5; border: 1px solid rgba(16,185,129,0.2); font-size: 1.1rem;">
+                                                {{ loop.index }}
+                                            </div>
+                                            
+                                            <div class="flex-grow-1">
+                                                <div class="d-flex flex-wrap align-items-center gap-2 mb-1">
+                                                    <h5 class="fw-bold m-0 text-dark" style="font-size: 1.05rem;">📘 {{ topic.title }}</h5>
+                                                    
+                                                    <!-- Status Badge -->
+                                                    {% if status == 'Completed' %}
+                                                        <span class="badge bg-success bg-opacity-15 text-success rounded-pill px-2.5 py-1" style="font-size: 0.7rem;">✅ Completed</span>
+                                                    {% elif status == 'Unlocked' or user.role in ['teacher', 'admin', 'super_admin'] %}
+                                                        <span class="badge bg-success bg-opacity-15 text-success rounded-pill px-2.5 py-1" style="font-size: 0.7rem;">🔓 Unlocked</span>
+                                                    {% else %}
+                                                        <span class="badge bg-secondary bg-opacity-15 text-secondary rounded-pill px-2.5 py-1" style="font-size: 0.7rem;">🔒 Locked</span>
+                                                    {% endif %}
+
+                                                    <!-- Difficulty Badge -->
+                                                    <span class="badge bg-light text-secondary border rounded-pill px-2.5 py-1 text-uppercase" style="font-size: 0.65rem;">
+                                                        ⚡ {{ topic.difficulty or 'EASY' }}
+                                                    </span>
+
+                                                    <!-- Video Active Badge -->
+                                                    <span class="badge rounded-pill px-2.5 py-1" style="background-color: #FEE2E2; color: #DC2626; font-size: 0.65rem;">
+                                                        🎬 Video Active
+                                                    </span>
+                                                </div>
+
+                                                <p class="text-muted small m-0 text-truncate" style="max-width: 650px; line-height: 1.4;">
+                                                    {{ topic.description or ('Comprehensive module covering ' ~ topic.title ~ '. Students master syntax, real-world patterns, and key concepts.') }}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <!-- Right Side: Duration + Action Buttons -->
+                                        <div class="d-flex align-items-center gap-3 ms-auto flex-shrink-0">
+                                            <span class="text-muted small font-mono">
+                                                ⏱️ ~{{ "%.1f"|format(topic.estimated_time) if topic.estimated_time else "1.5" }}h
+                                            </span>
+
+                                            {% if user and user.role in ['teacher', 'admin', 'super_admin', 'college_admin'] %}
+                                                <a href="/admin/topics/{{ milestone.id }}" class="btn btn-warning rounded-pill px-3 py-1.5 fw-semibold text-dark btn-sm shadow-xs" style="background-color: #F59E0B; border: none;">
+                                                    ✏️ Edit Curriculum
+                                                </a>
+                                            {% endif %}
+
+                                            {% if status == 'Locked' and user.role not in ['teacher', 'admin', 'super_admin'] %}
+                                                <button class="btn btn-secondary rounded-pill px-3.5 py-1.5 fw-semibold btn-sm" disabled>
+                                                    🔒 Locked
+                                                </button>
+                                            {% else %}
+                                                <a href="/roadmap/topic/{{ topic.id }}" class="btn btn-success rounded-pill px-3.5 py-1.5 fw-semibold text-white btn-sm shadow-xs" style="background-color: #10B981; border: none;">
+                                                    🚀 Start Learning
+                                                </a>
+                                            {% endif %}
+                                        </div>
+
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center py-5 border rounded-4 bg-white shadow-sm">
+                    <i class="bi-journal-x display-4 text-muted"></i>
+                    <h5 class="fw-bold mt-3">📋 No Milestones Added Yet</h5>
+                    <p class="text-muted">Please contact the Administrator to setup the roadmaps.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
